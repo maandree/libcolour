@@ -1,0 +1,10 @@
+NAME
+	libcolour - A C colour space library
+
+DESCRIPTION
+	libcolour is C library for colour space conversions.
+
+SEE ALSO
+	libclut(7), libred(7), redshift(1), blueshift(1), libgamma(7),
+	libcoopgamma(7)
+

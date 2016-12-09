@@ -1,0 +1,84 @@
+# Copyright (C) 2016  Mattias Andrée <maandree@kth.se>
+# 
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+
+
+### This file will be stored to Makefile once you have run ./configure. ###
+### See INSTALL for information on how to install this package.         ###
+
+
+
+##### What is below this line is configurable, but is seldom useful. #####
+
+
+# Additional options for compiling info and HTML manuals.
+INFO_FLAGS =
+
+# Additional options for compiling DVI, PDF, and PostScript manuals.
+TEXINFO_FLAGS =
+
+# The name of the package as it should be installed.
+PKGNAME = libcolour
+
+
+
+##### Nothing interesting below this. #####
+
+
+# In case you want add some configurations. Primarily
+# intended for maintainers. Perhaps add GPG_KEY here.
+# Of course, you can declare everthing with ./configure,
+# but with this you are less likely to forget it.
+-include .make-configurations
+
+
+# YOU, AS A USER, SHOULD NOT CHANGE THESE VARIABLES. {{
+# They specify how the reusable makefiles in mk/ shall behave.
+
+# Package information.
+_PROJECT = libcolour
+_VERSION = 0.1
+
+# Used by mk/lang-c.mk
+_C_STD = c99
+_H = libcolour
+_HEADER_DIRLEVELS = 1
+_LIB = libcolour
+_OBJ_libcolour = libcolour
+_SO_VERSION_libcolour = $(_VERSION)
+_SO_MAJOR_libcolour = $(shell echo $(_SO_VERSION_libcolour) | cut -d . -f 1)
+
+# Used by mk/texinfo.mk
+_TEXINFO_DIRLEVELS = 2
+_INFOPARTS = 0
+_HAVE_TEXINFO_MANUAL = yes
+_HTML_FILES = Free-Software-Needs-Free-Documentation.html  GNU-Free-Documentation-License.html  \
+              GNU-General-Public-License.html  index.html  Overview.html  CLUT-Manipulation.html  \
+              Colour-Spaces.html
+
+# Used by mk/man.mk
+#_MAN_PAGE_SECTIONS = 0 3 7
+#_MAN_0 = libcolour.h
+#_MAN_3 = 
+#_MAN_7 = libcolour
+
+# Used by mk/copy.mk
+_COPYING = COPYING
+
+# Used by mk/dist.mk
+___EVERYTHING_INFO = autohaltd titlepage-data content hardcopy-copying  \
+                     appx/fdl appx/free-software-needs-free-documentation appx/gpl  \
+                     reusable/macros reusable/paper reusable/titlepage  \
+                     chap/overview chap/clut-manipulation.texinfo chap/colour-spaces.texinfo
+_EVERYTHING = $(__EVERYTHING_ALL_COMMON) DEPENDENCIES INSTALL NEWS  \
+              $(foreach F,$(___EVERYTHING_INFO),doc/info/$(F).texinfo) libcolour.h
+
+# }}
+
+
+# Reusable make rules and the configurations.
+include $(v)mk/all.mk
+
