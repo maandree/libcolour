@@ -18,6 +18,9 @@
 #define LIBCOLOUR_H
 
 
+#include <stddef.h>
+
+
 
 union libcolour_colour;
 
@@ -42,6 +45,23 @@ union libcolour_colour;
 #define LIBCOLOUR_ILLUMINANT_F10  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.34609, .y = 0.35986, .Y = 1}
 #define LIBCOLOUR_ILLUMINANT_F11  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.38052, .y = 0.37713, .Y = 1}
 #define LIBCOLOUR_ILLUMINANT_F12  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.43695, .y = 0.40441, .Y = 1}
+
+
+#define LIBCOLOUR_LIST_MODELS\
+  X(LIBCOLOUR_RGB, libcolour_rgb_t)\
+  X(LIBCOLOUR_SRGB, libcolour_srgb_t)\
+  X(LIBCOLOUR_CIEXYY, libcolour_ciexyy_t)\
+  X(LIBCOLOUR_CIEXYZ, libcolour_ciexyz_t)\
+  X(LIBCOLOUR_CIELAB, libcolour_cielab_t)\
+  X(LIBCOLOUR_CIELUV, libcolour_cieluv_t)\
+  X(LIBCOLOUR_CIELCH, libcolour_cielch_t)\
+  X(LIBCOLOUR_YIQ, libcolour_yiq_t)\
+  X(LIBCOLOUR_YDBDR, libcolour_ydbdr_t)\
+  X(LIBCOLOUR_YUV, libcolour_yuv_t)\
+  X(LIBCOLOUR_YPBPR, libcolour_ypbpr_t)\
+  X(LIBCOLOUR_YCGCO, libcolour_ycgco_t)\
+  X(LIBCOLOUR_CIE1960UCS, libcolour_cie1960ucs_t)\
+  X(LIBCOLOUR_CIEUVW, libcolour_cieuvw_t)
 
 
 typedef enum libcolour_model {
@@ -264,7 +284,8 @@ double libcolour_srgb_decode(double);
 int libcolour_delta_e(const libcolour_colour_t*, const libcolour_colour_t*, double*);
 int libcolour_proper(libcolour_colour_t*);
 int libcolour_get_rgb_colour_space(libcolour_colour_t*, libcolour_rgb_colour_space_t);
-/* TODO (un)marshal */
+size_t libcolour_marshal(const libcolour_colour_t*, void*);
+size_t libcolour_unmarshal(libcolour_colour_t*, const void*);
 
 
 

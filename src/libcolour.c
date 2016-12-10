@@ -24,6 +24,10 @@
 
 
 
+#define MARSHAL_VERSION  0
+
+
+
 #define WASDIV0(x)  (isinf(x) || isnan(x))
 
 
@@ -1052,6 +1056,27 @@ static int invert(double **Minv, double **M, size_t n)
 }
 
 
+static void get_transfer_function(libcolour_colour_t* cs)
+{
+  if (cs->model == LIBCOLOUR_RGB) {
+    switch (cs->rgb.colour_space) {
+    case LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2: /* TODO L* */
+      break;
+    case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_PQ:
+    case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_PQ:
+    case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_PQ:
+    case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_HLG:
+    case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_HLG:
+    case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_HLG:
+      /* TODO http://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2100-0-201607-I!!PDF-E.pdf */
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+
 int libcolour_get_rgb_colour_space(libcolour_colour_t* cs_, libcolour_rgb_colour_space_t space)
 {
 #define XYY(XVALUE, YVALUE)  (libcolour_ciexyy_t){ .model = LIBCOLOUR_CIEXYY, .x = XVALUE, .y = YVALUE, .Y = 1}
@@ -1181,7 +1206,7 @@ int libcolour_get_rgb_colour_space(libcolour_colour_t* cs_, libcolour_rgb_colour
     cs->green = XYY(0.2100, 0.7100);
     cs->blue  = XYY(0.1400, 0.0800);
     cs->white = LIBCOLOUR_ILLUMINANT_D50;
-    cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_CUSTOM; /* TODO L* */
+    cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_CUSTOM;
     break;
 
   case LIBCOLOUR_RGB_COLOUR_SPACE_EKTA_SPACE_PS5:
@@ -1252,7 +1277,6 @@ int libcolour_get_rgb_colour_space(libcolour_colour_t* cs_, libcolour_rgb_colour
     cs->blue  = XYY(0.1310, 0.0460);
     cs->white = LIBCOLOUR_ILLUMINANT_D65;
     cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_CUSTOM;
-    /* TODO http://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2100-0-201607-I!!PDF-E.pdf */
     break;
 
   case LIBCOLOUR_RGB_COLOUR_SPACE_LIGHTROOM_RGB:
@@ -1348,7 +1372,63 @@ int libcolour_get_rgb_colour_space(libcolour_colour_t* cs_, libcolour_rgb_colour
   cs->white_r = cs->white_g = cs->white_b = 1;
   if (get_matrices(cs) || libcolour_proper(cs_))
     return -1;
+  get_transfer_function(cs_);
   return 0;
 
 #undef XYY
 }
+
+
+size_t libcolour_marshal(const libcolour_colour_t* colour, void* buf)
+{
+  if (buf)
+    *(int*)buf = MARSHAL_VERSION;
+  switch (colour->model) {
+#define X(C, T)\
+  case C:\
+    if (buf)\
+      memcpy((char*)buf + sizeof(int), colour, sizeof(T));\
+    return sizeof(int) + sizeof(T);
+  LIBCOLOUR_LIST_MODELS
+#undef X
+  default:
+    errno = EINVAL;
+    return 0;
+  }
+}
+
+
+size_t libcolour_unmarshal(libcolour_colour_t* colour, const void* buf)
+{
+  enum libcolour_model model;
+  size_t r;
+  int ver;
+  ver = *(int*)buf;
+  if (ver != MARSHAL_VERSION) {
+    errno = EINVAL;
+    return 0;
+  }
+  model = *(enum libcolour_model*)((char*)buf + sizeof(int));
+  switch (model) {
+#define X(C, T)\
+    case C:\
+      if (colour)\
+	memcpy(colour, (char*)buf + sizeof(int), sizeof(T));\
+      r = sizeof(int) + sizeof(T);\
+      break;
+  LIBCOLOUR_LIST_MODELS
+#undef X
+  default:
+    errno = EINVAL;
+    return 0;
+  }
+  if (colour) {
+    if (colour->model == LIBCOLOUR_RGB) {
+      colour->rgb.to_encoded_red = colour->rgb.to_encoded_green = colour->rgb.to_encoded_blue = NULL;
+      colour->rgb.to_decoded_red = colour->rgb.to_decoded_green = colour->rgb.to_decoded_blue = NULL;
+    }
+    get_transfer_function(colour);
+  }
+  return r;
+}
+
