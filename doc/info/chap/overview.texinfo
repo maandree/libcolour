@@ -5,3 +5,13 @@
 @command{libcolour} is used by including
 the header @file{<libcolour.h>} and by linking
 with @option{-lcolour}.
+
+@command{libcolour} provides conversion between
+a large number of colour spaces, including many
+different RGB colour spaces. It also supports
+encode and non-encoded representations.
+@command{libcolour} futhermore provides access
+to custom RGB colour spaces and custom arbitrary
+additive and subtractive colour spaces, with
+any number of primaries, as long as their
+conversion to CIE XYZ is linear.
