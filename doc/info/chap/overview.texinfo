@@ -1,0 +1,7 @@
+@node Overview
+@chapter Overview
+
+@command{libcolour} is colour space C library.
+@command{libcolour} is used by including
+the header @file{<libcolour.h>} and by linking
+with @option{-lcolour}.
