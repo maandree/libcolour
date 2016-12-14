@@ -31,8 +31,6 @@ GNU Free Documentation License
 
 
 @include chap/overview.texinfo
-@include chap/clut-manipulation.texinfo
-@include chap/colour-spaces.texinfo
 
 @include appx/free-software-needs-free-documentation.texinfo
 
