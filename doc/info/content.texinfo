@@ -9,6 +9,7 @@
 
 @menu
 * Overview::                                Brief overview of @command{libcolour}.
+* Illuminants::                             Illuminant initialisers.
 
 * Free Software Needs Free Documentation::  Why free documentation is important.
 * GNU General Public License::              Copying and sharing @command{libcolour}.
@@ -18,6 +19,8 @@
  --- The Detailed Node Listing ---
 
 Overview
+
+Illuminants
 
 
 Free Software Needs Free Documentation
@@ -31,6 +34,7 @@ GNU Free Documentation License
 
 
 @include chap/overview.texinfo
+@include chap/illuminants.texinfo
 
 @include appx/free-software-needs-free-documentation.texinfo
 
