@@ -43,6 +43,27 @@
 #define LIBCOLOUR_ILLUMINANT_F11  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.38052, .y = 0.37713, .Y = 1}
 #define LIBCOLOUR_ILLUMINANT_F12  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.43695, .y = 0.40441, .Y = 1}
 
+#define LIBCOLOUR_ILLUMINANT_A_10DEG_OBS    (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.45117, .y = 0.40594, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_B_10DEG_OBS    (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.34980, .y = 0.35270, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_C_10DEG_OBS    (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.31039, .y = 0.31905, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_D50_10DEG_OBS  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.34773, .y = 0.35952, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_D55_10DEG_OBS  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.33411, .y = 0.34877, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_D65_10DEG_OBS  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.31382, .y = 0.33100, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_D75_10DEG_OBS  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.29968, .y = 0.31740, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_E_10DEG_OBS    (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 1. / 3,  .y = 1. / 3,  .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F1_10DEG_OBS   (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.31811, .y = 0.33559, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F2_10DEG_OBS   (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.37925, .y = 0.36733, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F3_10DEG_OBS   (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.41761, .y = 0.38324, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F4_10DEG_OBS   (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.44920, .y = 0.39074, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F5_10DEG_OBS   (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.31975, .y = 0.34246, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F6_10DEG_OBS   (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.38660, .y = 0.37847, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F7_10DEG_OBS   (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.31569, .y = 0.32960, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F8_10DEG_OBS   (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.34902, .y = 0.35939, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F9_10DEG_OBS   (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.37829, .y = 0.37045, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F10_10DEG_OBS  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.35090, .y = 0.35444, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F11_10DEG_OBS  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.38541, .y = 0.37123, .Y = 1}
+#define LIBCOLOUR_ILLUMINANT_F12_10DEG_OBS  (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.44256, .y = 0.39717, .Y = 1}
+
 
 #define LIBCOLOUR_LIST_MODELS\
   X(LIBCOLOUR_RGB, libcolour_rgb_t)\
