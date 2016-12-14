@@ -11,7 +11,10 @@ a large number of colour spaces, including many
 different RGB colour spaces. It also supports
 encode and non-encoded representations.
 @command{libcolour} futhermore provides access
-to custom RGB colour spaces and custom arbitrary
+to custom RGB colour spaces.
+@ignore
+and custom arbitrary
 additive and subtractive colour spaces, with
 any number of primaries, as long as their
 conversion to CIE XYZ is linear.
+@end ignore
