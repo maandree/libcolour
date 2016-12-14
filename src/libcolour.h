@@ -22,9 +22,6 @@
 
 
 
-union libcolour_colour;
-
-
 #define LIBCOLOUR_ILLUMINANT_A    (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.44757, .y = 0.40745, .Y = 1}
 #define LIBCOLOUR_ILLUMINANT_B    (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.34842, .y = 0.35161, .Y = 1}
 #define LIBCOLOUR_ILLUMINANT_C    (libcolour_ciexyy_t){.model = LIBCOLOUR_CIEXYY, .x = 0.31006, .y = 0.31616, .Y = 1}
