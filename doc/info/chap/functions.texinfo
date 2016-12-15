@@ -17,7 +17,7 @@ Unapply the sRGB transfer function.
 Described in @ref{sRGB}.
 
 @item int libcolour_delta_e(const libcolour_colour_t*, const libcolour_colour_t*, double*)
-Calculates the @math{\Delta e^*_{ab}} distance
+Calculates the @math{\Delta E^*_{ab}} distance
 (the distance in CIE L*a*b*) of two colours.
 
 @item int libcolour_proper(libcolour_colour_t*)
