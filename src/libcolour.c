@@ -1082,11 +1082,9 @@ static void get_transfer_function(libcolour_colour_t* cs)
 }
 
 
-int libcolour_get_rgb_colour_space(libcolour_colour_t* cs_, libcolour_rgb_colour_space_t space)
+int libcolour_rgb_colour_space(libcolour_rgb_t* cs, libcolour_rgb_colour_space_t space)
 {
 #define XYY(XVALUE, YVALUE)  (libcolour_ciexyy_t){ .model = LIBCOLOUR_CIEXYY, .x = XVALUE, .y = YVALUE, .Y = 1}
-
-  libcolour_rgb_t* cs = &cs_->rgb;
 
   switch (space) {
   case LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS:
@@ -1375,9 +1373,9 @@ int libcolour_get_rgb_colour_space(libcolour_colour_t* cs_, libcolour_rgb_colour
     cs->transitioninv = cs->transition * cs->slope;
   cs->colour_space = space;
   cs->white_r = cs->white_g = cs->white_b = 1;
-  if (get_matrices(cs) || libcolour_proper(cs_))
+  if (get_matrices(cs) || libcolour_proper((libcolour_colour_t*)cs))
     return -1;
-  get_transfer_function(cs_);
+  get_transfer_function((libcolour_colour_t*)cs);
   return 0;
 
 #undef XYY

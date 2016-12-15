@@ -291,7 +291,7 @@ double libcolour_srgb_encode(double);
 double libcolour_srgb_decode(double);
 int libcolour_delta_e(const libcolour_colour_t*, const libcolour_colour_t*, double*);
 int libcolour_proper(libcolour_colour_t*);
-int libcolour_get_rgb_colour_space(libcolour_colour_t*, libcolour_rgb_colour_space_t);
+int libcolour_get_rgb_colour_space(libcolour_rgb_t*, libcolour_rgb_colour_space_t);
 size_t libcolour_marshal(const libcolour_colour_t*, void*);
 size_t libcolour_unmarshal(libcolour_colour_t*, const void*);
 
