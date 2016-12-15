@@ -1,0 +1,765 @@
+@node Colour Spaces
+@chapter Colour Spaces
+
+@menu
+* RGB::                                     Generic RGB colour spaces.
+* sRGB::                                    The Standard RGB colour space.
+* CIExyY::                                  The CIE xyY colour model.
+* CIEXYZ::                                  The CIE 1931 XYZ colour model.
+* CIELAB::                                  The CIE L*a*b* colour model.
+* CIELUV::                                  The CIE 1976 (L*, u*, v*) colour model.
+* CIELCh::                                  The CIE LCh colour model.
+* YIQ::                                     The YIQ colour model.
+* YDbDr::                                   The YDbDr colour model.
+* YUV::                                     The YUV colour model.
+* YPbPr::                                   The YPbPr colour model.
+* YCgCo::                                   The YCgCo colour model.
+* CIE 1960 UCS::                            The CIE 1960 UCS colour model.
+* CIEUVW::                                  The CIE 1964 (U*, V*, W*) colour model.
+@end menu
+
+
+
+A colour in @command{libcolour} is represented using
+
+@example
+typedef union libcolour_colour @{
+    enum libcolour_model model;
+    struct libcolour_rgb rgb;
+    struct libcolour_srgb srgb;
+    struct libcolour_ciexyy ciexyy;
+    struct libcolour_ciexyz ciexyz;
+    struct libcolour_cielab cielab;
+    struct libcolour_cieluv cieluv;
+    struct libcolour_cielch cielch;
+    struct libcolour_yiq yiq;
+    struct libcolour_ydbdr ydbdr;
+    struct libcolour_yuv yuv;
+    struct libcolour_ypbpr ypbpr;
+    struct libcolour_ycgco ycgco;
+    struct libcolour_cie1960ucs cie1960ucs;
+    struct libcolour_cieuvw cieuvw;
+@} libcolour_colour_t;
+@end example
+
+@noindent
+where @code{.model} is used to select colour model.
+Each @code{enum} and @code{struct} is also @code{typedef}:ed
+to the same name but with an @code{_t} suffix.
+
+The macro @code{LIBCOLOUR_LIST_MODELS} can be used to list
+all available colour models. It expands to a list of
+calls to @code{X} with the appropriate value for @code{.model}
+as the first argument and the @code{struct}, using the
+@code{typedef} name with the @code{_t} suffix, which is used
+to represent colours in that colour model as the second
+argument. It can used like this:
+
+@example
+void print_libcolour_srgb_t(libcolour_srgb* colour)
+@{
+    printf("sRGB(%lf, %lf, %lf, with_gamma = %i)\n",
+           colour->R, colour->G, colour->B, colour->with_gamma);
+@}
+
+/* ... */
+
+void print_colour(libcolour_colour_t* colour)
+@{
+#define X(MODEL, TYPE)\
+    case MODEL:\
+        print_##TYPE((TYPE*)colour);\
+        break;
+#undef X
+    switch (colour->model) @{
+    LIBCOLOUR_LIST_MODELS
+    default:
+        printf("Unknown colour model!\n");
+        break;
+    @}
+@}
+@end example
+
+To convert between a colour into another colour space,
+the function @code{libcolour_convert} is used. It takes
+two arguments, both if the type @code{libcolour_colour_t*}.
+The first parameter is @code{const}, it shall be the
+colour you want to convert. The second parameter shall
+be a different pointer, and it shall have it's @code{.model}
+set to the wanted colour model, and any colour space
+specific parameter for that model shall also be set. It
+can be used like this:
+
+@example
+int to_srgb(const libcolour_colour* from, libcolour_srgb_t* to)
+@{
+    to->model = LIBCOLOUR_SRGB;
+    to->with_gamma = 1;
+    return libcolour_convert(from, to);
+@}
+@end example
+
+@code{libcolour_convert} return 0 on success, on error @math{-1}
+is returned and @code{errno} is to indicate the error. Possible
+errors are:
+@table @code
+@item EINVAL
+Invalid colour model.
+@end table
+
+Colours obtained by conversion can be out of gamut. In RGB
+colour spaces, including sRGB, this means that at least one
+of the values (@code{.R}, @code{.G}, or @code{.B}) is less
+than 0 or greater than 1. @command{libcolour} does not provide
+any colour-matching functions for finding an in-gamut colour.
+
+
+
+@node RGB
+@section Generic RGB
+
+RGB colours, of any RGB colour space, are presented with
+@code{struct libcolour_rgb} (@code{libcolour_rgb_t}), and the
+@code{.model} member shall be set to @code{LIBCOLOUR_RGB}. In
+@code{union libcolour_colour}, @code{.rgb} are used for RGB
+colours. RGB colours are additive.
+
+@code{struct libcolour_rgb} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_RGB}.
+@item double R
+The red value. In-gamut values are between 0 and 1, inclusively.
+@item double G
+The green value. In-gamut values are between 0 and 1, inclusively.
+@item double B
+The blue value. In-gamut values are between 0 and 1, inclusively.
+@item int with_gamma
+Whether the the transfer function is applied to the values
+of @code{.R}, @code{.G}, and @code{.B}, which makes them non-linear.
+@item enum libcolour_encoding_type encoding_type
+One of the following:
+@table @code
+@item LIBCOLOUR_ENCODING_TYPE_LINEAR
+The colour space does not have a transfer function.
+@item LIBCOLOUR_ENCODING_TYPE_SIMPLE
+The colour space uses a simple gamma transfer function
+that only uses the gamma parameter.
+@item LIBCOLOUR_ENCODING_TYPE_REGULAR
+The colour space uses a linear–gamma hybrid transfer
+function that uses the gamma, offset, slope, and
+transition parameters.
+@item LIBCOLOUR_ENCODING_TYPE_CUSTOM
+The colour space uses a custom transfer function.
+@end table
+@item double gamma
+The gamma parameter of the transfer function.
+Ignored unless @code{.encoding_type} is
+@code{LIBCOLOUR_ENCODING_TYPE_SIMPLE} or
+@code{LIBCOLOUR_ENCODING_TYPE_REGULAR}.
+@item double offset
+The offset parameter of the transfer function.
+Ignored unless @code{.encoding_type} is
+@code{LIBCOLOUR_ENCODING_TYPE_REGULAR}.
+@item double slope
+The slope parameter of the transfer function.
+Ignored unless @code{.encoding_type} is
+@code{LIBCOLOUR_ENCODING_TYPE_REGULAR}.
+@item double transition
+The transition parameter of the transfer
+function. Ignored unless @code{.encoding_type}
+is @code{LIBCOLOUR_ENCODING_TYPE_REGULAR}.
+@item double transitioninv
+The inverse value of the transition parameter
+of the transfer function, that is, where the
+transition takes place in the encoded, rather
+than linear, values. This value is set
+automatically. Ignored unless @code{.encoding_type}
+is @code{LIBCOLOUR_ENCODING_TYPE_REGULAR}.
+@item double (*to_encoded_red)(double)
+Function used to apply the red channels transfer function
+to a value. Ignored unless @code{.encoding_type} is
+@code{LIBCOLOUR_ENCODING_TYPE_CUSTOM}.
+@item double (*to_decoded_red)(double)
+Function used to unapply the red channels transfer function
+from a value. Ignored unless @code{.encoding_type} is
+@code{LIBCOLOUR_ENCODING_TYPE_CUSTOM}.
+@item double (*to_encoded_green)(double)
+Function used to apply the green channels transfer function
+to a value. Ignored unless @code{.encoding_type} is
+@code{LIBCOLOUR_ENCODING_TYPE_CUSTOM}.
+@item double (*to_decoded_green)(double)
+Function used to unapply the green channels transfer function
+from a value. Ignored unless @code{.encoding_type} is
+@code{LIBCOLOUR_ENCODING_TYPE_CUSTOM}.
+@item double (*to_encoded_blue)(double)
+Function used to apply the blue channels transfer function
+to a value. Ignored unless @code{.encoding_type} is
+@code{LIBCOLOUR_ENCODING_TYPE_CUSTOM}.
+@item double (*to_decoded_blue)(double)
+Function used to unapply the blue channels transfer function
+from a value. Ignored unless @code{.encoding_type} is
+@code{LIBCOLOUR_ENCODING_TYPE_CUSTOM}.
+@item struct libcolour_ciexyy red
+The CIE xyY value of the red primarily.
+@item struct libcolour_ciexyy green
+The CIE xyY value of the green primarily.
+@item struct libcolour_ciexyy blue
+The CIE xyY value of the blue primarily.
+@item struct libcolour_ciexyy white
+The CIE xyY value of the white point, the Y value
+should usually be 1.
+@item double white_r
+The red value of the white point, should usually by 1.
+@item double white_g
+The green value of the white point, should usually by 1.
+@item double white_b
+The blue value of the white point, should usually by 1.
+@item double M[3][3]
+Matrix used to convert a colour to CIE 1931 XYZ.
+@item double Minv[3][3]
+Matrix used to convert a colour from CIE 1931 XYZ.
+@item enum libcolour_rgb_colour_space colour_space
+The colour space. Set automatically.
+@end table
+
+@code{libcolour_get_rgb_colour_space} is set the
+values in a @code{libcolour_rgb_t} to the those used
+to represent a specified RGB colour space.
+@code{libcolour_get_rgb_colour_space} has two arguments:
+@table @code
+@item libcolour_rgb_t*
+The @code{struct} whose members shall be set to represent
+to selected colour space.
+@item enum libcolour_rgb_colour_space
+The selected colour space.
+@end table
+
+@code{libcolour_get_rgb_colour_space} return 0 on success,
+on error @math{-1} is returned and @code{errno} is to indicate
+the error. Possible errors are:
+@table @code
+@item EINVAL
+Invalid colour space.
+@item EDOM
+The specified colour space parameters cannot be used
+as it results in matematical errors.
+@end table
+
+The following values are available for
+@code{enum libcolour_rgb_colour_space} (@code{libcolour_rgb_colour_space_t}):
+
+@table @code
+@item LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS
+A custom colour space. @code{.red}, @code{.green}, @code{.blue},
+@code{.white}, @code{.white_r}, @code{.white_g} and @code{.white_b}
+must be set. The transfer functions, and parameters, must be set
+manually. @code{.colour_space} must be set to any negative value,
+@code{LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS} (zero),
+@code{LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX}, or
+@code{LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX}.
+@code{.red.Y}, @code{.green.Y}, @code{.blue.Y} can be any value.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX
+A custom colour space. @code{.M}, @code{.white_r}, @code{.white_g}
+and @code{.white_b} must be set. The transfer functions, and
+parameters, must be set manually. @code{.colour_space} must be
+set to any negative value,
+@code{LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS} (zero),
+@code{LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX}, or
+@code{LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX}.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX
+A custom colour space. @code{.Minv}, @code{.white_r}, @code{.white_g}
+and @code{.white_b} must be set. The transfer functions, and
+parameters, must be set manually. @code{.colour_space} must be
+set to any negative value,
+@code{LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS} (zero),
+@code{LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX}, or
+@code{LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX}.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_SRGB
+The sRGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ADOBE_RGB
+The Adobe RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_APPLE_RGB
+The Apple RGB (1998) colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_BEST_RGB
+The Best RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_BETA_RGB
+The Beta RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_BRUCE_RGB
+The Bruce RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_CIE_RGB
+The CIE 1931 RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_COLORMATCH_RGB
+The ColorMatch RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_D65
+The DCI-P3 D65 colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_THEATER
+The DCI-P3 Theater colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_DON_RGB_4
+The Don RGB 4 colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2
+The ECI RGB v2 colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_EKTA_SPACE_PS5
+The Ekta Space PS5 colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_625_LINE
+The ITU-R Recommendation BT.601, 625 line colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_525_LINE
+The ITU-R Recommendation BT.601, 525 line colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_709
+The ITU-R Recommendation BT.709 colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2020
+The ITU-R Recommendation BT.2020 colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_PQ
+The ITU-R Recommendation BT.2100 colour space,
+using the perceptual quantization (PQ) elctro-optical
+transfer function (EOTF).
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_PQ
+The ITU-R Recommendation BT.2100 colour space,
+using the perceptual quantization (PQ) opto-optical
+transfer function (OOTF).
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_PQ
+The ITU-R Recommendation BT.2100 colour space,
+using the perceptual quantization (PQ) opto-electronic
+transfer function (OETF).
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_HLG
+The ITU-R Recommendation BT.2100 colour space,
+using the Hybrid Log-Gamma (HLG) elctro-optical
+transfer function (EOTF).
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_HLG
+The ITU-R Recommendation BT.2100 colour space,
+using the Hybrid Log-Gamma (HLG) opto-optical
+transfer function (OOTF).
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_HLG
+The ITU-R Recommendation BT.2100 colour space,
+using the Hybrid Log-Gamma (HLG) opto-electronic
+transfer function (OETF).
+@item LIBCOLOUR_RGB_COLOUR_SPACE_LIGHTROOM_RGB
+The Lightroom RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_NTSC_RGB
+The NTSC RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_PAL_SECAM_RGB
+The PAL/SECAM RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_PROPHOTO_RGB
+The ProPhoto RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_SGI_RGB
+The SGI RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_SMPTE_240M_RGB
+The SMPTE 240M RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_SMPTE_C_RGB
+The SMPTE C RGB colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_WIDE_GAMUT_RGB
+The wide-gamut RGB colour space, also known as
+Adobe Wide Gamut RGB.
+@end table
+
+Call @code{libcolour_proper(&c)} on a
+@code{struct libcolour_rgb_t c} (done automatically for
+predefined colour spaces) sets @code{c.red.model},
+@code{c.green.model}, and @code{c.blue.model} to
+@code{LIBCOLOUR_CIEXYY}, and calculate and sets the Y
+values for @code{c.red}, @code{c.green}, and @code{c.blue}.
+Zero is always normally returned, but of there is something
+wrong with with the values of the primaries, @math{-1}
+is returned and @code{errno} is set to @code{EDOM}.
+
+
+
+@node sRGB
+@section Standard RGB
+
+sRGB colours are presented with @code{struct libcolour_srgb}
+(@code{libcolour_srgb_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_SRGB}. In @code{union libcolour_colour},
+@code{.srgb} are used for sRGB colours. This is the colour model
+and colour space normally used on computers, it is however not
+the colour space your monitor have, although it is close to it.
+sRGB is designed after the human eye, but fails to take into
+account how the brain process the input to figure out which
+colour it actually receives.
+
+@code{struct libcolour_srgb} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_SRGB}.
+@item double R
+The red value. In-gamut values are between 0 and 1, inclusively.
+@item double G
+The green value. In-gamut values are between 0 and 1, inclusively.
+@item double B
+The blue value. In-gamut values are between 0 and 1, inclusively.
+@item int with_gamma
+Whether the the transfer function is applied to the values of
+@code{.R}, @code{.G}, and @code{.B}, which makes them non-linear.
+@end table
+
+The RGB color model, of which sRGB is a specific colour space,
+is an additive colour model.
+
+For your convenience, the sRGB transfer function and its inverse
+function is available for your use:
+
+@table @code
+@item double libcolour_srgb_encode(double x)
+Applies the sRGB transfer function.
+It's full code is
+@example
+return x <= 0.0031306684425217108
+       ? 12.92 * x
+       : 1.055 * pow(x, 1 / 2.4) - 0.055;
+@end example
+
+@item double libcolour_srgb_decode(double x)
+Unapplies the sRGB transfer function.
+It's full code is
+@example
+return x <= 0.040448236277380506 
+       ? x / 12.92
+       : pow((x + 0.055) / 1.055, 2.4);
+@end example
+@end table
+
+
+
+@node CIExyY
+@section CIE xyY
+
+CIE xyY colours are presented with @code{struct libcolour_ciexyy}
+(@code{libcolour_ciexyy_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_CIEXYY}. In @code{union libcolour_colour},
+@code{.ciexyy} are used for CIE xyY colours. This colour space is
+derived from CIE 1931 XYZ and is primarily used for representing
+chromaticities.
+
+@code{struct libcolour_ciexyy} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_CIEXYY}.
+@item double x
+The x value.
+@item double y
+The y value.
+@item double Y
+The Y value.
+@end table
+
+CIE xyY is not additive. CIE xyY is defined by
+@math{x = X/(X + Y + Z)}, @math{y = Y/(X + Y + Z)}
+where X, Y, and Z are CIE XYZ values.
+
+
+@node CIEXYZ
+@section CIE 1931 XYZ
+
+CIE 1931 XYZ colours are presented with @code{struct libcolour_ciexyz}
+(@code{libcolour_ciexyz_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_CIEXYZ}. In @code{union libcolour_colour},
+@code{.ciexyz} are used for CIE 1931 XYZ colours. This colour space
+is derived from CIE 1931 RGB and is used as an intermediary
+representation when converting between many colour spaces and
+colour models, making it very useful for device independent colour
+representation.
+
+@code{struct libcolour_ciexyz} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_CIEXYZ}.
+@item double X
+The X value.
+@item double Y
+The Y value.
+@item double Z
+The Z value.
+@end table
+
+CIE 1931 XYZ is additive, since it is defined by matrix
+multiplication with CIE 1932 RGB which is additive because
+it is an RGB colour space.
+
+
+
+@node CIELAB
+@section CIE L*a*b*
+
+CIE L*a*b* colours are presented with @code{struct libcolour_cielab}
+(@code{libcolour_cielab_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_CIELAB}. In @code{union libcolour_colour},
+@code{.cielab} are used for CIE L*a*b* colours. CIE L*a*b*
+approximates human colour perception with a lightness parameter
+(L*) and two chromaticity parameters (a* and b*), it is therefore
+useful in image manipulation applications.
+
+@code{struct libcolour_cielab} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_CIELAB}.
+@item double L
+The L* value. 0 is black, 100 is white.
+@item double a
+The a* value. Negative values are green, positive values are red.
+@item double b
+The b* value. Negative values are blue, positive values are yellow.
+@end table
+
+CIE L*a*b* is not additive, since conversion from
+CIE 1931 XYZ is non-linear. It's white point is the CIE Standard
+Illuminant D50.
+
+
+
+@node CIELUV
+@section CIE 1976 (L*, u*, v*)
+
+CIE 1976 (L*, u*, v*) colours are presented with @code{struct libcolour_cieluv}
+(@code{libcolour_cieluv_t}), and the @code{.model} member shall be set to
+@code{LIBCOLOUR_CIELUV}. In @code{union libcolour_colour}, @code{.cieluv}
+are used for CIE 1976 (L*, u*, v*) colours. CIE 1976 (L*, u*, v*)
+approximates uniform human colour perception.
+
+@code{struct libcolour_cieluv} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_CIELUV}.
+@item double L
+The L* value. 0 is black, 100 is white.
+@item double u
+The u* value.
+@item double v
+The v* value.
+@item struct libcolour_ciexyz white
+The white point.
+@end table
+
+CIE L*u*v* is not additive, since conversion from
+CIE 1931 XYZ is non-linear.
+
+Call @code{libcolour_proper(&c)} on a
+@code{struct libcolour_cieluv_t c} sets
+@code{c.white.model} to @code{LIBCOLOUR_CIEXYZ}.
+Zero is always returned in this case.
+
+
+
+@node CIELCh
+@section CIE LCh@sub{uv}
+
+CIE LCh@sub{uv} (also known as CIE HLC@sub{uv}) colours are presented
+with @code{struct libcolour_cielch} (@code{libcolour_cielch_t}), and
+the @code{.model} member shall be set to @code{LIBCOLOUR_CIELCH}. In
+@code{union libcolour_colour}, @code{.cielch} are used for CIE LCh@sub{uv}
+colours. CIE LCh@sub{uv} approximates uniform human colour perception
+using cylindrical representation.
+
+@code{struct libcolour_cielch} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_CIELCH}.
+@item double L
+The L* value. 0 is black, 100 is white.
+@item double C
+@iftex
+The @math{{\rm C}^{*}_{\rm uv}} value, the chroma.
+@end iftex
+@ifnottex
+The C*@sub{uv} value, the chroma.
+@end ifnottex
+@item double h
+The h@sub{uv} value, the hue.
+@item struct libcolour_ciexyz white
+The white point.
+@end table
+
+CIE LCh@sub{uv} is not additive. It is a cylindrical
+representation of CIE 1976 (L*, u*, v*).
+
+Call @code{libcolour_proper(&c)} on a
+@code{struct libcolour_cielch_t c} sets
+@code{c.white.model} to @code{LIBCOLOUR_CIEXYZ}.
+Zero is always returned in this case.
+
+
+@node YIQ
+@section YIQ
+
+YIQ colours are presented with @code{struct libcolour_yiq}
+(@code{libcolour_yiq_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_YIQ}. In @code{union libcolour_colour},
+@code{.yiq} are used for YIQ colours.
+
+@code{struct libcolour_yiq} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_YIQ}.
+@item double Y
+The Y value, the luma. 0 is black, 1 is white.
+@item double I
+The I (in-phase) value. Negative values are blue, positive values are orange.
+@item double Q
+The Q (quadrature) value. Negative values are green, positive values are purple.
+@end table
+
+YIQ is additive, since conversion from CIE 1931 XYZ is done
+with a matrix multiplication. It's white point is the CIE
+Standard Illuminant D65.
+
+
+
+@node YDbDr
+@section YDbDr
+
+YDbDr colours are presented with @code{struct libcolour_ydbdr}
+(@code{libcolour_ydbdr_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_YDBDR}. In @code{union libcolour_colour},
+@code{.ydbdr} are used for YDbDr colours.
+
+@code{struct libcolour_ydbdr} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_YDBDR}.
+@item double Y
+The Y value, the luma. 0 is black, 1 is white.
+@item double Db
+The Db value. Difference (with a factor) between Y and blue.
+@item double Dr
+The Dr value. Difference (with a factor) between Y and red.
+@end table
+
+YDbDr is additive, since conversion from CIE 1931 XYZ is done
+with a matrix multiplication. It's white point is the CIE
+Standard Illuminant D65.
+
+
+
+@node YUV
+@section YUV
+
+YUV colours are presented with @code{struct libcolour_yuv}
+(@code{libcolour_yuv_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_YUV}. In @code{union libcolour_colour},
+@code{.yuv} are used for YUV colours.
+
+@code{struct libcolour_yuv} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_YUV}.
+@item double Y
+The Y value, the luma. 0 is black, 1 is white.
+@item double U
+The U value. Difference (with a factor) between Y and blue.
+@item double V
+The V value. Difference (with a factor) between Y and red.
+@end table
+
+YUV is additive, since conversion from YDbDr is done
+with a diagonal matrix multiplication. It's white point is
+the CIE Standard Illuminant D65.
+
+
+
+@node YPbPr
+@section YP@sub{B}P@sub{R}
+
+YP@sub{B}P@sub{R} colours are presented with @code{struct libcolour_ypbpr}
+(@code{libcolour_ypbpr_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_YPBPR}. In @code{union libcolour_colour},
+@code{.ypbpr} are used for YP@sub{B}P@sub{R} colours.
+
+@code{struct libcolour_ypbpr} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_YPBPR}.
+@item double Y
+The Y value, the luma. 0 is black, 1 is white.
+@item double Pb
+The P@sub{B} value. Difference between Y and blue.
+@item double Pr
+The P@sub{R} value. Difference between Y and red.
+@end table
+
+YPbPr is additive, since conversion from CIE 1931 XYZ is done
+with a matrix multiplication. It's white point is the CIE
+Standard Illuminant D65.
+
+
+
+@node YCgCo
+@section YCgCo
+
+YCgCo colours are presented with @code{struct libcolour_ycgco}
+(@code{libcolour_ycgco_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_YCGCO}. In @code{union libcolour_colour},
+@code{.ycgco} are used for YCgCo colours.
+
+@code{struct libcolour_ycgco} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_YCGCO}.
+@item double Y
+The Y value, the luminance. 0 is black, 1 is white.
+@item double Cg
+The Cg (chrominance green) value.
+@item double co
+The Co (chrominance orange) value.
+@end table
+
+YCgCo is additive, since conversion from CIE 1931 XYZ is done
+with a matrix multiplication. It's white point is the CIE
+Standard Illuminant D65.
+
+
+
+@node CIE 1960 UCS
+@section CIE 1960 UCS
+
+CIE 1960 UCS colours are presented with @code{struct libcolour_cie1960ucs}
+(@code{libcolour_cie1960ucs_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_CIE1960UCS}. In @code{union libcolour_colour},
+@code{.cie1960ucs} are used for CIE 1960 UCS colours.
+
+@code{struct libcolour_cie1960ucs} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_CIE1960UCS}.
+@item double u
+The u value.
+@item double v
+The v value.
+@item double Y
+The Y value, the luminance.
+@end table
+
+CIE 1960 UCS is not additive. CIE 1960 UCS is defined by
+@math{u = 4X/(X + 15Y + 3Z)}, @math{v = 6Y/(X + 15Y + 3Z)}
+where X, Y, and Z are CIE XYZ values.
+
+
+
+@node CIEUVW
+@section CIE 1964 (U*, V*, W*)
+
+CIE 1964 (U*, V*, W*) colours are presented with @code{struct libcolour_cieuvw}
+(@code{libcolour_cieuvw_t}), and the @code{.model} member shall
+be set to @code{LIBCOLOUR_CIEUVW}. In @code{union libcolour_colour},
+@code{.cieuvw} are used for CIE 1964 (U*, V*, W*) colours.
+
+@code{struct libcolour_cieuvw} has the following members
+@table @code
+@item enum libcolour_model model
+Shall be set to @code{LIBCOLOUR_CIEUVW}.
+@item double U
+The U* value.
+@item double V
+The V* value.
+@item double W
+The W* value.
+@item double u0
+The u' chromaticity coordinate of a ``specified white object''.
+u' is defined as @math{4X/(X + 15Y + 3Z)} where X, Y, and Z
+are CIE 1931 XYZ values.
+@item double v0
+The v' chromaticity coordinate of a ``specified white object''.
+u' is defined as @math{9Y/(X + 15Y + 3Z)} where X, Y, and Z
+are CIE 1931 XYZ values.
+@end table
+
+CIE 1960 UCS is not additive.
+
