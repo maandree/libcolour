@@ -657,6 +657,8 @@ static void to_ydbdr(const libcolour_colour_t* restrict from, libcolour_ydbdr_t*
 
 static void to_yuv(const libcolour_colour_t* restrict from, libcolour_yuv_t* restrict to)
 {
+  /* TODO to_yuv: add direct conversion from and to CIE XYZ and use it as the default intermediary */
+  /* TODO to_yub: add direct conversion from and to sRGB */
   libcolour_colour_t tmp = *from;
   switch (from->model) {
   case LIBCOLOUR_YUV:

@@ -243,21 +243,21 @@ typedef struct libcolour_rgb {
   double slope;
   double transition;
   double transitioninv;
-  struct libcolour_ciexyy red;
-  struct libcolour_ciexyy green;
-  struct libcolour_ciexyy blue;
-  struct libcolour_ciexyy white;
   double (*to_encoded_red)(double);
   double (*to_decoded_red)(double);
   double (*to_encoded_green)(double);
   double (*to_decoded_green)(double);
   double (*to_encoded_blue)(double);
   double (*to_decoded_blue)(double);
-  double M[3][3];
-  double Minv[3][3];
+  struct libcolour_ciexyy red;
+  struct libcolour_ciexyy green;
+  struct libcolour_ciexyy blue;
+  struct libcolour_ciexyy white;
   double white_r;
   double white_g;
   double white_b;
+  double M[3][3];
+  double Minv[3][3];
   enum libcolour_rgb_colour_space colour_space;
 } libcolour_rgb_t;
 
