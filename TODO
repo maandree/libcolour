@@ -1,0 +1,17 @@
+Colour spaces:
+	LMS
+	L'M'S'
+	ICtCp
+	YCbCr
+	TSL
+	Y'UV
+	Hunter 1948 color space
+
+Support for generic additive colour spaces (3 channels and more)
+Support for generic subtractive colour spaces (3 channels and more)
+
+GPU accelerated functions:
+	int libcolour_convert_en_masse_f(const libcolour_colour_t* from, const libcolour_colour_t* to, size_t n, ...)
+		Where `...` normally is `float* ch1, float* ch2, float* ch3`.
+	int libcolour_convert_en_masse_d(const libcolour_colour_t* from, const libcolour_colour_t* to, size_t n, ...)
+		Where `...` normally is `double* ch1, double* ch2, double* ch3`.
