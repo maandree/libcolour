@@ -907,7 +907,7 @@ static int eliminate(double** M, size_t n, size_t m)
 
 int libcolour_proper(libcolour_colour_t* colour)
 {
-  libcolour_colour_t tmp, r, g, b;
+  libcolour_colour_t r, g, b, w;
   double m[3][4];
   switch (colour->model) {
   case LIBCOLOUR_CIELUV:
@@ -924,14 +924,14 @@ int libcolour_proper(libcolour_colour_t* colour)
     colour->rgb.red.Y   = 1;
     colour->rgb.green.Y = 1;
     colour->rgb.blue.Y  = 1;
-    r.model = g.model = b.model = tmp.model = LIBCOLOUR_CIEXYZ;
+    r.model = g.model = b.model = w.model = LIBCOLOUR_CIEXYZ;
     libcolour_convert((const libcolour_colour_t*)&colour->rgb.red, &r);
     libcolour_convert((const libcolour_colour_t*)&colour->rgb.green, &g);
     libcolour_convert((const libcolour_colour_t*)&colour->rgb.blue, &b);
-    libcolour_convert((const libcolour_colour_t*)&colour->rgb.white, &tmp);
-    m[0][0] = r.ciexyz.X, m[0][1] = g.ciexyz.X, m[0][2] = b.ciexyz.X, m[0][3] = tmp.ciexyz.X;
-    m[1][0] = r.ciexyz.Y, m[1][1] = g.ciexyz.Y, m[1][2] = b.ciexyz.Y, m[1][3] = tmp.ciexyz.Y;
-    m[2][0] = r.ciexyz.Z, m[2][1] = g.ciexyz.Z, m[2][2] = b.ciexyz.Z, m[2][3] = tmp.ciexyz.Z;
+    libcolour_convert((const libcolour_colour_t*)&colour->rgb.white, &w);
+    m[0][0] = r.ciexyz.X, m[0][1] = g.ciexyz.X, m[0][2] = b.ciexyz.X, m[0][3] = w.ciexyz.X;
+    m[1][0] = r.ciexyz.Y, m[1][1] = g.ciexyz.Y, m[1][2] = b.ciexyz.Y, m[1][3] = w.ciexyz.Y;
+    m[2][0] = r.ciexyz.Z, m[2][1] = g.ciexyz.Z, m[2][2] = b.ciexyz.Z, m[2][3] = w.ciexyz.Z;
     if (eliminate((double**)m, 3, 4))
       return -1;
     colour->rgb.red.Y   = m[0][3];
