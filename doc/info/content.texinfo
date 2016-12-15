@@ -11,6 +11,7 @@
 * Overview::                                Brief overview of @command{libcolour}.
 * Colour Spaces::                           Colour-space conversion.
 * Illuminants::                             Illuminant initialisers.
+* Functions::                               Functions available in @command{libcolour}.
 
 * Free Software Needs Free Documentation::  Why free documentation is important.
 * GNU General Public License::              Copying and sharing @command{libcolour}.
@@ -39,6 +40,7 @@ Colour Spaces
 
 Illuminants
 
+Functions
 
 Free Software Needs Free Documentation
 
@@ -53,6 +55,7 @@ GNU Free Documentation License
 @include chap/overview.texinfo
 @include chap/colour-spaces.texinfo
 @include chap/illuminants.texinfo
+@include chap/functions.texinfo
 
 @include appx/free-software-needs-free-documentation.texinfo
 
