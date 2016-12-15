@@ -602,6 +602,7 @@ static void to_cielch(const libcolour_colour_t* restrict from, libcolour_cielch_
 
 static void to_yiq(const libcolour_colour_t* restrict from, libcolour_yiq_t* restrict to)
 {
+  /* TODO to_yiq: add direct conversion from and to CIE XYZ and use it as the default intermediary */
   double r, g, b;
   libcolour_colour_t tmp = *from;
   switch (from->model) {
@@ -626,6 +627,7 @@ static void to_yiq(const libcolour_colour_t* restrict from, libcolour_yiq_t* res
 
 static void to_ydbdr(const libcolour_colour_t* restrict from, libcolour_ydbdr_t* restrict to)
 {
+  /* TODO to_ydbdr: add direct conversion from and to CIE XYZ and use it as the default intermediary */
   double r, g, b;
   libcolour_colour_t tmp = *from;
   switch (from->model) {
@@ -695,6 +697,7 @@ static void to_ypbpr(const libcolour_colour_t* restrict from, libcolour_ypbpr_t*
 
 static void to_ycgco(const libcolour_colour_t* restrict from, libcolour_ycgco_t* restrict to)
 {
+  /* TODO to_ycgco: add direct conversion from and to CIE XYZ and use it as the default intermediary */
   libcolour_colour_t tmp = *from;
   switch (from->model) {
   case LIBCOLOUR_YCGCO:

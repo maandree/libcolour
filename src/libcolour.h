@@ -261,7 +261,7 @@ typedef struct libcolour_rgb {
   enum libcolour_rgb_colour_space colour_space;
 } libcolour_rgb_t;
 
-/* TODO LMS, L'M'S', ICtCp */
+/* TODO LMS, L'M'S', ICtCp, YCbCr, TSL, Y'UV, Hunter 1948 color space */
 /* TODO generic additive colour space */
 /* TODO generic subtractive colour space */
 
