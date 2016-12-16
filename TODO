@@ -5,7 +5,8 @@ Colour spaces:
 	YCbCr
 	TSL
 	Y'UV
-	Hunter 1948 color space
+	Hunter 1948 color space (see Wikipedia article on CIELAB)
+	CIELCh (CIEHLC) (see Wikipedia article on CIELAB)
 
 Support for generic additive colour spaces (3 channels and more)
 Support for generic subtractive colour spaces (3 channels and more)

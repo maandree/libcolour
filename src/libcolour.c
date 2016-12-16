@@ -16,6 +16,7 @@
  */
 #include "libcolour.h"
 
+#include <alloca.h>
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
@@ -330,10 +331,9 @@ static void ciexyy_to_ciexyz(const libcolour_ciexyy_t* restrict from, libcolour_
   }
 }
 
-static inline double cielab_finv(double x)
+static inline double cielab_finv(double t)
 {
-  double x3 = x * x * x;
-  return (x3 > 0.00885642) ? x3 : (x - 0.1379310) / (7.78 + 703 / 99900);
+  return (t > 6. / 29.) ? t * t * t : (t - 4. / 29.) * 108 / 841;
 }
 
 static void cielab_to_ciexyz(const libcolour_cielab_t* restrict from, libcolour_ciexyz_t* restrict to)
@@ -341,10 +341,10 @@ static void cielab_to_ciexyz(const libcolour_cielab_t* restrict from, libcolour_
   double L = from->L, a = from->a, b = from->b;
   to->Y = (L + 16) / 116;
   to->X = to->Y + a / 500;
-  to->Z = to->Y - b / 300;
+  to->Z = to->Y - b / 200;
   to->X = cielab_finv(to->X) * 0.95047;
-  to->Y = cielab_finv(to->Y);
-  to->Z = cielab_finv(to->Z) * 1.08883;
+  to->Y = cielab_finv(to->Y) * 1.08883;
+  to->Z = cielab_finv(to->Z);
 }
 
 static void cieluv_to_ciexyz(const libcolour_cieluv_t* restrict from, libcolour_ciexyz_t* restrict to)
@@ -446,9 +446,9 @@ static void to_ciexyz(const libcolour_colour_t* restrict from, libcolour_ciexyz_
 }
 
 
-static inline double cielab_f(double x)
+static inline double cielab_f(double t)
 {
-  return (x > 0.00885642) ? cbrt(x) : x * (7.78 + 703 / 99900) + 0.1379310;
+  return (t > 216. / 24389.) ? cbrt(t) : t * 841. / 108. + 4. / 29.;
 }
 
 static void ciexyz_to_cielab(const libcolour_ciexyz_t* restrict from, libcolour_cielab_t* restrict to)
@@ -492,14 +492,14 @@ static void ciexyz_to_cieluv(const libcolour_ciexyz_t* restrict from, libcolour_
   t = to->white.X + 15 * to->white.Y + 3 * to->white.Z;
   u = 4 * to->white.X / t;
   v = 9 * to->white.Y / t;
-  t = from->X + 15 * from->Y + 4 * from->Z;
+  t = from->X + 15 * from->Y + 3 * from->Z;
   u = 4 * from->X / t - u;
   v = 9 * from->Y / t - v;
   y = from->Y / to->white.Y;
   y2 = y * 24389;
   y = y2 <= 216 ? y2 / 27 : cbrt(y) * 116 - 16;
   to->L = y;
-  y  *= 13;
+  y *= 13;
   to->u = u * y;
   to->v = v * y;
 }
@@ -535,6 +535,9 @@ static void other_to_cieluv(const libcolour_colour_t* restrict from, libcolour_c
 static void to_cieluv(const libcolour_colour_t* restrict from, libcolour_cieluv_t* restrict to)
 {
   switch (from->model) {
+  case LIBCOLOUR_CIEXYZ:
+    ciexyz_to_cieluv(&from->ciexyz, to);
+    return;
   case LIBCOLOUR_CIELCH:
     cielch_to_cieluv(&from->cielch, to);
     return;
@@ -563,7 +566,7 @@ static void cieluv_to_cielch(const libcolour_cieluv_t* restrict from, libcolour_
     to_cieluv((const libcolour_colour_t*)from, &tmp);
     L = tmp.L, u = tmp.u, v = tmp.v;
   } else {
-    L = from->L, u = from->u, v = from->u;
+    L = from->L, u = from->u, v = from->v;
   }
   to->L = L;
   to->C = sqrt(u * u + v * v);
@@ -611,9 +614,14 @@ static void to_yiq(const libcolour_colour_t* restrict from, libcolour_yiq_t* res
     return;
   default:
     tmp.model = LIBCOLOUR_SRGB;
+    tmp.srgb.with_gamma = 0;
     to_srgb(from, &tmp.srgb);
     /* fall through */
   case LIBCOLOUR_SRGB:
+    if (tmp.srgb.with_gamma) {
+      tmp.srgb.with_gamma = 0;
+      to_srgb(from, &tmp.srgb);
+    }
     r = tmp.srgb.R;
     g = tmp.srgb.G;
     b = tmp.srgb.B;
@@ -641,9 +649,14 @@ static void to_ydbdr(const libcolour_colour_t* restrict from, libcolour_ydbdr_t*
     return;
   default:
     tmp.model = LIBCOLOUR_SRGB;
+    tmp.srgb.with_gamma = 0;
     to_srgb(from, &tmp.srgb);
     /* fall through */
   case LIBCOLOUR_SRGB:
+    if (tmp.srgb.with_gamma) {
+      tmp.srgb.with_gamma = 0;
+      to_srgb(from, &tmp.srgb);
+    }
     r = tmp.srgb.R;
     g = tmp.srgb.G;
     b = tmp.srgb.B;
@@ -686,9 +699,14 @@ static void to_ypbpr(const libcolour_colour_t* restrict from, libcolour_ypbpr_t*
     return;
   default:
     tmp.model = LIBCOLOUR_SRGB;
+    tmp.srgb.with_gamma = 0;
     to_srgb(from, &tmp.srgb);
     /* fall through */
   case LIBCOLOUR_SRGB:
+    if (tmp.srgb.with_gamma) {
+      tmp.srgb.with_gamma = 0;
+      to_srgb(from, &tmp.srgb);
+    }
     to->Y  = tmp.srgb.R * 0.2126 + tmp.srgb.G * 0.7152 + tmp.srgb.B * 0.0722;
     to->Pb = tmp.srgb.B - to->Y;
     to->Pr = tmp.srgb.R - to->Y;
@@ -707,9 +725,14 @@ static void to_ycgco(const libcolour_colour_t* restrict from, libcolour_ycgco_t*
     return;
   default:
     tmp.model = LIBCOLOUR_SRGB;
+    tmp.srgb.with_gamma = 0;
     to_srgb(from, &tmp.srgb);
     /* fall through */
   case LIBCOLOUR_SRGB:
+    if (tmp.srgb.with_gamma) {
+      tmp.srgb.with_gamma = 0;
+      to_srgb(from, &tmp.srgb);
+    }
     to->Y  =  tmp.srgb.R / 4 + tmp.srgb.G / 2 + tmp.srgb.B / 4;
     to->Cg = -tmp.srgb.R / 4 + tmp.srgb.G / 2 - tmp.srgb.B / 4;
     to->Co =  tmp.srgb.R / 2 - tmp.srgb.B / 2;
@@ -766,7 +789,7 @@ static void to_cieuvw(const libcolour_colour_t* restrict from, libcolour_cieuvw_
     to_cie1960ucs(from, &tmp.cie1960ucs);
     /* fall through */
   case LIBCOLOUR_CIE1960UCS:
-    U = from->cie1960ucs.u, V = from->cie1960ucs.v, W = from->cie1960ucs.Y;
+    U = tmp.cie1960ucs.u, V = tmp.cie1960ucs.v, W = tmp.cie1960ucs.Y;
     W = 25 * cbrt(W) - 17;
     w = W * 13;
     to->U = w * (U - to->u0);
@@ -780,7 +803,9 @@ static void to_cieuvw(const libcolour_colour_t* restrict from, libcolour_cieuvw_
 
 int libcolour_convert(const libcolour_colour_t* restrict from, libcolour_colour_t* restrict to)
 {
-  if (from->model < 0 || from->model > LIBCOLOUR_CIEUVW) {
+#define X(C, T) 1 +
+  if (from->model < 0 || from->model > LIBCOLOUR_LIST_MODELS 0) {
+#undef X
     errno = EINVAL;
     return -1;
   }
@@ -862,8 +887,10 @@ int libcolour_delta_e(const libcolour_colour_t* a, const libcolour_colour_t* b, 
 }
 
 
-static int eliminate(double** M, size_t n, size_t m)
+#define eliminate(M, n, m)  eliminate_(n, m, &(M))
+static int eliminate_(size_t n, size_t m, double (*Mp)[n][m])
 {
+#define M (*Mp)
   size_t r1, r2, c;
   double d;
   double* R1;
@@ -894,7 +921,7 @@ static int eliminate(double** M, size_t n, size_t m)
   }
   for (r1 = n; --r1;) {
     R1 = M[r1];
-    for (r2 = r1; --r2;) {
+    for (r2 = r1; r2--;) {
       R2 = M[r2];
       d = R2[r1];
       for (c = 0; c < m; c++)
@@ -902,6 +929,7 @@ static int eliminate(double** M, size_t n, size_t m)
     }
   }
   return 0;
+#undef M
 }
 
 
@@ -932,7 +960,7 @@ int libcolour_proper(libcolour_colour_t* colour)
     m[0][0] = r.ciexyz.X, m[0][1] = g.ciexyz.X, m[0][2] = b.ciexyz.X, m[0][3] = w.ciexyz.X;
     m[1][0] = r.ciexyz.Y, m[1][1] = g.ciexyz.Y, m[1][2] = b.ciexyz.Y, m[1][3] = w.ciexyz.Y;
     m[2][0] = r.ciexyz.Z, m[2][1] = g.ciexyz.Z, m[2][2] = b.ciexyz.Z, m[2][3] = w.ciexyz.Z;
-    if (eliminate((double**)m, 3, 4))
+    if (eliminate(m, 3, 4))
       return -1;
     colour->rgb.red.Y   = m[0][3];
     colour->rgb.green.Y = m[1][3];
@@ -968,14 +996,14 @@ static int get_primaries(libcolour_rgb_t* cs)
   M[1][0] = r.ciexyz.Y, M[1][1] = g.ciexyz.Y, M[1][2] = b.ciexyz.Y, M[1][3] = 0, M[1][4] = 1, M[1][5] = 0;
   M[2][0] = r.ciexyz.Z, M[2][1] = g.ciexyz.Z, M[2][2] = b.ciexyz.Z, M[2][3] = 0, M[2][4] = 0, M[2][5] = 1;
 
-  if (eliminate((double**)M, 3, 6))
+  if (eliminate(M, 3, 6))
     return -1;
 
   memcpy(M[0], M[0] + 3, 3 * sizeof(double)), M[0][3] = Sr;
   memcpy(M[1], M[1] + 3, 3 * sizeof(double)), M[1][3] = Sg;
   memcpy(M[2], M[2] + 3, 3 * sizeof(double)), M[2][3] = Sb;
 
-  if (eliminate((double**)M, 3, 4))
+  if (eliminate(M, 3, 4))
     return -1;
 
   w.ciexyz.X = M[0][3];
@@ -1014,7 +1042,7 @@ static int get_matrices(libcolour_rgb_t* cs)
   M[1][0] = r.ciexyz.Y, M[1][1] = g.ciexyz.Y, M[1][2] = b.ciexyz.Y, M[1][3] = 0, M[1][4] = 1, M[1][5] = 0;
   M[2][0] = r.ciexyz.Z, M[2][1] = g.ciexyz.Z, M[2][2] = b.ciexyz.Z, M[2][3] = 0, M[2][4] = 0, M[2][5] = 1;
 
-  if (eliminate((double**)M, 3, 6))
+  if (eliminate(M, 3, 6))
     return -1;
 
   Sr = M[0][3] * w.ciexyz.X + M[0][4] * w.ciexyz.Y + M[0][5] * w.ciexyz.Z;
@@ -1033,7 +1061,7 @@ static int get_matrices(libcolour_rgb_t* cs)
   memcpy(M[1], cs->M[1], 3 * sizeof(double)), M[1][3] = 0, M[1][4] = 1, M[1][5] = 0;
   memcpy(M[2], cs->M[2], 3 * sizeof(double)), M[2][3] = 0, M[2][4] = 0, M[2][5] = 1;
 
-  if (eliminate((double**)M, 3, 6))
+  if (eliminate(M, 3, 6))
     return -1;
 
   memcpy(cs->Minv[0], M[0] + 3, 3 * sizeof(double));
@@ -1044,20 +1072,27 @@ static int get_matrices(libcolour_rgb_t* cs)
 }
 
 
-static int invert(double **Minv, double **M, size_t n)
+#define invert(Minv, M, n)  invert_(n, &(Minv), &(M))
+static int invert_(size_t n, double (*Minvp)[n][n], double (*Mp)[n][n])
 {
-  double J[3][6];
+#define Minv (*Minvp)
+#define M (*Mp)
+#define J (*Jp)
+  double J[n][2 * n] = alloca(sizeof(double[n][2 * n]));
   size_t i;
   for (i = 0; i < n; i++) {
     memcpy(J[i], M[i], n * sizeof(double));
     memset(J[i] + n, 0, n * sizeof(double));
     J[i][n + i] = 1;
   }
-  if (eliminate((double**)J, n, 2 * n))
+  if (eliminate(J, n, 2 * n))
     return -1;
   for (i = 0; i < n; i++)
-    memcpy(M[i], J[i] + n, n * sizeof(double));
+    memcpy(Minv[i], J[i] + n, n * sizeof(double));
   return 0;
+#undef J
+#undef M
+#undef Minv
 }
 
 
@@ -1082,7 +1117,7 @@ static void get_transfer_function(libcolour_colour_t* cs)
 }
 
 
-int libcolour_rgb_colour_space(libcolour_rgb_t* cs, libcolour_rgb_colour_space_t space)
+int libcolour_get_rgb_colour_space(libcolour_rgb_t* cs, libcolour_rgb_colour_space_t space)
 {
 #define XYY(XVALUE, YVALUE)  (libcolour_ciexyy_t){ .model = LIBCOLOUR_CIEXYY, .x = XVALUE, .y = YVALUE, .Y = 1}
 
@@ -1093,12 +1128,12 @@ int libcolour_rgb_colour_space(libcolour_rgb_t* cs, libcolour_rgb_colour_space_t
     return 0;
 
   case LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX:
-    if (invert((double**)(cs->Minv), (double**)(cs->M), 3) || get_primaries(cs))
+    if (invert(cs->Minv, cs->M, 3) || get_primaries(cs))
       return -1;
     return 0;
 
   case LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX:
-    if (invert((double**)(cs->M), (double**)(cs->Minv), 3) || get_primaries(cs))
+    if (invert(cs->M, cs->Minv, 3) || get_primaries(cs))
       return -1;
     return 0;
 
