@@ -200,6 +200,14 @@ static void ypbpr_to_srgb(const libcolour_ypbpr_t* restrict from, libcolour_srgb
   to->G = (Y - to->R * 0.2126 - to->B * 0.0722) / 0.7152;
 }
 
+static void yuv_to_srgb(const libcolour_yuv_t* restrict from, libcolour_srgb_t* restrict to)
+{
+  double Y = from->Y, U = from->U, V = from->V;
+  to->R = Y + U * 0.00028328010485821202317155420580263580632163211703 + V * 1.14070449590558520291949662350816652178764343261719;
+  to->G = Y - U * 0.39630886669497211727275498560629785060882568359375 - V * 0.58107364288228224857846271333983168005943298339844;
+  to->B = Y + U * 2.03990003507541306504435851820744574069976806640625 + V * 0.00017179031692307700847528739718228507626918144524;
+}
+
 static void ycgco_to_srgb(const libcolour_ycgco_t* restrict from, libcolour_srgb_t* restrict to)
 {
   double Y = from->Y, Cg = from->Cg, Co = from->Co;
@@ -234,6 +242,9 @@ static void to_srgb(const libcolour_colour_t* restrict from, libcolour_srgb_t* r
     break;
   case LIBCOLOUR_YPBPR:
     ypbpr_to_srgb(&from->ypbpr, to);
+    break;
+  case LIBCOLOUR_YUV:
+    yuv_to_srgb(&from->yuv, to);
     break;
   case LIBCOLOUR_YCGCO:
     ycgco_to_srgb(&from->ycgco, to);
@@ -398,12 +409,49 @@ static void cielchuv_to_ciexyz(const libcolour_cielchuv_t* restrict from, libcol
   cieluv_to_ciexyz(&tmp, to);
 }
 
+static void yiq_to_ciexyz(const libcolour_yiq_t* restrict from, libcolour_ciexyz_t* restrict to)
+{
+#define MULTIPLIY(CY, CI, CQ)  ((CY) * from->Y + (CI) * from->I + (CQ) * from->Q)
+  to->X = MULTIPLIY(0.95047055865428309306963683411595411598682403564453, 0.09738463974178063198294807989441324025392532348633, 0.33223466706854809515903070860076695680618286132812);
+  to->Y = MULTIPLIY(0.99999999999999988897769753748434595763683319091797, -0.07112658301916767455974621725545148365199565887451, -0.20786968876398304040264974901219829916954040527344);
+  to->Z = MULTIPLIY(1.08882873639588373393394249433185905218124389648438, -1.06592139332461721679123911599162966012954711914062, 1.55474471255181900808395312196807935833930969238281);
+#undef MULTIPLIY
+}
+
+static void ydbdr_to_ciexyz(const libcolour_ydbdr_t* restrict from, libcolour_ciexyz_t* restrict to)
+{
+#define MULTIPLIY(CY, CDB, CDR)  ((CY) * from->Y + (CDB) * from->Db + (CDR) * from->Dr)
+  to->X = MULTIPLIY(0.95047055865428309306963683411595411598682403564453, 0.07379612357298576119646327242662664502859115600586, -0.12113653724874726136384595065464964136481285095215);
+  to->Y = MULTIPLIY(0.99999999999999988897769753748434595763683319091797, -0.04435684145428285540813106990754022262990474700928, 0.07973534004202506575431641522300196811556816101074);
+  to->Z = MULTIPLIY(1.08882873639588373393394249433185905218124389648438, 0.61625657933494271123464613992837257683277130126953, 0.02168821359337728266192257819966471288353204727173);
+#undef MULTIPLIY
+}
+
 static void yuv_to_ciexyz(const libcolour_yuv_t* restrict from, libcolour_ciexyz_t* restrict to)
 {
-  libcolour_ydbdr_t tmp;
-  tmp.model = LIBCOLOUR_YDBDR;
-  to_ydbdr((const libcolour_colour_t*)from, &tmp);
-  to_ciexyz((const libcolour_colour_t*)&tmp, to);
+#define MULTIPLIY(CY, CU, CV)  ((CY) * from->Y + (CU) * from->U + (CV) * from->V)
+  to->X = MULTIPLIY(0.95047055865428309306963683411595411598682403564453, 0.22648030324549334180161963558930438011884689331055, 0.26274514929253273143316960158699657768011093139648);
+  to->Y = MULTIPLIY(0.99999999999999988897769753748434595763683319091797, -0.13613114642319409930415474718756740912795066833496, -0.17294595255115238763288232348713790997862815856934);
+  to->Z = MULTIPLIY(1.08882873639588373393394249433185905218124389648438, 1.89129144197893928058817891724174842238426208496094, -0.04704173528403532422714761196402832865715026855469);
+#undef MULTIPLIY
+}
+
+static void ypbpr_to_ciexyz(const libcolour_ypbpr_t* restrict from, libcolour_ciexyz_t* restrict to)
+{
+#define MULTIPLIY(CY, CPB, CPR)  ((CY) * from->Y + (CPB) * from->Pb + (CPR) * from->Pr)
+  to->X = MULTIPLIY(0.95047055865428298204733437160030007362365722656250, 0.14433968424876231217979238863335922360420227050781, 0.30616461986760712399302519770571961998939514160156);
+  to->Y = MULTIPLIY(0.99999999999999977795539507496869191527366638183594, -0.00002022802471486617736928792510298080742359161377, 0.00008771894888734421691367515450110659003257751465);
+  to->Z = MULTIPLIY(1.08882873639588373393394249433185905218124389648438, 0.93827031735982591165168287261622026562690734863281, -0.01609699914324668607035206946420657914131879806519);
+#undef MULTIPLIY
+}
+
+static void ycgco_to_ciexyz(const libcolour_ycgco_t* restrict from, libcolour_ciexyz_t* restrict to)
+{
+#define MULTIPLIY(CY, CCG, CCO)  ((CY) * from->Y + (CCG) * from->Cg + (CCO) * from->Co)
+  to->X = MULTIPLIY(0.95047055865428309306963683411595411598682403564453, -0.23531882816325136453805555447615915909409523010254, 0.23202019775596791073546398820326430723071098327637);
+  to->Y = MULTIPLIY(0.99999999999999988897769753748434595763683319091797, 0.43030346098206362359661625305307097733020782470703, 0.14049847124784842211653312915586866438388824462891);
+  to->Z = MULTIPLIY(1.08882873639588373393394249433185905218124389648438, -0.85044482623220662986796014592982828617095947265625, -0.93096889579069830311652822274481877684593200683594);
+#undef MULTIPLIY
 }
 
 static void cie1960ucs_to_ciexyz(const libcolour_cie1960ucs_t* restrict from, libcolour_ciexyz_t* restrict to)
@@ -436,37 +484,49 @@ static void to_ciexyz(const libcolour_colour_t* restrict from, libcolour_ciexyz_
   switch (from->model) {
   case LIBCOLOUR_RGB:
     rgb_to_ciexyz(&from->rgb, to);
-    return;
+    break;
   case LIBCOLOUR_SRGB:
     srgb_to_ciexyz(&from->srgb, to);
-    return;
+    break;
   case LIBCOLOUR_CIEXYY:
     ciexyy_to_ciexyz(&from->ciexyy, to);
-    return;
+    break;
   case LIBCOLOUR_CIEXYZ:
     *to = from->ciexyz;
-    return;
+    break;
   case LIBCOLOUR_CIELAB:
     cielab_to_ciexyz(&from->cielab, to);
-    return;
+    break;
   case LIBCOLOUR_CIELUV:
     cieluv_to_ciexyz(&from->cieluv, to);
-    return;
+    break;
   case LIBCOLOUR_CIELCHUV:
     cielchuv_to_ciexyz(&from->cielchuv, to);
-    return;
+    break;
+  case LIBCOLOUR_YIQ:
+    yiq_to_ciexyz(&from->yiq, to);
+    break;
+  case LIBCOLOUR_YDBDR:
+    ydbdr_to_ciexyz(&from->ydbdr, to);
+    break;
   case LIBCOLOUR_YUV:
     yuv_to_ciexyz(&from->yuv, to);
-    return;
+    break;
+  case LIBCOLOUR_YPBPR:
+    ypbpr_to_ciexyz(&from->ypbpr, to);
+    break;
+  case LIBCOLOUR_YCGCO:
+    ycgco_to_ciexyz(&from->ycgco, to);
+    break;
   case LIBCOLOUR_CIE1960UCS:
     cie1960ucs_to_ciexyz(&from->cie1960ucs, to);
-    return;
+    break;
   case LIBCOLOUR_CIEUVW:
     cieuvw_to_ciexyz(&from->cieuvw, to);
-    return;
+    break;
   default:
     other_to_ciexyz(from, to);
-    return;
+    break;
   }
 }
 
@@ -562,21 +622,21 @@ static void to_cieluv(const libcolour_colour_t* restrict from, libcolour_cieluv_
   switch (from->model) {
   case LIBCOLOUR_CIEXYZ:
     ciexyz_to_cieluv(&from->ciexyz, to);
-    return;
+    break;
   case LIBCOLOUR_CIELCHUV:
     cielchuv_to_cieluv(&from->cielchuv, to);
-    return;
+    break;
   case LIBCOLOUR_CIELUV:
     if (to->white.X == from->cieluv.white.X &&
 	to->white.Y == from->cieluv.white.Y &&
 	to->white.Z == from->cieluv.white.Z) {
       *to = from->cieluv;
-      return;
+      break;
     }
     /* fall through */
   default:
     other_to_cieluv(from, to);
-    return;
+    break;
   }
 }
 
@@ -612,109 +672,141 @@ static void to_cielchuv(const libcolour_colour_t* restrict from, libcolour_cielc
   switch (from->model) {
   case LIBCOLOUR_CIELUV:
     cieluv_to_cielchuv(&from->cieluv, to);
-    return;
+    break;
   case LIBCOLOUR_CIELCHUV:
     if (to->white.X == from->cielchuv.white.X &&
 	to->white.Y == from->cielchuv.white.Y &&
 	to->white.Z == from->cielchuv.white.Z) {
       *to = from->cielchuv;
-      return;
+      break;
     }
     /* fall through */
   default:
     other_to_cielchuv(from, to);
-    return;
+    break;
   }
 }
 
 
 static void to_yiq(const libcolour_colour_t* restrict from, libcolour_yiq_t* restrict to)
 {
-  /* TODO to_yiq: add direct conversion from and to CIE XYZ and use it as the default intermediary */
-  double r, g, b;
+  double x, y, z;
   libcolour_colour_t tmp = *from;
   switch (from->model) {
   case LIBCOLOUR_YIQ:
     *to = from->yiq;
-    return;
-  default:
-    tmp.model = LIBCOLOUR_SRGB;
-    tmp.srgb.with_gamma = 0;
-    to_srgb(from, &tmp.srgb);
-    /* fall through */
+    break;
   case LIBCOLOUR_SRGB:
     if (tmp.srgb.with_gamma) {
       tmp.srgb.with_gamma = 0;
       to_srgb(from, &tmp.srgb);
     }
-    r = tmp.srgb.R;
-    g = tmp.srgb.G;
-    b = tmp.srgb.B;
-    to->Y = r * 0.299 + g * 0.587 + b * 0.114;
-    to->I = r * 0.59571613491277464191853141528554260730743408203125  /* (0.877 cos 33°)(1 - 0.299) - (0.492 sin 33°)(-0.299) */
-          - g * 0.27445283783925644716106262421817518770694732666016  /* (0.877 cos 33°)(-0.587)    - (0.492 sin 33°)(-0.587) */
-          - b * 0.32126329707351808373516632855171337723731994628906; /* (0.877 cos 33°)(-0.114)    - (0.492 sin 33°)(1 - 0.114) */
-    to->Q = r * 0.21145640212011795888713550084503367543220520019531  /* (0.877 sin 33°)(1 - 0.299) + (0.492 cos 33°)(-0.299) */
-          - g * 0.52259104529161115593183239980135113000869750976562  /* (0.877 sin 33°)(-0.587)    + (0.492 cos 33°)(-0.587) */
-          + b * 0.31113464317149330806699936147197149693965911865234; /* (0.877 sin 33°)(-0.114)    + (0.492 cos 33°)(1 - 0.114) */
-    return;
+    x = tmp.srgb.R;
+    y = tmp.srgb.G;
+    z = tmp.srgb.B;
+    to->Y = x * 0.299 + y * 0.587 + z * 0.114;
+    to->I = x * 0.59571613491277464191853141528554260730743408203125  /* (0.877 cos 33°)(1 - 0.299) - (0.492 sin 33°)(-0.299) */
+          - y * 0.27445283783925644716106262421817518770694732666016  /* (0.877 cos 33°)(-0.587)    - (0.492 sin 33°)(-0.587) */
+          - z * 0.32126329707351808373516632855171337723731994628906; /* (0.877 cos 33°)(-0.114)    - (0.492 sin 33°)(1 - 0.114) */
+    to->Q = x * 0.21145640212011795888713550084503367543220520019531  /* (0.877 sin 33°)(1 - 0.299) + (0.492 cos 33°)(-0.299) */
+          - y * 0.52259104529161115593183239980135113000869750976562  /* (0.877 sin 33°)(-0.587)    + (0.492 cos 33°)(-0.587) */
+          + z * 0.31113464317149330806699936147197149693965911865234; /* (0.877 sin 33°)(-0.114)    + (0.492 cos 33°)(1 - 0.114) */
+    break;
+  default:
+    tmp.model = LIBCOLOUR_CIEXYZ;
+    to_ciexyz(from, &tmp.ciexyz);
+    /* fall through */
+  case LIBCOLOUR_CIEXYZ:
+    x = tmp.ciexyz.X;
+    y = tmp.ciexyz.Y;
+    z = tmp.ciexyz.Z;
+#define MULTIPLIY(CX, CY, CZ)  ((CX) * x + (CY) * y + (CZ) * z)
+    to->Y = MULTIPLIY(0.40627729168038273499519164033699780702590942382812, 0.61835674212166968910509012857801280915737152099609, -0.00414330221353725880462093300593551248311996459961);
+    to->I = MULTIPLIY(2.17852787350219845308174626552499830722808837890625, -1.36502666214454104753883711964590474963188171386719, -0.64803574634025240541745915834326297044754028320312);
+    to->Q = MULTIPLIY(1.20905577682138853923277110880007967352867126464844, -1.36890364998339797431015085749095305800437927246094, 0.20180559439597040016778350945969577878713607788086);
+#undef MULTIPLIY
+    break;
   }
 }
 
 
 static void to_ydbdr(const libcolour_colour_t* restrict from, libcolour_ydbdr_t* restrict to)
 {
-  /* TODO to_ydbdr: add direct conversion from and to CIE XYZ and use it as the default intermediary */
-  double r, g, b;
+  double x, y, z;
   libcolour_colour_t tmp = *from;
   switch (from->model) {
   case LIBCOLOUR_YDBDR:
     *to = from->ydbdr;
-    return;
-  case LIBCOLOUR_YUV:
-    to->Y  =  tmp.yuv.Y;
-    to->Db =  tmp.yuv.U * 3.069;
-    to->Dr = -tmp.yuv.V * 2.169;
-    return;
-  default:
-    tmp.model = LIBCOLOUR_SRGB;
-    tmp.srgb.with_gamma = 0;
-    to_srgb(from, &tmp.srgb);
-    /* fall through */
+    break;
   case LIBCOLOUR_SRGB:
     if (tmp.srgb.with_gamma) {
       tmp.srgb.with_gamma = 0;
       to_srgb(from, &tmp.srgb);
     }
-    r = tmp.srgb.R;
-    g = tmp.srgb.G;
-    b = tmp.srgb.B;
-    to->Y  =  r * 0.299 + g * 0.587 + b * 0.114;
-    to->Db = -r * 0.450 - g * 0.883 + b * 1.333;
-    to->Dr = -r * 1.333 + g * 1.116 + b * 0.217;
-    return;
+    x = tmp.srgb.R;
+    y = tmp.srgb.G;
+    z = tmp.srgb.B;
+    to->Y  =  x * 0.299 + y * 0.587 + z * 0.114;
+    to->Db = -x * 0.450 - y * 0.883 + z * 1.333;
+    to->Dr = -x * 1.333 + y * 1.116 + z * 0.217;
+    break;
+  case LIBCOLOUR_YUV:
+    to->Y  =  tmp.yuv.Y;
+    to->Db =  tmp.yuv.U * 3.069;
+    to->Dr = -tmp.yuv.V * 2.169;
+    break;
+  default:
+    tmp.model = LIBCOLOUR_CIEXYZ;
+    to_ciexyz(from, &tmp.ciexyz);
+    /* fall through */
+  case LIBCOLOUR_CIEXYZ:
+    x = tmp.ciexyz.X;
+    y = tmp.ciexyz.Y;
+    z = tmp.ciexyz.Z;
+#define MULTIPLY(CX, CY, CZ)  ((CX) * x + (CY) * y + (CZ) * z)
+    to->Y  = MULTIPLY(0.40627729168038273499519164033699780702590942382812, 0.61835674212166968910509012857801280915737152099609, -0.00414330221353725880462093300593551248311996459961);
+    to->Db = MULTIPLY(-0.52816561102614745237815441214479506015777587890625, -1.23677481526212962315014465275453403592109680175781, 1.59692761635924940222253098909277468919754028320312);
+    to->Dr = MULTIPLY(-5.38914174974103143966885909321717917919158935546875, 4.09835630362728497999569299281574785709381103515625, 0.94033545560642795013706063400604762136936187744141);
+#undef MULTIPLY
+    break;
   }
 }
 
 
 static void to_yuv(const libcolour_colour_t* restrict from, libcolour_yuv_t* restrict to)
 {
-  /* TODO to_yuv: add direct conversion from and to CIE XYZ and use it as the default intermediary */
-  /* TODO to_yub: add direct conversion from and to sRGB */
   libcolour_colour_t tmp = *from;
   switch (from->model) {
   case LIBCOLOUR_YUV:
     *to = from->yuv;
-    return;
-  default:
-    tmp.model = LIBCOLOUR_YDBDR;
-    to_ydbdr(from, &tmp.ydbdr);
-    /* fall through */
+    break;
   case LIBCOLOUR_YDBDR:
-    to->Y =  tmp.ydbdr.Y;
-    to->U =  tmp.ydbdr.Db / 3.069;
-    to->V = -tmp.ydbdr.Dr / 2.169;
-    return;
+    to->Y = from->ydbdr.Y;
+    to->U = from->ydbdr.Db /  3.069;
+    to->V = from->ydbdr.Dr / -2.169;
+    break;
+  case LIBCOLOUR_SRGB:
+    if (tmp.srgb.with_gamma) {
+      tmp.srgb.with_gamma = 0;
+      to_srgb(from, &tmp.srgb);
+    }
+#define MULTIPLY(CR, CG, CB)  ((CR) * tmp.srgb.R + (CG) * tmp.srgb.G + (CB) * tmp.srgb.B)
+    to->Y = MULTIPLY(0.29899999999999998800959133404830936342477798461914, 0.58699999999999996624922005139524117112159729003906, 0.11400000000000000410782519111307919956743717193604);
+    to->U = MULTIPLY(-0.14662756598240470062854967636667424812912940979004, -0.28771586836102963635752871596196200698614120483398, 0.43434343434343436474165400795754976570606231689453);
+    to->V = MULTIPLY(0.61456892577224520035628074765554629266262054443359, -0.51452282157676354490405401520547457039356231689453, -0.10004610419548178035231700278018251992762088775635);
+#undef MULTIPLY
+    break;
+  default:
+    tmp.model = LIBCOLOUR_CIEXYZ;
+    to_ciexyz(from, &tmp.ciexyz);
+    /* fall through */
+  case LIBCOLOUR_CIEXYZ:
+#define MULTIPLY(CX, CY, CZ)  ((CX) * tmp.ciexyz.X + (CY) * tmp.ciexyz.Y + (CZ) * tmp.ciexyz.Z)
+    to->Y = MULTIPLY(0.40627729168038273499519164033699780702590942382812, 0.61835674212166968910509012857801280915737152099609, -0.00414330221353725880462093300593551248311996459961);
+    to->U = MULTIPLY(-0.17209697328971895746718701047939248383045196533203, -0.40298951295605395239718404809536878019571304321289, 0.52034135430408912093014350830344483256340026855469);
+    to->V = MULTIPLY(2.48462044709130047692724474472925066947937011718750, -1.88951420176453876997868519538315013051033020019531, -0.43353409663735725798616726933687459677457809448242);
+#undef MULTIPLY
+    break;
   }
 }
 
@@ -725,12 +817,7 @@ static void to_ypbpr(const libcolour_colour_t* restrict from, libcolour_ypbpr_t*
   switch (from->model) {
   case LIBCOLOUR_YPBPR:
     *to = from->ypbpr;
-    return;
-  default:
-    tmp.model = LIBCOLOUR_SRGB;
-    tmp.srgb.with_gamma = 0;
-    to_srgb(from, &tmp.srgb);
-    /* fall through */
+    break;
   case LIBCOLOUR_SRGB:
     if (tmp.srgb.with_gamma) {
       tmp.srgb.with_gamma = 0;
@@ -739,24 +826,29 @@ static void to_ypbpr(const libcolour_colour_t* restrict from, libcolour_ypbpr_t*
     to->Y  = tmp.srgb.R * 0.2126 + tmp.srgb.G * 0.7152 + tmp.srgb.B * 0.0722;
     to->Pb = tmp.srgb.B - to->Y;
     to->Pr = tmp.srgb.R - to->Y;
-    return;
+    break;
+  default:
+    tmp.model = LIBCOLOUR_CIEXYZ;
+    to_ciexyz(from, &tmp.ciexyz);
+    /* fall through */
+  case LIBCOLOUR_CIEXYZ:
+#define MULTIPLY(CX, CY, CZ)  ((CX) * tmp.ciexyz.X + (CY) * tmp.ciexyz.Y + (CZ) * tmp.ciexyz.Z)
+    to->Y  = MULTIPLY(-0.00028314209073960778378920011277841695118695497513, 1.00019821310075673892470149439759552478790283203125, 0.00006512054470741990286342115723527967929840087891);
+    to->Pb = MULTIPLY(0.05592664565509243568275365987574332393705844879150, -1.20422439283671711685030913940863683819770812988281, 1.05716144717799576113748116767965257167816162109375);
+    to->Pr = MULTIPLY(3.24072939673847715269516811531502753496170043945312, -2.53733297492083753610359053709544241428375244140625, -0.49859531356743613805804216099204495549201965332031);
+#undef MULTIPLY
+    break;
   }
 }
 
 
 static void to_ycgco(const libcolour_colour_t* restrict from, libcolour_ycgco_t* restrict to)
 {
-  /* TODO to_ycgco: add direct conversion from and to CIE XYZ and use it as the default intermediary */
   libcolour_colour_t tmp = *from;
   switch (from->model) {
   case LIBCOLOUR_YCGCO:
     *to = from->ycgco;
-    return;
-  default:
-    tmp.model = LIBCOLOUR_SRGB;
-    tmp.srgb.with_gamma = 0;
-    to_srgb(from, &tmp.srgb);
-    /* fall through */
+    break;
   case LIBCOLOUR_SRGB:
     if (tmp.srgb.with_gamma) {
       tmp.srgb.with_gamma = 0;
@@ -765,7 +857,18 @@ static void to_ycgco(const libcolour_colour_t* restrict from, libcolour_ycgco_t*
     to->Y  =  tmp.srgb.R / 4 + tmp.srgb.G / 2 + tmp.srgb.B / 4;
     to->Cg = -tmp.srgb.R / 4 + tmp.srgb.G / 2 - tmp.srgb.B / 4;
     to->Co =  tmp.srgb.R / 2 - tmp.srgb.B / 2;
-    return;
+    break;
+  default:
+    tmp.model = LIBCOLOUR_CIEXYZ;
+    to_ciexyz(from, &tmp.ciexyz);
+    /* fall through */
+  case LIBCOLOUR_CIEXYZ:
+#define MULTIPLY(CX, CY, CZ)  ((CX) * tmp.ciexyz.X + (CY) * tmp.ciexyz.Y + (CZ) * tmp.ciexyz.Z)
+    to->Y  = MULTIPLY(0.33938913643068269188063368346774950623512268066406, 0.50271574450517486631895280879689380526542663574219, 0.16045211478220866574417868832824751734733581542969);
+    to->Cg = MULTIPLY(-1.30865574267536244335019546269904822111129760742188, 1.37329621528319534284889869013568386435508728027344, -0.11889607256777862120955546743061859160661697387695);
+    to->Co = MULTIPLY(1.59240137554169236544510113162687048316001892089844, -0.66655429104206020962664069884340278804302215576172, -0.77787838037271606062006412685150280594825744628906);
+#undef MULTIPLY
+    break;
   }
 }
 
@@ -812,7 +915,7 @@ static void to_cieuvw(const libcolour_colour_t* restrict from, libcolour_cieuvw_
     U += w * (from->cieuvw.u0 - to->u0);
     V += w * (from->cieuvw.v0 - to->v0);
     to->U = U, to->V = V, to->W = W;
-    return;
+    break;
   default:
     tmp.model = LIBCOLOUR_CIE1960UCS;
     to_cie1960ucs(from, &tmp.cie1960ucs);
@@ -824,7 +927,7 @@ static void to_cieuvw(const libcolour_colour_t* restrict from, libcolour_cieuvw_
     to->U = w * (U - to->u0);
     to->V = w * (V - to->v0);
     to->W = W;
-    return;
+    break;
   }
 }
 
