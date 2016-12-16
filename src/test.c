@@ -249,6 +249,16 @@ int main(int argc, char* argv[])
   if (!r)
     rc = 1;
 
+  /* TODO test libcolour_srgb_encode */
+  /* TODO test libcolour_srgb_decode */
+  /* TODO test libcolour_srgb -> libcolour_rgb[srgb] */
+  /* TODO test libcolour_rgb[srgb] -> libcolour_srgb */
+  /* TODO test RGB colour spaces */
+  /* TODO test libcolour_delta_e */
+  /* TODO test libcolour_marshal */
+  /* TODO test libcolour_unmarshal */
+  /* TODO test libcolour_convert with single conversions */
+
   return rc;
  fail:
   perror(*argv);
