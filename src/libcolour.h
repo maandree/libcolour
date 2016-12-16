@@ -72,7 +72,7 @@
   X(LIBCOLOUR_CIEXYZ, libcolour_ciexyz_t)\
   X(LIBCOLOUR_CIELAB, libcolour_cielab_t)\
   X(LIBCOLOUR_CIELUV, libcolour_cieluv_t)\
-  X(LIBCOLOUR_CIELCH, libcolour_cielch_t)\
+  X(LIBCOLOUR_CIELCHUV, libcolour_cielchuv_t)\
   X(LIBCOLOUR_YIQ, libcolour_yiq_t)\
   X(LIBCOLOUR_YDBDR, libcolour_ydbdr_t)\
   X(LIBCOLOUR_YUV, libcolour_yuv_t)\
@@ -112,6 +112,7 @@ typedef enum libcolour_rgb_colour_space {
   LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_D65,
   LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_THEATER,
   LIBCOLOUR_RGB_COLOUR_SPACE_DON_RGB_4,
+  LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB,
   LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2,
   LIBCOLOUR_RGB_COLOUR_SPACE_EKTA_SPACE_PS5,
   LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_625_LINE,
@@ -223,13 +224,13 @@ typedef struct libcolour_cieluv {
   struct libcolour_ciexyz white;
 } libcolour_cieluv_t;
 
-typedef struct libcolour_cielch {
+typedef struct libcolour_cielchuv {
   enum libcolour_model model;
   double L;
   double C;
   double h;
   struct libcolour_ciexyz white;
-} libcolour_cielch_t;
+} libcolour_cielchuv_t;
 
 typedef struct libcolour_rgb {
   enum libcolour_model model;
@@ -270,7 +271,7 @@ typedef union libcolour_colour {
   struct libcolour_ciexyz ciexyz;
   struct libcolour_cielab cielab;
   struct libcolour_cieluv cieluv;
-  struct libcolour_cielch cielch;
+  struct libcolour_cielchuv cielchuv;
   struct libcolour_yiq yiq;
   struct libcolour_ydbdr ydbdr;
   struct libcolour_yuv yuv;

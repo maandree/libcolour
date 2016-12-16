@@ -61,11 +61,11 @@ int test_convert(libcolour_colour_t* c1, libcolour_model_t model)
       return -1;
     return r1 & r2;
   case LIBCOLOUR_CIELUV:
-  case LIBCOLOUR_CIELCH:
-    c2.cielch.white.model = LIBCOLOUR_CIEXYZ;
-    c2.cielch.white.X = 1.0294;
-    c2.cielch.white.Y = 1;
-    c2.cielch.white.Z = 0.9118;
+  case LIBCOLOUR_CIELCHUV:
+    c2.cieluv.white.model = LIBCOLOUR_CIEXYZ;
+    c2.cieluv.white.X = 1.0294;
+    c2.cieluv.white.Y = 1;
+    c2.cieluv.white.Z = 0.9118;
     return test_convert_(c1, &c2, &c3);
   case LIBCOLOUR_CIEUVW:
     c2.cieuvw.u0 = 0.37;
@@ -95,11 +95,11 @@ int test_convert_all(libcolour_model_t model, const char* model_name)
     c1.srgb.with_gamma = 0;
     break;
   case LIBCOLOUR_CIELUV:
-  case LIBCOLOUR_CIELCH:
-    c1.cielch.white.model = LIBCOLOUR_CIEXYZ;
-    c1.cielch.white.X = 1.0294;
-    c1.cielch.white.Y = 1;
-    c1.cielch.white.Z = 0.9118;
+  case LIBCOLOUR_CIELCHUV:
+    c1.cieluv.white.model = LIBCOLOUR_CIEXYZ;
+    c1.cieluv.white.X = 1.0294;
+    c1.cieluv.white.Y = 1;
+    c1.cieluv.white.Z = 0.9118;
     break;
   case LIBCOLOUR_CIEUVW:
     c1.cieuvw.u0 = 0.37;

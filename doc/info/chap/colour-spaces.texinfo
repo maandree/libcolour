@@ -8,7 +8,7 @@
 * CIEXYZ::                                  The CIE 1931 XYZ colour model.
 * CIELAB::                                  The CIE L*a*b* colour model.
 * CIELUV::                                  The CIE 1976 (L*, u*, v*) colour model.
-* CIELCh::                                  The CIE LCh colour model.
+* CIELChuv::                                The CIE LCh@sub{uv} colour model.
 * YIQ::                                     The YIQ colour model.
 * YDbDr::                                   The YDbDr colour model.
 * YUV::                                     The YUV colour model.
@@ -31,7 +31,7 @@ typedef union libcolour_colour @{
     struct libcolour_ciexyz ciexyz;
     struct libcolour_cielab cielab;
     struct libcolour_cieluv cieluv;
-    struct libcolour_cielch cielch;
+    struct libcolour_cielchuv cielchuv;
     struct libcolour_yiq yiq;
     struct libcolour_ydbdr ydbdr;
     struct libcolour_yuv yuv;
@@ -297,6 +297,8 @@ The DCI-P3 D65 colour space.
 The DCI-P3 Theater colour space.
 @item LIBCOLOUR_RGB_COLOUR_SPACE_DON_RGB_4
 The Don RGB 4 colour space.
+@item LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB
+The ECI RGB colour space.
 @item LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2
 The ECI RGB v2 colour space.
 @item LIBCOLOUR_RGB_COLOUR_SPACE_EKTA_SPACE_PS5
@@ -539,20 +541,20 @@ Zero is always returned in this case.
 
 
 
-@node CIELCh
+@node CIELChuv
 @section CIE LCh@sub{uv}
 
 CIE LCh@sub{uv} (also known as CIE HLC@sub{uv}) colours are presented
-with @code{struct libcolour_cielch} (@code{libcolour_cielch_t}), and
-the @code{.model} member shall be set to @code{LIBCOLOUR_CIELCH}. In
-@code{union libcolour_colour}, @code{.cielch} are used for CIE LCh@sub{uv}
+with @code{struct libcolour_cielchuv} (@code{libcolour_cielchuv_t}), and
+the @code{.model} member shall be set to @code{LIBCOLOUR_CIELCHUV}. In
+@code{union libcolour_colour}, @code{.cielchuv} are used for CIE LCh@sub{uv}
 colours. CIE LCh@sub{uv} approximates uniform human colour perception
 using cylindrical representation.
 
-@code{struct libcolour_cielch} has the following members
+@code{struct libcolour_cielchuv} has the following members
 @table @code
 @item enum libcolour_model model
-Shall be set to @code{LIBCOLOUR_CIELCH}.
+Shall be set to @code{LIBCOLOUR_CIELCHUV}.
 @item double L
 The L* value. 0 is black, 100 is white.
 @item double C
@@ -572,7 +574,7 @@ CIE LCh@sub{uv} is not additive. It is a cylindrical
 representation of CIE 1976 (L*, u*, v*).
 
 Call @code{libcolour_proper(&c)} on a
-@code{struct libcolour_cielch_t c} sets
+@code{struct libcolour_cielchuv_t c} sets
 @code{c.white.model} to @code{LIBCOLOUR_CIEXYZ}.
 Zero is always returned in this case.
 

@@ -29,7 +29,7 @@ Colour Spaces
 * CIEXYZ::                                  The CIE 1931 XYZ colour model.
 * CIELAB::                                  The CIE L*a*b* colour model.
 * CIELUV::                                  The CIE 1976 (L*, u*, v*) colour model.
-* CIELCh::                                  The CIE LCh colour model.
+* CIELChuv::                                The CIE LCh@sub{uv} colour model.
 * YIQ::                                     The YIQ colour model.
 * YDbDr::                                   The YDbDr colour model.
 * YUV::                                     The YUV colour model.

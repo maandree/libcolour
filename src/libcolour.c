@@ -38,7 +38,7 @@ static void to_ciexyy(const libcolour_colour_t* restrict from, libcolour_ciexyy_
 static void to_ciexyz(const libcolour_colour_t* restrict from, libcolour_ciexyz_t* restrict to);
 static void to_cielab(const libcolour_colour_t* restrict from, libcolour_cielab_t* restrict to);
 static void to_cieluv(const libcolour_colour_t* restrict from, libcolour_cieluv_t* restrict to);
-static void to_cielch(const libcolour_colour_t* restrict from, libcolour_cielch_t* restrict to);
+static void to_cielchuv(const libcolour_colour_t* restrict from, libcolour_cielchuv_t* restrict to);
 static void to_yiq(const libcolour_colour_t* restrict from, libcolour_yiq_t* restrict to);
 static void to_ydbdr(const libcolour_colour_t* restrict from, libcolour_ydbdr_t* restrict to);
 static void to_yuv(const libcolour_colour_t* restrict from, libcolour_yuv_t* restrict to);
@@ -364,7 +364,7 @@ static void cieluv_to_ciexyz(const libcolour_cieluv_t* restrict from, libcolour_
   to->Z = Y * (3 / v - 0.75 * u / v - 5);
 }
 
-static void cielch_to_ciexyz(const libcolour_cielch_t* restrict from, libcolour_ciexyz_t* restrict to)
+static void cielchuv_to_ciexyz(const libcolour_cielchuv_t* restrict from, libcolour_ciexyz_t* restrict to)
 {
   libcolour_cieluv_t tmp;
   tmp.model = LIBCOLOUR_CIELUV;
@@ -427,8 +427,8 @@ static void to_ciexyz(const libcolour_colour_t* restrict from, libcolour_ciexyz_
   case LIBCOLOUR_CIELUV:
     cieluv_to_ciexyz(&from->cieluv, to);
     return;
-  case LIBCOLOUR_CIELCH:
-    cielch_to_ciexyz(&from->cielch, to);
+  case LIBCOLOUR_CIELCHUV:
+    cielchuv_to_ciexyz(&from->cielchuv, to);
     return;
   case LIBCOLOUR_YUV:
     yuv_to_ciexyz(&from->yuv, to);
@@ -504,17 +504,17 @@ static void ciexyz_to_cieluv(const libcolour_ciexyz_t* restrict from, libcolour_
   to->v = v * y;
 }
 
-static void cielch_to_cieluv(const libcolour_cielch_t* restrict from, libcolour_cieluv_t* restrict to)
+static void cielchuv_to_cieluv(const libcolour_cielchuv_t* restrict from, libcolour_cieluv_t* restrict to)
 {
   libcolour_ciexyz_t tmp;
-  libcolour_cielch_t tmp2;
+  libcolour_cielchuv_t tmp2;
   double L, C, h;
   if (to->white.X != from->white.X || to->white.Y != from->white.Y || to->white.Z != from->white.Z) {
     tmp.model = LIBCOLOUR_CIEXYZ;
-    tmp2.model = LIBCOLOUR_CIELCH;
+    tmp2.model = LIBCOLOUR_CIELCHUV;
     tmp2.white = to->white;
     to_ciexyz((const libcolour_colour_t*)from, &tmp);
-    to_cielch((const libcolour_colour_t*)&tmp, &tmp2);
+    to_cielchuv((const libcolour_colour_t*)&tmp, &tmp2);
     L = tmp2.L, C = tmp2.C, h = tmp2.h;
   } else {
     L = from->L, C = from->C, h = from->h;
@@ -538,8 +538,8 @@ static void to_cieluv(const libcolour_colour_t* restrict from, libcolour_cieluv_
   case LIBCOLOUR_CIEXYZ:
     ciexyz_to_cieluv(&from->ciexyz, to);
     return;
-  case LIBCOLOUR_CIELCH:
-    cielch_to_cieluv(&from->cielch, to);
+  case LIBCOLOUR_CIELCHUV:
+    cielchuv_to_cieluv(&from->cielchuv, to);
     return;
   case LIBCOLOUR_CIELUV:
     if (to->white.X == from->cieluv.white.X &&
@@ -556,7 +556,7 @@ static void to_cieluv(const libcolour_colour_t* restrict from, libcolour_cieluv_
 }
 
 
-static void cieluv_to_cielch(const libcolour_cieluv_t* restrict from, libcolour_cielch_t* restrict to)
+static void cieluv_to_cielchuv(const libcolour_cieluv_t* restrict from, libcolour_cielchuv_t* restrict to)
 {
   libcolour_cieluv_t tmp;
   double L, u, v;
@@ -573,31 +573,31 @@ static void cieluv_to_cielch(const libcolour_cieluv_t* restrict from, libcolour_
   to->h = atan2(v, u);
 }
 
-static void other_to_cielch(const libcolour_colour_t* restrict from, libcolour_cielch_t* restrict to)
+static void other_to_cielchuv(const libcolour_colour_t* restrict from, libcolour_cielchuv_t* restrict to)
 {
   libcolour_cieluv_t tmp;
   tmp.model = LIBCOLOUR_CIELUV;
   tmp.white = to->white;
   to_cieluv(from, &tmp);
-  cieluv_to_cielch(&tmp, to);
+  cieluv_to_cielchuv(&tmp, to);
 }
 
-static void to_cielch(const libcolour_colour_t* restrict from, libcolour_cielch_t* restrict to)
+static void to_cielchuv(const libcolour_colour_t* restrict from, libcolour_cielchuv_t* restrict to)
 {
   switch (from->model) {
   case LIBCOLOUR_CIELUV:
-    cieluv_to_cielch(&from->cieluv, to);
+    cieluv_to_cielchuv(&from->cieluv, to);
     return;
-  case LIBCOLOUR_CIELCH:
-    if (to->white.X == from->cielch.white.X &&
-	to->white.Y == from->cielch.white.Y &&
-	to->white.Z == from->cielch.white.Z) {
-      *to = from->cielch;
+  case LIBCOLOUR_CIELCHUV:
+    if (to->white.X == from->cielchuv.white.X &&
+	to->white.Y == from->cielchuv.white.Y &&
+	to->white.Z == from->cielchuv.white.Z) {
+      *to = from->cielchuv;
       return;
     }
     /* fall through */
   default:
-    other_to_cielch(from, to);
+    other_to_cielchuv(from, to);
     return;
   }
 }
@@ -828,8 +828,8 @@ int libcolour_convert(const libcolour_colour_t* restrict from, libcolour_colour_
   case LIBCOLOUR_CIELUV:
     to_cieluv(from, &to->cieluv);
     break;
-  case LIBCOLOUR_CIELCH:
-    to_cielch(from, &to->cielch);
+  case LIBCOLOUR_CIELCHUV:
+    to_cielchuv(from, &to->cielchuv);
     break;
   case LIBCOLOUR_YIQ:
     to_yiq(from, &to->yiq);
@@ -941,8 +941,8 @@ int libcolour_proper(libcolour_colour_t* colour)
   case LIBCOLOUR_CIELUV:
     colour->cieluv.white.model = LIBCOLOUR_CIEXYZ;
     break;
-  case LIBCOLOUR_CIELCH:
-    colour->cielch.white.model = LIBCOLOUR_CIEXYZ;
+  case LIBCOLOUR_CIELCHUV:
+    colour->cielchuv.white.model = LIBCOLOUR_CIEXYZ;
     break;
   case LIBCOLOUR_RGB:
     colour->rgb.red.model   = LIBCOLOUR_CIEXYY;
@@ -1096,11 +1096,26 @@ static int invert_(size_t n, double (*Minvp)[n][n], double (*Mp)[n][n])
 }
 
 
+static double transfer_function_l_star(double t)
+{
+  t = (t > 216. / 24389.) ? cbrt(t) : t * 841. / 108. + 4. / 29.;
+  return t * 1.16 - 0.16;
+}
+ 
+static double invtransfer_function_l_star(double t)
+{
+  t = (t + 0.16) / 1.16;
+  return (t > 6. / 29.) ? t * t * t : (t - 4. / 29.) * 108 / 841;
+}
+
+
 static void get_transfer_function(libcolour_colour_t* cs)
 {
   if (cs->model == LIBCOLOUR_RGB) {
     switch (cs->rgb.colour_space) {
-    case LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2: /* TODO L* */
+    case LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2:
+      cs->rgb.to_encoded_red = cs->rgb.to_encoded_green = cs->rgb.to_encoded_blue = transfer_function_l_star;
+      cs->rgb.to_decoded_red = cs->rgb.to_decoded_green = cs->rgb.to_decoded_blue = invtransfer_function_l_star;
       break;
     case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_PQ:
     case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_PQ:
@@ -1237,6 +1252,15 @@ int libcolour_get_rgb_colour_space(libcolour_rgb_t* cs, libcolour_rgb_colour_spa
     cs->white = LIBCOLOUR_ILLUMINANT_D50;
     cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
     cs->gamma = 2.2;
+    break;
+
+  case LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB:
+    cs->red   = XYY(0.6700, 0.3300);
+    cs->green = XYY(0.2100, 0.7100);
+    cs->blue  = XYY(0.1400, 0.0800);
+    cs->white = LIBCOLOUR_ILLUMINANT_D50;
+    cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
+    cs->gamma = 1.8;
     break;
 
   case LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2:
