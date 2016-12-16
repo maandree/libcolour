@@ -16,9 +16,11 @@
  */
 #include "libcolour.h"
 
+#include <math.h>
 #include <stdio.h>
 
 
+#ifndef SKIP_CONVERT
 static int test_convert(libcolour_colour_t* c1, libcolour_colour_t* c2, libcolour_colour_t* c3)
 {
   double ch1, ch2, ch3;
@@ -230,6 +232,64 @@ static int test_convert_nm_all(void)
   return rc;
 #undef N
 }
+#endif
+
+
+static inline int ftest(double a, double b, double l)
+{
+  return a - l <= b && b <= a + l;
+}
+
+
+#define test_rgb(COLOUR_SPACE, ...)  test_rgb_(COLOUR_SPACE, #COLOUR_SPACE, __VA_ARGS__)
+static int test_rgb_(enum libcolour_rgb_colour_space colour_space, const char* name,
+		     double r, double g, double b, double x, double y, double z,
+		     double xx, double yy, double zz)
+{
+  libcolour_colour_t c1, c2;
+
+  c1.model = LIBCOLOUR_RGB;
+  c2.model = LIBCOLOUR_CIEXYZ;
+  c1.rgb.with_gamma = 0;
+  c1.rgb.R = r, c1.rgb.G = g, c1.rgb.B = b;
+  if (libcolour_get_rgb_colour_space(&c1.rgb, colour_space) ||
+      libcolour_convert(&c1, &c2)) {
+    printf("%s failed without gamma\n", name);
+    return 0;
+  } else if (!ftest(c2.ciexyz.X, x, 0.0001) ||
+	     !ftest(c2.ciexyz.Y, y, 0.0001) ||
+	     !ftest(c2.ciexyz.Z, z, 0.0001)) {
+    printf("%s failed without gamma\n", name);
+    printf("%.6lf, %.6lf, %.6lf\n", c2.ciexyz.X, c2.ciexyz.Y, c2.ciexyz.Z);
+    return 0;
+  }
+
+  c1.model = LIBCOLOUR_RGB;
+  c2.model = LIBCOLOUR_CIEXYZ;
+  c1.rgb.with_gamma = 1;
+  c1.rgb.R = r, c1.rgb.G = g, c1.rgb.B = b;
+  if (libcolour_get_rgb_colour_space(&c1.rgb, colour_space) ||
+      libcolour_convert(&c1, &c2)) {
+    printf("%s failed with gamma\n", name);
+    return 0;
+  } else if (!ftest(c2.ciexyz.X, xx, 0.0001) ||
+	     !ftest(c2.ciexyz.Y, yy, 0.0001) ||
+	     !ftest(c2.ciexyz.Z, zz, 0.0001)) {
+    printf("%s failed with gamma\n", name);
+    printf("%.6lf, %.6lf, %.6lf\n", c2.ciexyz.X, c2.ciexyz.Y, c2.ciexyz.Z);
+    return 0;
+  }
+
+  if (libcolour_convert(&c2, &c1) ||
+      !ftest(c1.rgb.R, r, 0.0000001) ||
+      !ftest(c1.rgb.G, g, 0.0000001) ||
+      !ftest(c1.rgb.B, b, 0.0000001)) {
+    printf("%s failed, encode\n", name);
+    return 0;
+  }
+
+  return 1;
+}
 
 
 /**
@@ -242,23 +302,151 @@ static int test_convert_nm_all(void)
 int main(int argc, char* argv[])
 {
   int r, rc = 0;
+  libcolour_colour_t c1, c2;
+  double t1, t2;
 
+#ifndef SKIP_CONVERT
   r = test_convert_nm_all();
   if (r < 0)
     goto fail;
   if (!r)
     rc = 1;
+#else
+  (void) r;
+#endif
+
+  c1.model = LIBCOLOUR_SRGB;
+  c1.srgb.R = 0.02, c1.srgb.G = 0.5, c1.srgb.B = 0.9;
+  c1.srgb.with_gamma = 0;
+  c2.model = LIBCOLOUR_RGB;
+  c2.rgb.with_gamma = 0;
+  if (libcolour_get_rgb_colour_space(&c2.rgb, LIBCOLOUR_RGB_COLOUR_SPACE_SRGB)) {
+    printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+    goto colour_spaces_done;
+  }
+  if (c2.rgb.white_r != 1 || c2.rgb.white_g != 1 || c2.rgb.white_b != 1 ||
+      c2.rgb.red.model != LIBCOLOUR_CIEXYY || c2.rgb.green.model != LIBCOLOUR_CIEXYY ||
+      c2.rgb.blue.model != LIBCOLOUR_CIEXYY || c2.rgb.white.model != LIBCOLOUR_CIEXYY ||
+      c2.rgb.colour_space != LIBCOLOUR_RGB_COLOUR_SPACE_SRGB || c2.rgb.gamma != 2.4 ||
+      c2.rgb.encoding_type != LIBCOLOUR_ENCODING_TYPE_REGULAR || c2.rgb.slope != 12.92
+      || c2.rgb.offset != 0.055 || c2.rgb.transitioninv != c2.rgb.transition * c2.rgb.slope ||
+      !ftest(c2.rgb.transition, 0.00313067, 0.00000001)) {
+    printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+    goto colour_spaces_done;
+  }
+  t1 = c2.rgb.transition * c2.rgb.slope;
+  t2 = (1 + c2.rgb.offset) * pow(c2.rgb.transition, 1 / c2.rgb.gamma) - c2.rgb.offset;
+  if (!ftest(t1, t2, 0.0000001) || c2.rgb.white.Y != 1 ||
+      c2.rgb.red.x != 0.64 || c2.rgb.red.y != 0.33 || !ftest(c2.rgb.red.Y, 0.21265, 0.00005) ||
+      c2.rgb.green.x != 0.30 || c2.rgb.green.y != 0.60 || !ftest(c2.rgb.green.Y, 0.71515, 0.00005) ||
+      c2.rgb.blue.x != 0.15 || c2.rgb.blue.y != 0.06 || !ftest(c2.rgb.blue.Y, 0.07215, 0.00005) ||
+      !ftest(c2.rgb.white.x, 0.312727, 0.000001) || !ftest(c2.rgb.white.y, 0.329023, 0.000001) ||
+      !ftest(c2.rgb.red.Y + c2.rgb.green.Y + c2.rgb.blue.Y, 1, 0.00000001)) {
+    printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+    goto colour_spaces_done;
+  }
+  if (libcolour_convert(&c1, &c2) ||
+      !ftest(c1.srgb.R, c2.rgb.R, 0.0000001) ||
+      !ftest(c1.srgb.G, c2.rgb.G, 0.0000001) ||
+      !ftest(c1.srgb.B, c2.rgb.B, 0.0000001)) {
+    printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+    goto colour_spaces_done;
+  }
+  if (libcolour_convert(&c2, &c1) ||
+      !ftest(c1.srgb.R, c2.rgb.R, 0.0000001) ||
+      !ftest(c1.srgb.G, c2.rgb.G, 0.0000001) ||
+      !ftest(c1.srgb.B, c2.rgb.B, 0.0000001)) {
+    printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+    goto colour_spaces_done;
+  }
+
+  c1.model = c2.model = LIBCOLOUR_CIELAB;
+  c1.cielab.L =  30, c2.cielab.L =  80;
+  c1.cielab.a =  40, c2.cielab.a = -10;
+  c1.cielab.b = -50, c2.cielab.b = -40;
+  if (libcolour_delta_e(&c1, &c2, &t1) || !ftest(t1, 71.4142842854285, 0.0000001))
+    printf("libcolour_delta_e failed\n"), rc = 0;
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_ADOBE_RGB, 0.3, 0.2, 0.9,
+		 0.379497, 0.282430, 0.914245, 0.195429, 0.098925, 0.790020);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_APPLE_RGB, 0.3, 0.2, 0.9,
+		 0.364212, 0.282789, 0.866008, 0.221570, 0.134028, 0.773782);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_BEST_RGB, 0.3, 0.2, 0.9,
+		 0.345007, 0.246779, 0.736029, 0.151406, 0.064655, 0.647212);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_BETA_RGB, 0.3, 0.2, 0.9,
+		 0.342837, 0.253386, 0.714198, 0.146437, 0.066824, 0.623382);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_BRUCE_RGB, 0.3, 0.2, 0.9,
+		 0.368857, 0.276910, 0.915272, 0.191184, 0.096699, 0.791486);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_CIE_RGB, 0.3, 0.2, 0.9,
+		 0.389293, 0.225188, 0.892857, 0.202678, 0.044608, 0.785312);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_COLORMATCH_RGB, 0.3, 0.2, 0.9,
+		 0.337557, 0.274378, 0.651989, 0.186858, 0.123210, 0.581381);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_DON_RGB_4, 0.3, 0.2, 0.9,
+		 0.344990, 0.251411, 0.727872, 0.150504, 0.066348, 0.638058);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB, 0.3, 0.2, 0.9,
+		 0.353021, 0.286400, 0.695202, 0.196733, 0.134157, 0.630279);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2, 0.3, 0.2, 0.9,
+		 0.353021, 0.286400, 0.695202, 0.149594, 0.097238, 0.579927);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_EKTA_SPACE_PS5, 0.3, 0.2, 0.9,
+		 0.320377, 0.229160, 0.713291, 0.127134, 0.043253, 0.622392);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_NTSC_RGB, 0.3, 0.2, 0.9,
+		 0.397081, 0.310031, 1.017821, 0.235650, 0.156675, 0.906707);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_PAL_SECAM_RGB, 0.3, 0.2, 0.9,
+		 0.357972, 0.272130, 0.877151, 0.208580, 0.120322, 0.769056);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_PROPHOTO_RGB, 0.3, 0.2, 0.9,
+		 0.294559, 0.228864, 0.742689, 0.124735, 0.072340, 0.682655);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_SMPTE_C_RGB, 0.3, 0.2, 0.9,
+		 0.363595, 0.281822, 0.890350, 0.216773, 0.131311, 0.783348);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_WIDE_GAMUT_RGB, 0.3, 0.2, 0.9,
+		 0.367485, 0.237631, 0.706442, 0.170318, 0.052665, 0.614915);
+
+  rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_LIGHTROOM_RGB, 0.3, 0.2, 0.9,
+		 0.294559, 0.228864, 0.742689, 0.294559, 0.228864, 0.742689);
+
+  /*
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_D65
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_THEATER
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_625_LINE
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_525_LINE
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_709
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2020
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_PQ
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_PQ
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_PQ
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_HLG
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_HLG
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_HLG
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_SGI_RGB
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_SMPTE_240M_RGB
+  */
+
+  /* TODO test transfer functions more rigorously */
+
+  /* TODO test libcolour_convert with single conversions */
+ colour_spaces_done:
 
   /* TODO test libcolour_srgb_encode */
   /* TODO test libcolour_srgb_decode */
-  /* TODO test libcolour_srgb -> libcolour_rgb[srgb] */
-  /* TODO test libcolour_rgb[srgb] -> libcolour_srgb */
-  /* TODO test RGB colour spaces */
-  /* TODO test libcolour_delta_e */
   /* TODO test libcolour_marshal */
   /* TODO test libcolour_unmarshal */
-  /* TODO test libcolour_convert with single conversions */
-
   return rc;
  fail:
   perror(*argv);

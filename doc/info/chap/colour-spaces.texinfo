@@ -403,21 +403,8 @@ function is available for your use:
 @table @code
 @item double libcolour_srgb_encode(double x)
 Applies the sRGB transfer function.
-It's full code is
-@example
-return x <= 0.0031306684425217108
-       ? 12.92 * x
-       : 1.055 * pow(x, 1 / 2.4) - 0.055;
-@end example
-
 @item double libcolour_srgb_decode(double x)
 Unapplies the sRGB transfer function.
-It's full code is
-@example
-return x <= 0.040448236277380506 
-       ? x / 12.92
-       : pow((x + 0.055) / 1.055, 2.4);
-@end example
 @end table
 
 

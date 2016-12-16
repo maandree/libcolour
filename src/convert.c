@@ -84,9 +84,9 @@ static void to_rgb(const libcolour_colour_t* restrict from, libcolour_rgb_t* res
 	to->B = pow(to->B, 1 / to->gamma);
 	break;
       case LIBCOLOUR_ENCODING_TYPE_REGULAR:
-	to->R <= to->transition ? to->slope * to->R : (1 + to->offset) * pow(to->R, 1 / to->gamma) - to->offset;
-	to->G <= to->transition ? to->slope * to->G : (1 + to->offset) * pow(to->G, 1 / to->gamma) - to->offset;
-	to->B <= to->transition ? to->slope * to->B : (1 + to->offset) * pow(to->B, 1 / to->gamma) - to->offset;
+	to->R = to->R <= to->transition ? to->slope * to->R : (1 + to->offset) * pow(to->R, 1 / to->gamma) - to->offset;
+	to->G = to->G <= to->transition ? to->slope * to->G : (1 + to->offset) * pow(to->G, 1 / to->gamma) - to->offset;
+	to->B = to->B <= to->transition ? to->slope * to->B : (1 + to->offset) * pow(to->B, 1 / to->gamma) - to->offset;
 	break;
       case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
 	to->R = (to->to_encoded_red)(to->R);
@@ -107,9 +107,9 @@ static void to_rgb(const libcolour_colour_t* restrict from, libcolour_rgb_t* res
 	to->B = pow(to->B, to->gamma);
 	break;
       case LIBCOLOUR_ENCODING_TYPE_REGULAR:
-	to->R <= to->transitioninv ? to->R * to->slope : pow((to->R + to->offset) / (1 + to->offset), to->gamma);
-	to->G <= to->transitioninv ? to->G * to->slope : pow((to->G + to->offset) / (1 + to->offset), to->gamma);
-	to->B <= to->transitioninv ? to->B * to->slope : pow((to->B + to->offset) / (1 + to->offset), to->gamma);
+	to->R = to->R <= to->transitioninv ? to->R * to->slope : pow((to->R + to->offset) / (1 + to->offset), to->gamma);
+	to->G = to->G <= to->transitioninv ? to->G * to->slope : pow((to->G + to->offset) / (1 + to->offset), to->gamma);
+	to->B = to->B <= to->transitioninv ? to->B * to->slope : pow((to->B + to->offset) / (1 + to->offset), to->gamma);
 	break;
       case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
 	to->R = (to->to_decoded_red)(to->R);
@@ -128,19 +128,33 @@ static void to_rgb(const libcolour_colour_t* restrict from, libcolour_rgb_t* res
 static void ciexyz_to_srgb(const libcolour_ciexyz_t* restrict from, libcolour_srgb_t* restrict to)
 {
   double X = from->X, Y = from->Y, Z = from->Z;
-  to->R =  3.240450 * X + -1.537140 * Y + -0.4985320 * Z;
-  to->G = -0.969266 * X +  1.876010 * Y +  0.0415561 * Z;
-  to->B = 0.0556434 * X + -0.204026 * Y +  1.0572300 * Z;
+#define MULTIPLY(CX, CY, CZ)  ((CX) * X + (CY) * Y + (CZ) * Z)
+  to->R = MULTIPLY(3.240446254647737500675930277794, -1.537134761820080575134284117667, -0.498530193022728718155178739835);
+  to->G = MULTIPLY(-0.969266606244679751469561779231, 1.876011959788370209167851498933, 0.041556042214430065351304932619);
+  to->B = MULTIPLY(0.055643503564352832235773149705, -0.204026179735960239147729566866, 1.057226567722703292062647051353);
+#undef MULTIPLY
 }
 
-static inline double srgb_encode(double x)
+static inline double srgb_encode(double t)
 {
-  return x <= 0.0031306684425217108 ? 12.92 * x : 1.055 * pow(x, 1 / 2.4) - 0.055;
+  double sign = 1;
+  if (t < 0) {
+    t = -t;
+    sign = -1;
+  }
+  t = t <= 0.0031306684425217108 ? 12.92 * t : 1.055 * pow(t, 1 / 2.4) - 0.055;
+  return t * sign;
 }
 
-static inline double srgb_decode(double x)
+static inline double srgb_decode(double t)
 {
-  return x <= 0.040448236277380506 ? x / 12.92 : pow((x + 0.055) / 1.055, 2.4);
+  double sign = 1;
+  if (t < 0) {
+    t = -t;
+    sign = -1;
+  }
+  t = t <= 0.040448236277380506 ? t / 12.92 : pow((t + 0.055) / 1.055, 2.4);
+  return t * sign;
 }
 
 static void srgb_to_srgb(const libcolour_srgb_t* restrict from, libcolour_srgb_t* restrict to)
@@ -161,9 +175,13 @@ static void srgb_to_srgb(const libcolour_srgb_t* restrict from, libcolour_srgb_t
 static void yiq_to_srgb(const libcolour_yiq_t* restrict from, libcolour_srgb_t* restrict to)
 {
   double Y = from->Y, I = from->I, Q = from->Q;
-  to->R = Y + I * 0.956 + Q * 0.621;
-  to->G = Y - I * 0.272 - Q * 0.647;
-  to->B = Y - I * 1.106 + Q * 1.703;
+  to->R = Y + I * 0.95629483232089407263032398986979387700557708740234 + Q * 0.62102512544472865396727456754888407886028289794922;
+  to->G = Y - I * 0.27212147408397735492968649850809015333652496337891 - Q * 0.64738095351761570928061928498209454119205474853516;
+  to->B = Y - I * 1.10698990856712820018969978264067322015762329101562 + Q * 1.70461497549882934343656870623817667365074157714844;
+  /* ⎛1    1000 cos 33° / 877                                  1000 sin 33° / 877                               ⎞
+     ⎜1    9500 sin 33° / 24067 - 299000 * cos 33° / 514799    -9500 cos 33° / 24067 - 299000 * sin 33° / 514799⎟
+     ⎝1    -250 sin 33° / 123                                  250 cos 33° / 123                                ⎠
+  */
 }
 
 static void ydbdr_to_srgb(const libcolour_ydbdr_t* restrict from, libcolour_srgb_t* restrict to)
@@ -318,9 +336,11 @@ static void srgb_to_ciexyz(const libcolour_srgb_t* restrict from, libcolour_ciex
   } else {
     R = from->R, G = from->G, B = from->B;
   }
-  to->X = 0.4124564 * R + 0.3575761 * G + 0.1804375 * B;
-  to->Y = 0.2126729 * R + 0.7151522 * G + 0.0721750 * B;
-  to->Z = 0.0193339 * R + 0.1191920 * G + 0.9503041 * B;
+#define MULTIPLIY(CR, CG, CB)  ((CR) * R + (CG) * G + (CB) * B)
+  to->X = MULTIPLIY(0.412457445582367576708548995157, 0.357575865245515878143578447634, 0.180437247826399665973085006954);
+  to->Y = MULTIPLIY(0.212673370378408277403536885686, 0.715151730491031756287156895269, 0.072174899130559869164791564344);
+  to->Z = MULTIPLIY(0.019333942761673460208893260415, 0.119191955081838593666354597644, 0.950302838552371742508739771438);
+#undef MULTIPLIY
 }
 
 static void ciexyy_to_ciexyz(const libcolour_ciexyy_t* restrict from, libcolour_ciexyz_t* restrict to)
@@ -630,9 +650,13 @@ static void to_yiq(const libcolour_colour_t* restrict from, libcolour_yiq_t* res
     r = tmp.srgb.R;
     g = tmp.srgb.G;
     b = tmp.srgb.B;
-    to->Y = r * 0.29893602129377540 + g * 0.5870430744511212 + b * 0.11402090425510336;
-    to->I = r * 0.59594574307079930 - g * 0.2743886357457892 - b * 0.32155710732501010;
-    to->Q = r * 0.21149734030682846 - g * 0.5229106903029739 + b * 0.31141334999614540;
+    to->Y = r * 0.299 + g * 0.587 + b * 0.114;
+    to->I = r * 0.59571613491277464191853141528554260730743408203125  /* (0.877 cos 33°)(1 - 0.299) - (0.492 sin 33°)(-0.299) */
+          - g * 0.27445283783925644716106262421817518770694732666016  /* (0.877 cos 33°)(-0.587)    - (0.492 sin 33°)(-0.587) */
+          - b * 0.32126329707351808373516632855171337723731994628906; /* (0.877 cos 33°)(-0.114)    - (0.492 sin 33°)(1 - 0.114) */
+    to->Q = r * 0.21145640212011795888713550084503367543220520019531  /* (0.877 sin 33°)(1 - 0.299) + (0.492 cos 33°)(-0.299) */
+          - g * 0.52259104529161115593183239980135113000869750976562  /* (0.877 sin 33°)(-0.587)    + (0.492 cos 33°)(-0.587) */
+          + b * 0.31113464317149330806699936147197149693965911865234; /* (0.877 sin 33°)(-0.114)    + (0.492 cos 33°)(1 - 0.114) */
     return;
   }
 }

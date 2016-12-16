@@ -18,7 +18,11 @@ Described in @ref{sRGB}.
 
 @item int libcolour_delta_e(const libcolour_colour_t*, const libcolour_colour_t*, double*)
 Calculates the @math{\Delta E^*_{ab}} distance
-(the distance in CIE L*a*b*) of two colours.
+(the distance in CIE L*a*b*) of two colours,
+and outputs it to the last parameter.
+Returns 0 on success and @math{-1} one error.
+This function fails if and only if
+@code{libcolour_convert} fails.
 
 @item int libcolour_proper(libcolour_colour_t*)
 Sets any member or submember that may be

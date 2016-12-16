@@ -26,14 +26,26 @@
 
 
 
-double libcolour_srgb_encode(double x)
+double libcolour_srgb_encode(double t)
 {
-  return x <= 0.0031306684425217108 ? 12.92 * x : 1.055 * pow(x, 1 / 2.4) - 0.055;
+  double sign = 1;
+  if (t < 0) {
+    t = -t;
+    sign = -1;
+  }
+  t = t <= 0.0031306684425217108 ? 12.92 * t : 1.055 * pow(t, 1 / 2.4) - 0.055;
+  return t * sign;
 }
 
-double libcolour_srgb_decode(double x)
+double libcolour_srgb_decode(double t)
 {
-  return x <= 0.040448236277380506 ? x / 12.92 : pow((x + 0.055) / 1.055, 2.4);
+  double sign = 1;
+  if (t < 0) {
+    t = -t;
+    sign = -1;
+  }
+  t = t <= 0.040448236277380506 ? t / 12.92 : pow((t + 0.055) / 1.055, 2.4);
+  return t * sign;
 }
 
 
@@ -264,14 +276,24 @@ static int invert_(size_t n, double (*Minvp)[n][n], double (*Mp)[n][n])
 
 static double transfer_function_l_star(double t)
 {
-  t = (t > 216. / 24389.) ? cbrt(t) : t * 841. / 108. + 4. / 29.;
-  return t * 1.16 - 0.16;
+  double sign = 1;
+  if (t < 0) {
+    t = -t;
+    sign = -1;
+  }
+  t = t > 216. / 24389. ? 1.16 * cbrt(t) - 0.16 : t * 24389. / 2700.;
+  return t * sign;
 }
  
 static double invtransfer_function_l_star(double t)
 {
-  t = (t + 0.16) / 1.16;
-  return (t > 6. / 29.) ? t * t * t : (t - 4. / 29.) * 108 / 841;
+  double sign = 1;
+  if (t < 0) {
+    t = -t;
+    sign = -1;
+  }
+  t = t > 0.08 ?  (((1000000. * t + 480000.) * t + 76800.) * t + 4096.) / 1560896.0 : t * 2700. / 24389.;
+  return t * sign;
 }
 
 
@@ -306,16 +328,22 @@ int libcolour_get_rgb_colour_space(libcolour_rgb_t* cs, libcolour_rgb_colour_spa
   case LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS:
     if (get_matrices(cs))
       return -1;
+    if (cs->encoding_type == LIBCOLOUR_ENCODING_TYPE_REGULAR)
+      cs->transitioninv = cs->transition * cs->slope;
     return 0;
 
   case LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX:
     if (invert(cs->Minv, cs->M, 3) || get_primaries(cs))
       return -1;
+    if (cs->encoding_type == LIBCOLOUR_ENCODING_TYPE_REGULAR)
+      cs->transitioninv = cs->transition * cs->slope;
     return 0;
 
   case LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX:
     if (invert(cs->M, cs->Minv, 3) || get_primaries(cs))
       return -1;
+    if (cs->encoding_type == LIBCOLOUR_ENCODING_TYPE_REGULAR)
+      cs->transitioninv = cs->transition * cs->slope;
     return 0;
 
   case LIBCOLOUR_RGB_COLOUR_SPACE_SRGB:
@@ -377,7 +405,7 @@ int libcolour_get_rgb_colour_space(libcolour_rgb_t* cs, libcolour_rgb_colour_spa
 
   case LIBCOLOUR_RGB_COLOUR_SPACE_CIE_RGB:
     cs->red   = XYY(0.7350, 0.2650);
-    cs->green = XYY(0.2640, 0.7170);
+    cs->green = XYY(0.2740, 0.7170);
     cs->blue  = XYY(0.1670, 0.0090);
     cs->white = LIBCOLOUR_ILLUMINANT_E;
     cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
