@@ -133,18 +133,28 @@ static void ciexyz_to_srgb(const libcolour_ciexyz_t* restrict from, libcolour_sr
   to->B = 0.0556434 * X + -0.204026 * Y +  1.0572300 * Z;
 }
 
+static inline double srgb_encode(double x)
+{
+  return x <= 0.0031306684425217108 ? 12.92 * x : 1.055 * pow(x, 1 / 2.4) - 0.055;
+}
+
+static inline double srgb_decode(double x)
+{
+  return x <= 0.040448236277380506 ? x / 12.92 : pow((x + 0.055) / 1.055, 2.4);
+}
+
 static void srgb_to_srgb(const libcolour_srgb_t* restrict from, libcolour_srgb_t* restrict to)
 {
   if (from->with_gamma == to->with_gamma) {
     *to = *from;
   } else if (to->with_gamma) {
-    to->R = libcolour_srgb_encode(from->R);
-    to->G = libcolour_srgb_encode(from->G);
-    to->B = libcolour_srgb_encode(from->B);
+    to->R = srgb_encode(from->R);
+    to->G = srgb_encode(from->G);
+    to->B = srgb_encode(from->B);
   } else {
-    to->R = libcolour_srgb_decode(from->R);
-    to->G = libcolour_srgb_decode(from->G);
-    to->B = libcolour_srgb_decode(from->B);
+    to->R = srgb_decode(from->R);
+    to->G = srgb_decode(from->G);
+    to->B = srgb_decode(from->B);
   }
 }
 
