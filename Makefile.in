@@ -47,7 +47,7 @@ _C_STD = c99
 _H = libcolour
 _HEADER_DIRLEVELS = 1
 _LIB = libcolour
-_OBJ_libcolour = libcolour
+_OBJ_libcolour = libcolour convert
 _SO_VERSION_libcolour = $(_VERSION)
 _SO_MAJOR_libcolour = $(shell echo $(_SO_VERSION_libcolour) | cut -d . -f 1)
 
