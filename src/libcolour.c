@@ -296,6 +296,28 @@ static double invtransfer_function_l_star(double t)
   return t * sign;
 }
 
+static double transfer_function_oetf_hlg(double t)
+{
+  double sign = 1;
+  if (t < 0) {
+    t = -t;
+    sign = -1;
+  }
+  t = 12 * t <= 1 ? sqrt(3 * t) : 0.17883277 * log(t - 0.02372241) + 1.004293468902569985701234145381;
+  return t * sign;
+}
+
+static double invtransfer_function_oetf_hlg(double t)
+{
+  double sign = 1;
+  if (t < 0) {
+    t = -t;
+    sign = -1;
+  }
+  t = t <= 0.5 ? t * t / 3 : exp(t - 1.004293468902569985701234145381) / 0.17883277 + 0.02372241;
+  return t * sign;
+}
+
 
 static void get_transfer_function(libcolour_colour_t* cs)
 {
@@ -310,8 +332,11 @@ static void get_transfer_function(libcolour_colour_t* cs)
     case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_PQ:
     case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_HLG:
     case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_HLG:
-    case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_HLG:
       /* TODO http://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2100-0-201607-I!!PDF-E.pdf */
+      break;
+    case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_HLG:
+      cs->rgb.to_encoded_red = cs->rgb.to_encoded_green = cs->rgb.to_encoded_blue = transfer_function_oetf_hlg;
+      cs->rgb.to_decoded_red = cs->rgb.to_decoded_green = cs->rgb.to_decoded_blue = invtransfer_function_oetf_hlg;
       break;
     default:
       break;
