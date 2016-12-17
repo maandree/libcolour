@@ -1,14 +1,22 @@
-Colour models:
+Colour models and colour spaces:
 	LMS
 	L'M'S'
 	ICtCp
 	YCbCr
 	TSL
 	Y'UV
-	Hunter 1948 color space (see Wikipedia article on CIELAB)
+	Hunter 1948 color space (see Wikipedia article on CIELAB; see http://www.konicaminolta.com/instruments/knowledge/color/part4/06.html)
 	Hunter Rdab
 	CIELCh (CIEHLC) (see Wikipedia article on CIELAB)
 	IPT
+	xvYCC
+	scRGB
+	HSL (Alternative RGB model)
+	HSV (Alternative RGB model)
+	HSI (Alternative RGB model)
+	HCL (Alternative RGB model)
+	HCV (Alternative RGB model)
+	HCI (Alternative RGB model)
 
 Support for generic additive colour spaces (3 channels and more)
 Support for generic subtractive colour spaces (3 channels and more)
