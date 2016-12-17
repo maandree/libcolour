@@ -232,6 +232,7 @@ typedef struct libcolour_cielchuv {
   double C;
   double h;
   struct libcolour_ciexyz white;
+  double one_revolution;
 } libcolour_cielchuv_t;
 
 typedef struct libcolour_rgb {

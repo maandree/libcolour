@@ -121,6 +121,8 @@ int libcolour_proper(libcolour_colour_t* colour)
     break;
   case LIBCOLOUR_CIELCHUV:
     colour->cielchuv.white.model = LIBCOLOUR_CIEXYZ;
+    if (colour->cielchuv.one_revolution == 0.)
+      colour->cielchuv.one_revolution = 360.;
     break;
   case LIBCOLOUR_RGB:
     colour->rgb.red.model   = LIBCOLOUR_CIEXYY;

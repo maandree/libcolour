@@ -354,7 +354,7 @@ The wide-gamut RGB colour space, also known as
 Adobe Wide Gamut RGB.
 @end table
 
-Call @code{libcolour_proper(&c)} on a
+The call @code{libcolour_proper(&c)} on a
 @code{struct libcolour_rgb_t c} (done automatically for
 predefined colour spaces) sets @code{c.red.model},
 @code{c.green.model}, and @code{c.blue.model} to
@@ -521,7 +521,7 @@ The white point.
 CIE L*u*v* is not additive, since conversion from
 CIE 1931 XYZ is non-linear.
 
-Call @code{libcolour_proper(&c)} on a
+The call @code{libcolour_proper(&c)} on a
 @code{struct libcolour_cieluv_t c} sets
 @code{c.white.model} to @code{LIBCOLOUR_CIEXYZ}.
 Zero is always returned in this case.
@@ -555,15 +555,20 @@ The C*@sub{uv} value, the chroma.
 The h@sub{uv} value, the hue.
 @item struct libcolour_ciexyz white
 The white point.
+@item double one_revolution
+The value lowest positive values of @code{h} that is equivalent to 0.
+360 if the hue is measured in degrees, 400 if the hue is measured in
+gon, and 2 pi if the hue is measured radian. Any value can be used.
 @end table
 
 CIE LCh@sub{uv} is not additive. It is a cylindrical
 representation of CIE 1976 (L*, u*, v*).
 
-Call @code{libcolour_proper(&c)} on a
+The call @code{libcolour_proper(&c)} on a
 @code{struct libcolour_cielchuv_t c} sets
-@code{c.white.model} to @code{LIBCOLOUR_CIEXYZ}.
-Zero is always returned in this case.
+@code{c.white.model} to @code{LIBCOLOUR_CIEXYZ},
+and if @code{c.one_revolution} is 0, it is set
+to 360. Zero is always returned in this case.
 
 
 @node YIQ

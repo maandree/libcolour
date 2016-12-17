@@ -94,8 +94,10 @@ static int test_convert_11(libcolour_colour_t* c1, libcolour_model_t model)
     if (r2 = test_convert(c1, &c2, &c3), r2 < 0)
       return -1;
     return r1 & r2;
-  case LIBCOLOUR_CIELUV:
   case LIBCOLOUR_CIELCHUV:
+    c2.cielchuv.one_revolution = 360.;
+    /* fall though */
+  case LIBCOLOUR_CIELUV:
     c2.cieluv.white.model = LIBCOLOUR_CIEXYZ;
     c2.cieluv.white.X = 1.0294;
     c2.cieluv.white.Y = 1;
@@ -119,8 +121,12 @@ static int test_convert_1n(libcolour_model_t model, const char* model_name, doub
   c1.model = model;
   switch (model) {
   case LIBCOLOUR_CIELAB:
-    c1.srgb.R = ch1 * 100, c1.srgb.G = ch2 * 100, c1.srgb.B = ch3 * 100;
+    c1.cielab.L = ch1 * 100, c1.cielab.a = ch2 * 100, c1.cielab.b = ch3 * 100;
     break;
+  case LIBCOLOUR_CIELCHUV:
+    if (ch3 > 0.9999)
+      return 1;
+    /* fall though */
   default:
     c1.srgb.R = ch1, c1.srgb.G = ch2, c1.srgb.B = ch3;
     break;
@@ -140,14 +146,25 @@ static int test_convert_1n(libcolour_model_t model, const char* model_name, doub
 	return rc;
       c1.srgb.with_gamma = run;
       break;
-    case LIBCOLOUR_CIELUV:
     case LIBCOLOUR_CIELCHUV:
+      c1.cielchuv.one_revolution = run < 2 ? 360. : 2 * 3.14159265358979323846;
+      c1.cielchuv.h *= c1.cielchuv.one_revolution;
+      /* fall through */
+    case LIBCOLOUR_CIELUV:
       c1.cieluv.white.model = LIBCOLOUR_CIEXYZ;
       if (run == 0) {
 	c1.cieluv.white.X = 1.0294;
 	c1.cieluv.white.Y = 1;
 	c1.cieluv.white.Z = 0.9118;
       } else if (run == 1) {
+	c1.cieluv.white.X = 1.03;
+	c1.cieluv.white.Y = 0.8;
+	c1.cieluv.white.Z = 0.92;
+      } else if (run == 2 && model == LIBCOLOUR_CIELCHUV) {
+	c1.cieluv.white.X = 1.0294;
+	c1.cieluv.white.Y = 1;
+	c1.cieluv.white.Z = 0.9118;
+      } else if (run == 3 && model == LIBCOLOUR_CIELCHUV) {
 	c1.cieluv.white.X = 1.03;
 	c1.cieluv.white.Y = 0.8;
 	c1.cieluv.white.Z = 0.92;

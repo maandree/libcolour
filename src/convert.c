@@ -24,6 +24,8 @@
 
 
 #define WASDIV0(x)  (isinf(x) || isnan(x))
+#define PI          (3.14159265358979323846)
+#define PI2         (2 * PI)
 
 
 
@@ -598,11 +600,12 @@ static void cielchuv_to_cieluv(const libcolour_cielchuv_t* restrict from, libcol
     tmp.model = LIBCOLOUR_CIEXYZ;
     tmp2.model = LIBCOLOUR_CIELCHUV;
     tmp2.white = to->white;
+    tmp2.one_revolution = PI2;
     to_ciexyz((const libcolour_colour_t*)from, &tmp);
     to_cielchuv((const libcolour_colour_t*)&tmp, &tmp2);
     L = tmp2.L, C = tmp2.C, h = tmp2.h;
   } else {
-    L = from->L, C = from->C, h = from->h;
+    L = from->L, C = from->C, h = from->h * PI2 / from->one_revolution;
   }
   to->L = L;
   to->u = C * cos(h);
@@ -655,7 +658,7 @@ static void cieluv_to_cielchuv(const libcolour_cieluv_t* restrict from, libcolou
   }
   to->L = L;
   to->C = sqrt(u * u + v * v);
-  to->h = atan2(v, u);
+  to->h = atan2(v, u) / PI2 * to->one_revolution;
 }
 
 static void other_to_cielchuv(const libcolour_colour_t* restrict from, libcolour_cielchuv_t* restrict to)
@@ -669,6 +672,7 @@ static void other_to_cielchuv(const libcolour_colour_t* restrict from, libcolour
 
 static void to_cielchuv(const libcolour_colour_t* restrict from, libcolour_cielchuv_t* restrict to)
 {
+  double one_revolution;
   switch (from->model) {
   case LIBCOLOUR_CIELUV:
     cieluv_to_cielchuv(&from->cieluv, to);
@@ -677,7 +681,14 @@ static void to_cielchuv(const libcolour_colour_t* restrict from, libcolour_cielc
     if (to->white.X == from->cielchuv.white.X &&
 	to->white.Y == from->cielchuv.white.Y &&
 	to->white.Z == from->cielchuv.white.Z) {
-      *to = from->cielchuv;
+      if (to->one_revolution == from->cielchuv.one_revolution) {
+	*to = from->cielchuv;
+      } else {
+	one_revolution = to->one_revolution;
+	*to = from->cielchuv;
+	to->one_revolution = one_revolution;
+	to->h = to->h / from->cielchuv.one_revolution * one_revolution;
+      }
       break;
     }
     /* fall through */
