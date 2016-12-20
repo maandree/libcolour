@@ -53,6 +53,106 @@ static void ciexyz_to_rgb(const libcolour_ciexyz_t* restrict from, libcolour_rgb
   to->B = to->Minv[2][0] * X + to->Minv[2][1] * Y + to->Minv[2][2] * Z;
 }
 
+#define REGULAR(s, t)     ((t) <= (s)->transition ? (s)->slope * (t) : (1 + (s)->offset) * pow((t), 1 / (s)->gamma) - (s)->offset)
+#define INVREGULAR(s, t)  ((t) <= (s)->transitioninv ? (t) / (s)->slope : pow(((t) + (s)->offset) / (1 + (s)->offset), (s)->gamma))
+
+static void rgb_encode(libcolour_rgb_t* restrict colour, const libcolour_rgb_t* restrict space)
+{
+  double r_sign = 1, g_sign = 1, b_sign = 1;
+  switch (space->encoding_type) {
+  case LIBCOLOUR_ENCODING_TYPE_LINEAR:
+    break;
+  case LIBCOLOUR_ENCODING_TYPE_SIMPLE:
+  case LIBCOLOUR_ENCODING_TYPE_REGULAR:
+    if (colour->R < 0)  r_sign = -1, colour->R = -colour->R;
+    if (colour->G < 0)  g_sign = -1, colour->G = -colour->G;
+    if (colour->B < 0)  b_sign = -1, colour->B = -colour->B;
+    if (space->encoding_type == LIBCOLOUR_ENCODING_TYPE_SIMPLE) {
+      colour->R = pow(colour->R, 1 / space->gamma);
+      colour->G = pow(colour->G, 1 / space->gamma);
+      colour->B = pow(colour->B, 1 / space->gamma);
+    } else {
+      colour->R = REGULAR(space, colour->R);
+      colour->G = REGULAR(space, colour->G);
+      colour->B = REGULAR(space, colour->B);
+    }
+    colour->R *= r_sign;
+    colour->G *= g_sign;
+    colour->B *= b_sign;
+    break;
+  case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
+    colour->R = (space->to_encoded_red)(colour->R);
+    colour->G = (space->to_encoded_green)(colour->G);
+    colour->B = (space->to_encoded_blue)(colour->B);
+    break;
+  default:
+    fprintf(stderr, "libcolour: invalid encoding type\n");
+    abort();
+  }
+}
+
+static void rgb_decode(libcolour_rgb_t* restrict colour, const libcolour_rgb_t* restrict space)
+{
+  double r_sign = 1, g_sign = 1, b_sign = 1;
+  switch (space->encoding_type) {
+  case LIBCOLOUR_ENCODING_TYPE_LINEAR:
+    break;
+  case LIBCOLOUR_ENCODING_TYPE_SIMPLE:
+  case LIBCOLOUR_ENCODING_TYPE_REGULAR:
+    if (colour->R < 0)  r_sign = -1, colour->R = -colour->R;
+    if (colour->G < 0)  g_sign = -1, colour->G = -colour->G;
+    if (colour->B < 0)  b_sign = -1, colour->B = -colour->B;
+    if (space->encoding_type == LIBCOLOUR_ENCODING_TYPE_SIMPLE) {
+      colour->R = pow(colour->R, space->gamma);
+      colour->G = pow(colour->G, space->gamma);
+      colour->B = pow(colour->B, space->gamma);
+    } else {
+      colour->R = INVREGULAR(space, colour->R);
+      colour->G = INVREGULAR(space, colour->G);
+      colour->B = INVREGULAR(space, colour->B);
+    }
+    colour->R *= r_sign;
+    colour->G *= g_sign;
+    colour->B *= b_sign;
+    break;
+  case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
+    colour->R = (space->to_decoded_red)(colour->R);
+    colour->G = (space->to_decoded_green)(colour->G);
+    colour->B = (space->to_decoded_blue)(colour->B);
+    break;
+  default:
+    fprintf(stderr, "libcolour: invalid encoding type\n");
+    abort();
+  }
+}
+
+#undef REGULAR
+#undef INVREGULAR
+
+static int rgb_same_gamma(const libcolour_rgb_t* restrict a, const libcolour_rgb_t* restrict b)
+{
+  if (a->encoding_type != b->encoding_type)
+    return 0;
+  switch (a->encoding_type) {
+  case LIBCOLOUR_ENCODING_TYPE_SIMPLE:
+    return a->gamma == b->gamma;
+  case LIBCOLOUR_ENCODING_TYPE_REGULAR:
+    return a->gamma      == b->gamma  &&
+	   a->offset     == b->offset &&
+	   a->slope      == b->slope  &&
+	   a->transition == b->transition;
+  case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
+    return a->to_encoded_red   == b->to_encoded_red   &&
+	   a->to_encoded_green == b->to_encoded_green &&
+	   a->to_encoded_blue  == b->to_encoded_blue  &&
+	   a->to_decoded_red   == b->to_decoded_red   &&
+	   a->to_decoded_green == b->to_decoded_green &&
+	   a->to_decoded_blue  == b->to_decoded_blue;
+  default:
+    return 1;
+  }
+}
+
 static void to_rgb(const libcolour_colour_t* restrict from, libcolour_rgb_t* restrict to)
 {
   int have_gamma = 0, with_gamma = to->with_gamma;
@@ -64,7 +164,11 @@ static void to_rgb(const libcolour_colour_t* restrict from, libcolour_rgb_t* res
   case LIBCOLOUR_RGB:
     if (!memcmp(from->rgb.M, to->M, sizeof(double[3][3]))) {
       have_gamma = from->rgb.with_gamma;
-      *to = from->rgb;
+      to->R = from->rgb.R;
+      to->G = from->rgb.G;
+      to->B = from->rgb.B;
+      if (have_gamma && with_gamma && !rgb_same_gamma(&from->rgb, to))
+	rgb_decode(to, &from->rgb), have_gamma = 0;
       break;
     }
     /* fall through */
@@ -77,51 +181,9 @@ static void to_rgb(const libcolour_colour_t* restrict from, libcolour_rgb_t* res
 
   if (have_gamma != with_gamma) {
     if (with_gamma) {
-      switch (to->encoding_type) {
-      case LIBCOLOUR_ENCODING_TYPE_LINEAR:
-	break;
-      case LIBCOLOUR_ENCODING_TYPE_SIMPLE:
-	to->R = pow(to->R, 1 / to->gamma);
-	to->G = pow(to->G, 1 / to->gamma);
-	to->B = pow(to->B, 1 / to->gamma);
-	break;
-      case LIBCOLOUR_ENCODING_TYPE_REGULAR:
-	to->R = to->R <= to->transition ? to->slope * to->R : (1 + to->offset) * pow(to->R, 1 / to->gamma) - to->offset;
-	to->G = to->G <= to->transition ? to->slope * to->G : (1 + to->offset) * pow(to->G, 1 / to->gamma) - to->offset;
-	to->B = to->B <= to->transition ? to->slope * to->B : (1 + to->offset) * pow(to->B, 1 / to->gamma) - to->offset;
-	break;
-      case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
-	to->R = (to->to_encoded_red)(to->R);
-	to->G = (to->to_encoded_green)(to->G);
-	to->B = (to->to_encoded_blue)(to->B);
-	break;
-      default:
-	fprintf(stderr, "libcolour: invalid encoding type\n");
-	abort();
-      }
+      rgb_encode(to, to);
     } else {
-      switch (to->encoding_type) {
-      case LIBCOLOUR_ENCODING_TYPE_LINEAR:
-	break;
-      case LIBCOLOUR_ENCODING_TYPE_SIMPLE:
-	to->R = pow(to->R, to->gamma);
-	to->G = pow(to->G, to->gamma);
-	to->B = pow(to->B, to->gamma);
-	break;
-      case LIBCOLOUR_ENCODING_TYPE_REGULAR:
-	to->R = to->R <= to->transitioninv ? to->R * to->slope : pow((to->R + to->offset) / (1 + to->offset), to->gamma);
-	to->G = to->G <= to->transitioninv ? to->G * to->slope : pow((to->G + to->offset) / (1 + to->offset), to->gamma);
-	to->B = to->B <= to->transitioninv ? to->B * to->slope : pow((to->B + to->offset) / (1 + to->offset), to->gamma);
-	break;
-      case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
-	to->R = (to->to_decoded_red)(to->R);
-	to->G = (to->to_decoded_green)(to->G);
-	to->B = (to->to_decoded_blue)(to->B);
-	break;
-      default:
-	fprintf(stderr, "libcolour: invalid encoding type\n");
-	abort();
-      }
+      rgb_decode(to, &from->rgb);
     }
   }
 }
@@ -155,7 +217,7 @@ static inline double srgb_decode(double t)
     t = -t;
     sign = -1;
   }
-  t = t <= 0.040448236277380506 ? t / 12.92 : pow((t + 0.055) / 1.055, 2.4);
+  t = t <= 0.0031306684425217108 * 12.92 ? t / 12.92 : pow((t + 0.055) / 1.055, 2.4);
   return t * sign;
 }
 

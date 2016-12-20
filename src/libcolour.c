@@ -44,7 +44,7 @@ double libcolour_srgb_decode(double t)
     t = -t;
     sign = -1;
   }
-  t = t <= 0.040448236277380506 ? t / 12.92 : pow((t + 0.055) / 1.055, 2.4);
+  t = t <= 0.0031306684425217108 * 12.92 ? t / 12.92 : pow((t + 0.055) / 1.055, 2.4);
   return t * sign;
 }
 

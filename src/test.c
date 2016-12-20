@@ -18,6 +18,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 
 #ifndef SKIP_CONVERT
@@ -319,8 +320,10 @@ static int test_rgb_(enum libcolour_rgb_colour_space colour_space, const char* n
 int main(int argc, char* argv[])
 {
   int r, rc = 0;
-  libcolour_colour_t c1, c2;
+  libcolour_colour_t c1, c2, c3, c4;
   double t1, t2;
+  size_t n;
+  char buf[sizeof(int) + sizeof(libcolour_rgb_t)];
 
 #ifndef SKIP_CONVERT
   r = test_convert_nm_all();
@@ -436,9 +439,6 @@ int main(int argc, char* argv[])
 		 0.294559, 0.228864, 0.742689, 0.294559, 0.228864, 0.742689);
 
   /*
-  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS
-  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX
-  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX
   TODO test LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_D65
   TODO test LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_THEATER
   TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_625_LINE
@@ -453,17 +453,125 @@ int main(int argc, char* argv[])
   TODO test LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_HLG
   TODO test LIBCOLOUR_RGB_COLOUR_SPACE_SGI_RGB
   TODO test LIBCOLOUR_RGB_COLOUR_SPACE_SMPTE_240M_RGB
+  
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX
+  TODO test LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX
   */
 
   /* TODO test transfer functions more rigorously */
 
+  c1.model = c2.model = LIBCOLOUR_RGB;
+  c3.model = c4.model = LIBCOLOUR_SRGB;
+  c1.rgb.with_gamma = c3.srgb.with_gamma = 0;
+  c2.rgb.with_gamma = c4.srgb.with_gamma = 1;
+  if (libcolour_get_rgb_colour_space(&c1.rgb, LIBCOLOUR_RGB_COLOUR_SPACE_SRGB))
+    goto fail;
+  if (libcolour_get_rgb_colour_space(&c2.rgb, LIBCOLOUR_RGB_COLOUR_SPACE_SRGB))
+    goto fail;
+  for (t1 = 0; t1 <= 1; t1 += 0.001) {
+    c1.rgb.R = c3.srgb.R = t1 - 1;
+    c1.rgb.G = c3.srgb.G = t1;
+    c1.rgb.B = c3.srgb.B = t1 + 1;
+    if (libcolour_convert(&c1, &c2))
+      goto fail;
+    if (libcolour_convert(&c3, &c4))
+      goto fail;
+    if (!ftest(c2.rgb.R, c4.srgb.R, 0.00000000001) ||
+	!ftest(c2.rgb.G, c4.srgb.G, 0.00000000001) ||
+	!ftest(c2.rgb.B, c4.srgb.B, 0.00000000001) ||
+	!ftest(libcolour_srgb_encode(c1.rgb.R), c2.srgb.R, 0.00000000001) ||
+	!ftest(libcolour_srgb_encode(c1.rgb.G), c2.srgb.G, 0.00000000001) ||
+	!ftest(libcolour_srgb_encode(c1.rgb.B), c2.srgb.B, 0.00000000001)) {
+      printf("libcolour_srgb_encode failed\n"), rc = 0;
+      goto colour_spaces_done;
+    }
+    if (libcolour_convert(&c2, &c1))
+      goto fail;
+    if (libcolour_convert(&c4, &c3))
+      goto fail;
+    if (!ftest(c1.rgb.R, c3.srgb.R, 0.00000000001) ||
+	!ftest(c1.rgb.G, c3.srgb.G, 0.00000000001) ||
+	!ftest(c1.rgb.B, c3.srgb.B, 0.00000000001) ||
+	!ftest(libcolour_srgb_decode(c2.rgb.R), c1.srgb.R, 0.00000000001) ||
+	!ftest(libcolour_srgb_decode(c2.rgb.G), c1.srgb.G, 0.00000000001) ||
+	!ftest(libcolour_srgb_decode(c2.rgb.B), c1.srgb.B, 0.00000000001)) {
+      printf("%.30lf -> %.30lf\n%.30lf -> %.30lf\n%.30lf -> %.30lf\n",
+	     c2.rgb.R, c1.rgb.R, c4.srgb.R, c3.srgb.R, c2.rgb.R, libcolour_srgb_decode(c2.rgb.R));
+      printf("libcolour_srgb_decode failed\n"), rc = 0;
+      goto colour_spaces_done;
+    }
+  }
+
+  c1.rgb.encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
+  c1.rgb.gamma = 2.2;
+  c1.rgb.with_gamma = 0;
+  c1.rgb.R = 0.25;
+  c1.rgb.G = 0.5;
+  c1.rgb.B = 0.75;
+  c4 = c3 = c2 = c1;
+  c2.rgb.with_gamma = c3.srgb.with_gamma = 1;
+  c3.rgb.gamma = c4.rgb.gamma = 1.8;
+  if (libcolour_convert(&c1, &c2))
+    goto fail;
+  if (libcolour_convert(&c2, &c3))
+    goto fail;
+  if (libcolour_convert(&c3, &c4))
+    goto fail;
+  if (!ftest(c1.rgb.R, c4.srgb.R, 0.0000001) ||
+      !ftest(c1.rgb.G, c4.srgb.G, 0.0000001) ||
+      !ftest(c1.rgb.B, c4.srgb.B, 0.0000001)) {
+    printf("libcolour_convert failed to convert between two transfer functions\n"), rc = 0;
+    goto colour_spaces_done;
+  }
+
+  if (libcolour_convert(&c1, &c4))
+    goto fail;
+  if (!ftest(c1.rgb.R, c4.srgb.R, 0.0000001) ||
+      !ftest(c1.rgb.G, c4.srgb.G, 0.0000001) ||
+      !ftest(c1.rgb.B, c4.srgb.B, 0.0000001)) {
+    printf("libcolour_convert failed to convert when two different transfer functions are not applied\n"), rc = 0;
+    goto colour_spaces_done;
+  }
+
   /* TODO test libcolour_convert with single conversions */
  colour_spaces_done:
 
-  /* TODO test libcolour_srgb_encode */
-  /* TODO test libcolour_srgb_decode */
-  /* TODO test libcolour_marshal */
-  /* TODO test libcolour_unmarshal */
+  memset(&c1, 0, sizeof(c1));
+  memset(&c2, 0, sizeof(c2));
+  c1.model = LIBCOLOUR_RGB;
+  if (libcolour_get_rgb_colour_space(&c1.rgb, LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2))
+    goto fail;
+  c3 = c1;
+  c1.rgb.to_encoded_red = NULL;
+  c1.rgb.to_encoded_green = NULL;
+  c1.rgb.to_encoded_blue = NULL;
+  c1.rgb.to_decoded_red = NULL;
+  c1.rgb.to_decoded_green = NULL;
+  c1.rgb.to_decoded_blue = NULL;
+  if (libcolour_marshal(&c1, NULL) > sizeof(buf)) {
+    printf("libcolour_marshal failed\n"), rc = 0;
+    goto marshal_done;
+  }
+  n = libcolour_marshal(&c1, buf);
+  if (n > sizeof(buf)) {
+    printf("libcolour_marshal failed\n"), rc = 0;
+    goto marshal_done;
+  }
+  if (libcolour_unmarshal(NULL, buf) != n) {
+    printf("libcolour_unmarshal failed\n"), rc = 0;
+    goto marshal_done;
+  }
+  if (libcolour_unmarshal(&c2, buf) != n) {
+    printf("libcolour_unmarshal failed\n"), rc = 0;
+    goto marshal_done;
+  }
+  if (memcmp(&c2, &c3, sizeof(c2))) {
+    printf("libcolour_(un)marshal failed\n"), rc = 0;
+    goto marshal_done;
+  }
+ marshal_done:
+
   return rc;
  fail:
   perror(*argv);
