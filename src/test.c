@@ -283,7 +283,6 @@ static int test_rgb_(enum libcolour_rgb_colour_space colour_space, const char* n
 	     !ftest(c2.ciexyz.Y, y, 0.0001) ||
 	     !ftest(c2.ciexyz.Z, z, 0.0001)) {
     printf("%s failed without gamma\n", name);
-    printf("%.6lf, %.6lf, %.6lf\n", c2.ciexyz.X, c2.ciexyz.Y, c2.ciexyz.Z);
     return 0;
   }
 
@@ -299,7 +298,6 @@ static int test_rgb_(enum libcolour_rgb_colour_space colour_space, const char* n
 	     !ftest(c2.ciexyz.Y, yy, 0.0001) ||
 	     !ftest(c2.ciexyz.Z, zz, 0.0001)) {
     printf("%s failed with gamma\n", name);
-    printf("%.6lf, %.6lf, %.6lf\n", c2.ciexyz.X, c2.ciexyz.Y, c2.ciexyz.Z);
     return 0;
   }
 
@@ -340,9 +338,6 @@ static int test_1convert(libcolour_colour_t *c1, libcolour_model_t model, const 
   if (!ftest(c2.srgb.R, ch1, d1) ||
       !ftest(c2.srgb.G, ch2, d2) ||
       !ftest(c2.srgb.B, ch3, d3)) {
-    printf("%.10lf, %.10lf, %.10lf\n", c2.srgb.R, c2.srgb.G, c2.srgb.B);
-    printf("%.10lf, %.10lf, %.10lf\n", ch1, ch2, ch3);
-    printf("%.10lf, %.10lf, %.10lf\n", d1, d2, d3);
     printf("%s -> %s failed\n", name1, name2), rc = 0;
     rc = 0;
   }
@@ -544,8 +539,6 @@ int main(int argc, char* argv[])
 	!ftest(libcolour_srgb_decode(c2.rgb.R), c1.srgb.R, 0.00000000001) ||
 	!ftest(libcolour_srgb_decode(c2.rgb.G), c1.srgb.G, 0.00000000001) ||
 	!ftest(libcolour_srgb_decode(c2.rgb.B), c1.srgb.B, 0.00000000001)) {
-      printf("%.30lf -> %.30lf\n%.30lf -> %.30lf\n%.30lf -> %.30lf\n",
-	     c2.rgb.R, c1.rgb.R, c4.srgb.R, c3.srgb.R, c2.rgb.R, libcolour_srgb_decode(c2.rgb.R));
       printf("libcolour_srgb_decode failed\n"), rc = 0;
       goto colour_spaces_done;
     }
@@ -586,15 +579,12 @@ int main(int argc, char* argv[])
   r = test_1convert(&c1, TO, "LIBCOLOUR_SRGB", #TO, CH1, CH2, CH3, D1, D2, D3);\
   if (r < 0)\
     goto fail;\
-  if (!r) {\
-    rc = 1;\
-    goto colour_spaces_done;\
-  }
+  if (!r)\
+    rc = 1;
 
   c1.model = LIBCOLOUR_SRGB;
   c1.srgb.with_gamma = 0;
   c1.srgb.R = 0.3, c1.srgb.G = 0.2, c1.srgb.B = 0.7;
-
   TEST(LIBCOLOUR_CIEXYZ, 0.321558, 0.257355, 0.694851, 0.000001, 00000001, 0.000001);
   TEST(LIBCOLOUR_CIEXYY, 0.252447, 0.202043, 0.257355, 0.000001, 0.000001, 0.000001);
   TEST(LIBCOLOUR_CIELAB, 57.7851, 30.3599, -44.9740, 0.0001, 0.0001, 0.0001);
@@ -603,14 +593,23 @@ int main(int argc, char* argv[])
   /*
    * TODO convert test from sRGB to:
    *     LChab  57.7851, 54.2622, 304.0215
-   *     YIQ
    *     YDbDr
-   *     YUV
    *     YPbPr
    *     YCgCo
    *     CIE 1960 UCS
    *     CIEUVW
    */
+  c1.srgb.with_gamma = 0;
+  c1.srgb.R = 32 / 255., c1.srgb.G = 65 / 255., c1.srgb.B = 32 / 255.;
+  TEST(LIBCOLOUR_YIQ, 0.201, -0.035, -0.068, 0.001, 0.001, 0.001);
+  TEST(LIBCOLOUR_YUV, 0.201, -0.037, -0.067, 0.001, 0.001, 0.001);
+  /* XXX YCbCr(60, 118, 116) */
+  /* XXX HSV(120, 0.508, 0.255) */
+  /* XXX HSI(120, 0.256, 0.169) */
+  /* XXX HSL(120, 0.340, 0.190) */
+
+  if (rc)
+    goto colour_spaces_done;
 
 #undef TEST
  colour_spaces_done:
