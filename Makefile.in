@@ -40,7 +40,7 @@ PKGNAME = libcolour
 
 # Package information.
 _PROJECT = libcolour
-_VERSION = 0.1
+_VERSION = 1.0
 
 # Used by mk/lang-c.mk
 _C_STD = c99
