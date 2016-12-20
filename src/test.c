@@ -21,14 +21,19 @@
 #include <string.h>
 
 
-#ifndef SKIP_CONVERT
-static int test_convert(libcolour_colour_t* c1, libcolour_colour_t* c2, libcolour_colour_t* c3)
+#ifndef SKIP_2CONVERT
+static int test_2convert(libcolour_colour_t* c1, libcolour_colour_t* c2, libcolour_colour_t* c3)
 {
   double ch1, ch2, ch3;
   if (libcolour_convert(c1, c2))
     return -1;
   if (libcolour_convert(c2, c3))
     return -1;
+  if ((c1->model == LIBCOLOUR_CIELCHUV) &&
+      !isnan(c1->cielchuv.h) && !isnan(c3->cielchuv.h) &&
+      !isinf(c1->cielchuv.h) && !isinf(c3->cielchuv.h) &&
+      (c3->cielchuv.h / c3->cielchuv.one_revolution > 0.99999))
+    c3->cielchuv.h = 0;
   ch1 = c1->srgb.R - c3->srgb.R;
   ch2 = c1->srgb.G - c3->srgb.G;
   ch3 = c1->srgb.B - c3->srgb.B;
@@ -75,7 +80,7 @@ static int test_convert(libcolour_colour_t* c1, libcolour_colour_t* c2, libcolou
 }
   
 
-static int test_convert_11(libcolour_colour_t* c1, libcolour_model_t model)
+static int test_2convert_11(libcolour_colour_t* c1, libcolour_model_t model)
 {
   libcolour_colour_t c2, c3;
   int r1, r2;
@@ -86,13 +91,13 @@ static int test_convert_11(libcolour_colour_t* c1, libcolour_model_t model)
     c2.rgb.with_gamma = 0;
     if (libcolour_get_rgb_colour_space(&c2.rgb, LIBCOLOUR_RGB_COLOUR_SPACE_SRGB) < 0)
       return -1;
-    return test_convert(c1, &c2, &c3);
+    return test_2convert(c1, &c2, &c3);
   case LIBCOLOUR_SRGB:
     c2.srgb.with_gamma = 0;
-    if (r1 = test_convert(c1, &c2, &c3), r1 < 0)
+    if (r1 = test_2convert(c1, &c2, &c3), r1 < 0)
       return -1;
     c2.srgb.with_gamma = 1;
-    if (r2 = test_convert(c1, &c2, &c3), r2 < 0)
+    if (r2 = test_2convert(c1, &c2, &c3), r2 < 0)
       return -1;
     return r1 & r2;
   case LIBCOLOUR_CIELCHUV:
@@ -103,18 +108,18 @@ static int test_convert_11(libcolour_colour_t* c1, libcolour_model_t model)
     c2.cieluv.white.X = 1.0294;
     c2.cieluv.white.Y = 1;
     c2.cieluv.white.Z = 0.9118;
-    return test_convert(c1, &c2, &c3);
+    return test_2convert(c1, &c2, &c3);
   case LIBCOLOUR_CIEUVW:
     c2.cieuvw.u0 = 0.37;
     c2.cieuvw.v0 = 0.30;
-    return test_convert(c1, &c2, &c3);
+    return test_2convert(c1, &c2, &c3);
   default:
-    return test_convert(c1, &c2, &c3);
+    return test_2convert(c1, &c2, &c3);
   }
 }
 
 
-static int test_convert_1n(libcolour_model_t model, const char* model_name, double ch1, double ch2, double ch3)
+static int test_2convert_1n(libcolour_model_t model, const char* model_name, double ch1, double ch2, double ch3)
 {
   libcolour_colour_t c1;
   int run, r, rc = 1;
@@ -191,7 +196,7 @@ static int test_convert_1n(libcolour_model_t model, const char* model_name, doub
     }
 
 #define X(ENUM, TYPE)\
-    r = test_convert_11(&c1, ENUM);\
+    r = test_2convert_11(&c1, ENUM);\
     if (r < 0)\
       return -1;\
     if (!r)\
@@ -203,12 +208,12 @@ static int test_convert_1n(libcolour_model_t model, const char* model_name, doub
 }
 
 
-static int test_convert_nm(double ch1, double ch2, double ch3)
+static int test_2convert_nm(double ch1, double ch2, double ch3)
 {
   int r, rc = 1;
 
 #define X(ENUM, TYPE)\
-  r = test_convert_1n(ENUM, #ENUM, ch1, ch2, ch3);\
+  r = test_2convert_1n(ENUM, #ENUM, ch1, ch2, ch3);\
   if (r < 0)\
     return -1;\
   if (!r)\
@@ -220,7 +225,7 @@ static int test_convert_nm(double ch1, double ch2, double ch3)
 }
 
 
-static int test_convert_nm_all(void)
+static int test_2convert_nm_all(void)
 {
 #define N 11
   int r, rc = 1;
@@ -238,7 +243,7 @@ static int test_convert_nm_all(void)
 	if (ch2 > 0.999) ch2 = 1;
 	if (ch3 > 0.999) ch3 = 1;
 
-	r = test_convert_nm(ch1, ch2, ch3);
+	r = test_2convert_nm(ch1, ch2, ch3);
 	if (r < 0)
 	  return -1;
 	if (!r)
@@ -310,6 +315,49 @@ static int test_rgb_(enum libcolour_rgb_colour_space colour_space, const char* n
 }
 
 
+static int test_1convert(libcolour_colour_t *c1, libcolour_model_t model, const char* name1,
+			 const char* name2, double ch1, double ch2, double ch3, double d1,
+			 double d2, double d3)
+{
+  libcolour_colour_t c2, c3;
+  int rc = 1;
+  c3 = *c1;
+  c2.model = model;
+  switch (model) {
+  case LIBCOLOUR_CIELCHUV:
+    c2.cielchuv.one_revolution = 360;
+    /* fall-through */
+  case LIBCOLOUR_CIELUV:
+    c2.cieluv.white.X = 0.9504705586542831;
+    c2.cieluv.white.Y = 1;
+    c2.cieluv.white.Z = 1.0888287363958837;
+    break;
+  default:
+    break;
+  }
+  if (libcolour_convert(c1, &c2))
+    return -1;
+  if (!ftest(c2.srgb.R, ch1, d1) ||
+      !ftest(c2.srgb.G, ch2, d2) ||
+      !ftest(c2.srgb.B, ch3, d3)) {
+    printf("%.10lf, %.10lf, %.10lf\n", c2.srgb.R, c2.srgb.G, c2.srgb.B);
+    printf("%.10lf, %.10lf, %.10lf\n", ch1, ch2, ch3);
+    printf("%.10lf, %.10lf, %.10lf\n", d1, d2, d3);
+    printf("%s -> %s failed\n", name1, name2), rc = 0;
+    rc = 0;
+  }
+  if (libcolour_convert(&c2, &c3))
+    return -1;
+  if (!ftest(c3.srgb.R, c1->srgb.R, 0.00000001) ||
+      !ftest(c3.srgb.G, c1->srgb.G, 0.00000001) ||
+      !ftest(c3.srgb.B, c1->srgb.B, 0.00000001)) {
+    printf("%s -> %s failed\n", name2, name1), rc = 0;
+    rc = 0;
+  }
+  return rc;
+}
+
+
 /**
  * Test libcolour
  * 
@@ -325,8 +373,8 @@ int main(int argc, char* argv[])
   size_t n;
   char buf[sizeof(int) + sizeof(libcolour_rgb_t)];
 
-#ifndef SKIP_CONVERT
-  r = test_convert_nm_all();
+#ifndef SKIP_2CONVERT
+  r = test_2convert_nm_all();
   if (r < 0)
     goto fail;
   if (!r)
@@ -534,7 +582,37 @@ int main(int argc, char* argv[])
     goto colour_spaces_done;
   }
 
-  /* TODO test libcolour_convert with single conversions */
+#define TEST(TO, CH1, CH2, CH3, D1, D2, D3)\
+  r = test_1convert(&c1, TO, "LIBCOLOUR_SRGB", #TO, CH1, CH2, CH3, D1, D2, D3);\
+  if (r < 0)\
+    goto fail;\
+  if (!r) {\
+    rc = 1;\
+    goto colour_spaces_done;\
+  }
+
+  c1.model = LIBCOLOUR_SRGB;
+  c1.srgb.with_gamma = 0;
+  c1.srgb.R = 0.3, c1.srgb.G = 0.2, c1.srgb.B = 0.7;
+
+  TEST(LIBCOLOUR_CIEXYZ, 0.321558, 0.257355, 0.694851, 0.000001, 00000001, 0.000001);
+  TEST(LIBCOLOUR_CIEXYY, 0.252447, 0.202043, 0.257355, 0.000001, 0.000001, 0.000001);
+  TEST(LIBCOLOUR_CIELAB, 57.7851, 30.3599, -44.9740, 0.0001, 0.0001, 0.0001);
+  TEST(LIBCOLOUR_CIELUV, 57.7851, 5.5723, -74.1571, 0.0001, 0.0001, 0.0001);
+  TEST(LIBCOLOUR_CIELCHUV, 57.7851, 74.3662, 274.2972, 0.0001, 0.0001, 0.0001);
+  /*
+   * TODO convert test from sRGB to:
+   *     LChab  57.7851, 54.2622, 304.0215
+   *     YIQ
+   *     YDbDr
+   *     YUV
+   *     YPbPr
+   *     YCgCo
+   *     CIE 1960 UCS
+   *     CIEUVW
+   */
+
+#undef TEST
  colour_spaces_done:
 
   memset(&c1, 0, sizeof(c1));

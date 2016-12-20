@@ -443,8 +443,8 @@ static void cielab_to_ciexyz(const libcolour_cielab_t* restrict from, libcolour_
   to->X = to->Y + a / 500;
   to->Z = to->Y - b / 200;
   to->X = cielab_finv(to->X) * 0.95047;
-  to->Y = cielab_finv(to->Y) * 1.08883;
-  to->Z = cielab_finv(to->Z);
+  to->Y = cielab_finv(to->Y);
+  to->Z = cielab_finv(to->Z) * 1.08883;
 }
 
 static void cieluv_to_ciexyz(const libcolour_cieluv_t* restrict from, libcolour_ciexyz_t* restrict to)
@@ -604,7 +604,7 @@ static void ciexyz_to_cielab(const libcolour_ciexyz_t* restrict from, libcolour_
 {
   double X = from->X, Y = from->Y, Z = from->Z;
   X /= 0.95047;
-  Y /= 1.08883;
+  Z /= 1.08883;
   Y = cielab_f(Y);
   to->L = 116 * Y - 16;
   to->a = 500 * (cielab_f(X) - Y);
@@ -721,6 +721,8 @@ static void cieluv_to_cielchuv(const libcolour_cieluv_t* restrict from, libcolou
   to->L = L;
   to->C = sqrt(u * u + v * v);
   to->h = atan2(v, u) / PI2 * to->one_revolution;
+  if (!isnan(to->h) && !isinf(to->h) && (to->h < 0))
+    to->h += to->one_revolution;
 }
 
 static void other_to_cielchuv(const libcolour_colour_t* restrict from, libcolour_cielchuv_t* restrict to)
