@@ -1,0 +1,6 @@
+VERSION_MAJOR = 2
+VERSION_MINOR = 0
+
+CFLAGS   = -Wall -pedantic -std=c11 -g
+CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE
+LDFLAGS  = -lm
