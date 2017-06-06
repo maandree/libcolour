@@ -1,6 +1,9 @@
 VERSION_MAJOR = 2
 VERSION_MINOR = 0
 
-CFLAGS   = -Wall -pedantic -std=c11 -g
+PREFIX = /usr/local
+MANPREFIX = $(PREFIX)/share/man
+
+CFLAGS   = -std=c11 -Wall -pedantic -O2
 CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE
-LDFLAGS  = -lm
+LDFLAGS  = -lm -s
