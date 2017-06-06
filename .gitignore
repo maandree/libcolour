@@ -10,3 +10,4 @@
 *.so
 *.a
 /test
+/libcolour.7

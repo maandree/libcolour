@@ -3,7 +3,252 @@ NAME
 
 DESCRIPTION
 	libcolour is C library for colour space conversions.
+	libcolour provides conversion between a large number of colour
+	spaces, including many different RGB colour spaces. It also
+	supports encode and non-encoded representations. libcolour
+	futhermore provides access to custom RGB colour spaces.
 
-SEE ALSO
-	libclut(7)
+	To use libcolour, include the header file <libcolour.h> and
+	link with /usr/local/lib/libcolour.a -lm or -lcolour.
 
+COLOUR MODELS
+	libcolour supports a number of colour models. A colour model
+	is specified with a value of
+
+		typedef enum libcolour_model libcolour_model_t;
+
+	The colour models can listed using the macros
+
+		LIBCOLOUR_LIST_MODELS(IMACRO, TYPE_AFFIX)
+
+	or
+
+		LIBCOLOUR_LIST_MODELS_N(MACRO, TYPE_AFFIX, ...)
+
+	where MACRO is the macro that shall be expanded, and
+	TYPE_AFFIX shall be f, lf, or llf for float-typed,
+	double-typed, and long double-typed colour module stuctures,
+	respectively. LIBCOLOUR_LIST_MODELS expands MACRO with three
+	parameters: enum libcolour_model value of the colour model,
+	typedef-name of struct used to store colours of the colour
+	model, and the name of the member in union libcolour_colour_f,
+	union libcolour_colour_lf, and union libcolour_colour_llf that
+	is used to store a colour with the colour model.
+	LIBCOLOUR_LIST_MODELS_N is identical to LIBCOLOUR_LIST_MODELS
+	except allows the programmer to specify additional parameters
+	to pass MACRO when it is expanded.
+
+	There there are three structs defined for each colour model,
+	the first member in each struct is
+
+		enum libcolour_model model;
+
+	The three structs for each colour model are for different data
+	types: float, double, and long double. For example, for sRGB,
+	the follow structs are defined:
+
+		typedef struct libcolour_srgb_f libcolour_srgb_f_t;
+		typedef struct libcolour_srgb_lf libcolour_srgb_lf_t;
+		typedef struct libcolour_srgb_llf libcolour_srgb_llf_t;
+
+	for float, double, and long double, respectively. Similarly,
+
+		typedef union libcolour_colour_f libcolour_colour_f_t;
+		typedef union libcolour_colour_lf libcolour_colour_lf_t;
+		typedef union libcolour_colour_llf libcolour_colour_llf_t;
+
+	are used for float, double, long double, respectively, and all
+	have the member
+
+		enum libcolour_model model;
+
+	The structs are not padded to be of the same size.
+
+	<libcolour.h> defines structs the following for colour models:
+
+	Generic RGB
+		See LIBCOLOUR_RGB(7).
+
+	Standard RGB
+		See LIBCOLOUR_SRGB(7).
+
+	CIE xyY
+		See LIBCOLOUR_CIEXYY(7).
+
+	CIE 1931 XYZ
+		See LIBCOLOUR_CIEXYZ(7).
+
+	CIE L*a*b*
+		See LIBCOLOUR_CIELAB(7).
+
+	CIE 1976 (L*, u*, v*)
+		See LIBCOLOUR_CIELUV(7).
+
+	CIE LChuv (also known as CIE HLCuv)
+		See LIBCOLOUR_CIELCHUV(7).
+
+	YIQ
+		See LIBCOLOUR_YIQ(7).
+
+	YDbDr
+		See LIBCOLOUR_YDBDR(7).
+
+	YUV
+		See LIBCOLOUR_YUV(7).
+
+	YPBPR
+		See LIBCOLOUR_YPBPR(7).
+
+	YCgCo
+		See LIBCOLOUR_YCGCO(7).
+
+	CIE 1960 UCS
+		See LIBCOLOUR_CIE1960UCS(7).
+
+	CIE 1964 (U*, V*, W*)
+		See LIBCOLOUR_CIEUVW(7).
+
+ILLUMINANTS
+	libcolour provides a number of initialiser macros for standard
+	illuminants. The following macros expand to a
+	libcolour_ciexyy_f_t with the standard 2 degrees observer
+	value in CIE xyY, each have a supplementary 10 degrees
+	observer counterpart using suffix _10DEG_OBS, both with the Y
+	value set to 1. Additionally, each macro, including the
+	_10DEG_OBS variants, have a variant that uses the _LF affix
+	that expands to a libcolour_ciexyy_lf_t and a variant that
+	uses the _LLF affix that expands to a libcolour_ciexyy_llf_t
+	in addition to the listed variants that uses the _F affix.
+
+	LIBCOLOUR_ILLUMINANT_A_F
+		CIE Standard Illuminant A.
+		Incandescent/Tungsten.
+		2855.54K (2848K in old definition of 1K).
+
+	LIBCOLOUR_ILLUMINANT_B_F
+		CIE Standard Illuminant B.
+		Direct sunlight at noon (obsolete).
+		4874K.
+
+	LIBCOLOUR_ILLUMINANT_C_F
+		CIE Standard Illuminant C.
+		Average/north sky daylight (obsolete).
+		6774K.
+
+	LIBCOLOUR_ILLUMINANT_D50_F
+		CIE Standard Illuminant D50.
+		Horizon Light.
+		5002.78K (5000K in old definition of 1K).
+
+	LIBCOLOUR_ILLUMINANT_D55_F
+		CIE Standard Illuminant D55.
+		Mid-morning/mid-afternoon daylight.
+		5503.06K (5500K in old definition of 1K).
+
+	LIBCOLOUR_ILLUMINANT_D65_F
+		CIE Standard Illuminant D65.
+		Noon daylight.
+		6503.62K (6500K in old definition of 1K).
+
+	LIBCOLOUR_ILLUMINANT_D75_F
+		CIE Standard Illuminant D75.
+		North sky daylight.
+		7504.17K (7500K in old definition of 1K).
+
+	LIBCOLOUR_ILLUMINANT_E_F
+		CIE Standard Illuminant E.
+		Equal energy.
+		5454K.
+
+	LIBCOLOUR_ILLUMINANT_F1_F
+		CIE Standard Illuminant F1.
+		Daylight fluorescent.
+		6430K.
+
+	LIBCOLOUR_ILLUMINANT_F2_F
+		CIE Standard Illuminant F2.
+		Cool white fluorescent.
+		4230K.
+
+	LIBCOLOUR_ILLUMINANT_F3_F
+		CIE Standard Illuminant F3.
+		White fluorescent.
+		3450K.
+
+	LIBCOLOUR_ILLUMINANT_F4_F
+		CIE Standard Illuminant F4.
+		Warm white fluorescent.
+		2940K.
+
+	LIBCOLOUR_ILLUMINANT_F5_F
+		CIE Standard Illuminant F5.
+		Daylight fluorescent.
+		6350K.
+
+	LIBCOLOUR_ILLUMINANT_F6_F
+		CIE Standard Illuminant F6.
+		Lite white fluorescent.
+		4150K.
+
+	LIBCOLOUR_ILLUMINANT_F7_F
+		CIE Standard Illuminant F7.
+		D65 simulator, daylight simulator.
+		6500K.
+
+	LIBCOLOUR_ILLUMINANT_F8_F
+		CIE Standard Illuminant F8.
+		D50 simulator, Sylvania F40 Design 50.
+		5000K.
+
+	LIBCOLOUR_ILLUMINANT_F9_F
+		CIE Standard Illuminant F9.
+		Cool white deluxe fluorescent.
+		4150K.
+
+	LIBCOLOUR_ILLUMINANT_F10_F
+		CIE Standard Illuminant F10.
+		Philips TL85, Ultralume 50.
+		5000K.
+
+	LIBCOLOUR_ILLUMINANT_F11_F
+		CIE Standard Illuminant F11.
+		Philips TL84, Ultralume 40.
+		4000K.
+
+	LIBCOLOUR_ILLUMINANT_F12_F
+		CIE Standard Illuminant F12.
+		Philips TL83, Ultralume 30.
+		3000K.
+
+FUNCTIONS
+	libcolour_convert(3)
+		Colour space and colour model conversion.
+
+	libcolour_srgb_encode(3)
+		Apply the sRGB transfer function.
+
+	libcolour_srgb_decode(3)
+		Unapply the sRGB transfer function.
+
+	libcolour_delta_e(3)
+		Calculate delta E*_ab distance.
+
+	libcolour_proper(3)
+		Sets any member or submember that may be incorrectly
+		set.
+
+	libcolour_get_rgb_colour_space(3)
+		Selects RGB colour space.
+
+	libcolour_marshal(3)
+		Marshal a colour record.
+
+	libcolour_unmarshal(3)
+		Unmarshal a colour record.
+
+NOTES
+	All enum values have a macro with the same name defined which
+	can be used to test the existance of value.
+
+AUTHORS
+	Mattias Andrée <maandree@kth.se>

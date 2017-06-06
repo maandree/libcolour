@@ -17,8 +17,39 @@ TEMPLATES =\
 	convert-template.c\
 	libcolour-template.c
 
+MAN7 =\
+	libcolour.7
 
-all: libcolour.a libcolour.so.$(SO_VERSION) test
+MAN3 =
+
+MAN3_SYMLINKS =\
+	libcolour_convert_f.3\
+	libcolour_convert_lf.3\
+	libcolour_convert_llf.3\
+	libcolour_srgb_encode_f.3\
+	libcolour_srgb_encode_lf.3\
+	libcolour_srgb_encode_llf.3\
+	libcolour_srgb_decode_f.3\
+	libcolour_srgb_decode_lf.3\
+	libcolour_srgb_decode_llf.3\
+	libcolour_delta_e_f.3\
+	libcolour_delta_e_lf.3\
+	libcolour_delta_e_llf.3\
+	libcolour_proper_f.3\
+	libcolour_proper_lf.3\
+	libcolour_proper_llf.3\
+	libcolour_get_rgb_colour_space_f.3\
+	libcolour_get_rgb_colour_space_lf.3\
+	libcolour_get_rgb_colour_space_llf.3\
+	libcolour_marshal_f.3\
+	libcolour_marshal_lf.3\
+	libcolour_marshal_llf.3\
+	libcolour_unmarshal_f.3\
+	libcolour_unmarshal_lf.3\
+	libcolour_unmarshal_llf.3
+
+
+all: libcolour.a libcolour.so.$(SO_VERSION) libcolour.7 test
 
 
 float.o: float.c $(TEMPLATES) $(HDR)
@@ -56,17 +87,51 @@ test: test.o libcolour.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 
-install:
+libcolour.7: libcolour.7.in
+	sed 's:/usr/local:$(PREFIX):g' < libcolour.7.in > libcolour.7
+
+
+install: libcolour.a libcolour.so.$(SO_VERSION) libcolour.7
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/include"
-	mkdir -p -- "$(DESTDIR)$(PREFIX)/lib"
 	cp -- libcolour.h "$(DESTDIR)$(PREFIX)/include/libcolour.h"
 	chmod -- 644 "$(DESTDIR)$(PREFIX)/include/libcolour.h"
+	mkdir -p -- "$(DESTDIR)$(PREFIX)/lib"
 	cp -- libcolour.a "$(DESTDIR)$(PREFIX)/lib/libcolour.a"
 	chmod -- 644 "$(DESTDIR)$(PREFIX)/lib/libcolour.a"
 	cp -- libcolour.so.$(SO_VERSION) "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(SO_VERSION)"
 	chmod -- 755 "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(SO_VERSION)"
 	ln -sf -- libcolour.so.$(SO_VERSION) "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(VERSION_MAJOR)"
 	ln -sf -- libcolour.so.$(SO_VERSION) "$(DESTDIR)$(PREFIX)/lib/libcolour.so"
+	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man7"
+	cp -- $(MAN7) "$(DESTDIR)$(MANPREFIX)/man7/"
+	cd -- "$(DESTDIR)$(MANPREFIX)/man7" && chmod -- 644 $(MAN7)
+	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man3"
+	cp -- $(MAN3) "$(DESTDIR)$(MANPREFIX)/man3/"
+	cd -- "$(DESTDIR)$(MANPREFIX)/man3" && chmod -- 644 $(MAN3)
+	ln -sf -- libcolour_convert.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_f.3"
+	ln -sf -- libcolour_convert.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_lf.3"
+	ln -sf -- libcolour_convert.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_llf.3"
+	ln -sf -- libcolour_srgb_encode.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_srgb_encode_f.3"
+	ln -sf -- libcolour_srgb_encode.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_srgb_encode_lf.3"
+	ln -sf -- libcolour_srgb_encode.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_srgb_encode_llf.3"
+	ln -sf -- libcolour_srgb_decode.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_srgb_decode_f.3"
+	ln -sf -- libcolour_srgb_decode.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_srgb_decode_lf.3"
+	ln -sf -- libcolour_srgb_decode.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_srgb_decode_llf.3"
+	ln -sf -- libcolour_delta_e.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_delta_e_f.3"
+	ln -sf -- libcolour_delta_e.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_delta_e_lf.3"
+	ln -sf -- libcolour_delta_e.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_delta_e_llf.3"
+	ln -sf -- libcolour_proper.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_proper_f.3"
+	ln -sf -- libcolour_proper.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_proper_lf.3"
+	ln -sf -- libcolour_proper.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_proper_llf.3"
+	ln -sf -- libcolour_get_rgb_colour_space.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_get_rgb_colour_space_f.3"
+	ln -sf -- libcolour_get_rgb_colour_space.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_get_rgb_colour_space_lf.3"
+	ln -sf -- libcolour_get_rgb_colour_space.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_get_rgb_colour_space_llf.3"
+	ln -sf -- libcolour_marshal.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_marshal_f.3"
+	ln -sf -- libcolour_marshal.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_marshal_lf.3"
+	ln -sf -- libcolour_marshal.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_marshal_llf.3"
+	ln -sf -- libcolour_unmarshal.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_unmarshal_f.3"
+	ln -sf -- libcolour_unmarshal.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_unmarshal_lf.3"
+	ln -sf -- libcolour_unmarshal.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_unmarshal_llf.3"
 
 
 uninstall:
@@ -75,6 +140,8 @@ uninstall:
 	-rm -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(SO_VERSION)"
 	-rm -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(VERSION_MAJOR)"
 	-rm -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so"
+	-cd -- "$(DESTDIR)$(MANPREFIX)/man7" && rm -- $(MAN7)
+	-cd -- "$(DESTDIR)$(MANPREFIX)/man3" && rm -- $(MAN3) $(MAN3_SYMLINKS)
 
 
 check: test
