@@ -28,3 +28,17 @@ GPU accelerated functions:
 		Where `...` normally is `double* ch1, double* ch2, double* ch3`.
 	int libcolour_convert_en_masse_llf(const libcolour_colour_t* from, const libcolour_colour_t* to, size_t n, ...)
 		Where `...` normally is `long double* ch1, long double* ch2, long double* ch3`.
+
+	int libcolour_convert_en_masse_3f(const libcolour_colour_t* from, const libcolour_colour_t* to, size_t n, ...)
+		Where `...` normally is `float* ch123`.
+	int libcolour_convert_en_masse_3lf(const libcolour_colour_t* from, const libcolour_colour_t* to, size_t n, ...)
+		Where `...` normally is `double* ch123`.
+	int libcolour_convert_en_masse_3llf(const libcolour_colour_t* from, const libcolour_colour_t* to, size_t n, ...)
+		Where `...` normally is `long double* ch123`.
+
+	int libcolour_convert_en_masse_4f(const libcolour_colour_t* from, const libcolour_colour_t* to, size_t n, ...)
+		Where `...` normally is `float* ch123a`.
+	int libcolour_convert_en_masse_4lf(const libcolour_colour_t* from, const libcolour_colour_t* to, size_t n, ...)
+		Where `...` normally is `double* ch123a`.
+	int libcolour_convert_en_masse_4llf(const libcolour_colour_t* from, const libcolour_colour_t* to, size_t n, ...)
+		Where `...` normally is `long double* ch123a`.
