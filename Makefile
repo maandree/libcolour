@@ -18,9 +18,31 @@ TEMPLATES =\
 	libcolour-template.c
 
 MAN7 =\
-	libcolour.7
+	libcolour.7\
+	LIBCOLOUR_RGB.7\
+	LIBCOLOUR_SRGB.7\
+	LIBCOLOUR_CIEXYY.7\
+	LIBCOLOUR_CIEXYZ.7\
+	LIBCOLOUR_CIELAB.7\
+	LIBCOLOUR_CIELUV.7\
+	LIBCOLOUR_CIELCHUV.7\
+	LIBCOLOUR_YIQ.7\
+	LIBCOLOUR_YDBDR.7\
+	LIBCOLOUR_YUV.7\
+	LIBCOLOUR_YPBPR.7\
+	LIBCOLOUR_YCGCO.7\
+	LIBCOLOUR_CIE1960UCS.7\
+	LIBCOLOUR_CIEUVW.7
 
-MAN3 =
+MAN3 =\
+	libcolour_convert.3\
+	libcolour_srgb_encode.3\
+	libcolour_srgb_decode.3\
+	libcolour_delta_e.3\
+	libcolour_proper.3\
+	libcolour_get_rgb_colour_space.3\
+	libcolour_marshal.3\
+	libcolour_unmarshal.3
 
 MAN3_SYMLINKS =\
 	libcolour_convert_f.3\

@@ -1,0 +1,77 @@
+.TH LIBCOLOUR_CIELUV 7 libcolour
+.SH NAME
+LIBCOLOUR_CIELUV - CIE 1976 (L*, u*, v*)
+.SH DESCRIPTION
+CIE 1976 (L*, u*, v*) (also known simply as CIE L*u*v*)
+colours are presented with either of
+.nf
+
+	\fBtypedef struct libcolour_cieluv_f libcolour_cieluv_f_t;\fP
+	\fBtypedef struct libcolour_cieluv_lf libcolour_cieluv_lf_t;\fP
+	\fBtypedef struct libcolour_cieluv_llf libcolour_cieluv_llf_t;\fP
+
+.fi
+These
+.BR struct s
+use
+.BR float ,
+.BR double ,
+and
+.BR long\ double ,
+respecitively, for the values stored in them,
+and are otherwise identical.
+.B struct libcolour_cieluv_f
+is defined as
+.nf
+
+	\fBstruct libcolour_cieluv_f {\fP
+		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
+		\fBfloat\fP \fIL\fP\fB;\fP
+		\fBfloat\fP \fIu\fP\fB;\fP
+		\fBfloat\fP \fIv\fP\fB;\fP
+		\fBstruct libcolour_ciexyz\fP \fIwhite\fP\fB;\fP
+	\fB};\fP
+
+.fi
+.I .model
+shall be set to
+.BR LIBCOLOUR_CIELUV .
+In
+.BR union\ libcolour_colour_f ,
+.BR union\ libcolour_colour_lf ,
+and
+.BR union\ libcolour_colour_llf ,
+.I .cieluv
+is used for CIE L*u*v* colours.
+.P
+.IR .L ,
+.IR .u ,
+and
+.I .v
+hold the L*, u*, and v* values, respectively, and
+.I .white
+holds the white point.
+.P
+L* is 0 in black and 100 in white.
+.P
+The call
+.BI libcolour_proper(& c )
+on a
+.B struct libcolour_cieluv_t
+.I c
+sets
+.I c.white.model
+to
+.BR LIBCOLOUR_CIEXYZ .
+Zero is always returned in this case.
+.P
+CIE L*u*v* is not additive, since conversion from
+CIE 1931 XYZ is non-linear.
+.P
+CIE 1976 (L*, u*, v*) approximates
+uniform human colour perception.
+.SH SEE ALSO
+.BR libcolour (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >

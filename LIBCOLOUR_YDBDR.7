@@ -1,0 +1,64 @@
+.TH LIBCOLOUR_YDBDR 7 libcolour
+.SH NAME
+LIBCOLOUR_YDBDR - YDbDr
+.SH DESCRIPTION
+YDbDr colours are presented with either of
+.nf
+
+	\fBtypedef struct libcolour_ydbdr_f libcolour_ydbdr_f_t;\fP
+	\fBtypedef struct libcolour_ydbdr_lf libcolour_ydbdr_lf_t;\fP
+	\fBtypedef struct libcolour_ydbdr_llf libcolour_ydbdr_llf_t;\fP
+
+.fi
+These
+.BR struct s
+use
+.BR float ,
+.BR double ,
+and
+.BR long\ double ,
+respecitively, for the values stored in them,
+and are otherwise identical.
+.B struct libcolour_ydbdr_f
+is defined as
+.nf
+
+	\fBstruct libcolour_ydbdr_f {\fP
+		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
+		\fBfloat\fP \fIY\fP\fB;\fP
+		\fBfloat\fP \fIDb\fP\fB;\fP
+		\fBfloat\fP \fIDr\fP\fB;\fP
+	\fB};\fP
+
+.fi
+.I .model
+shall be set to
+.BR LIBCOLOUR_YDBDR .
+In
+.BR union\ libcolour_colour_f ,
+.BR union\ libcolour_colour_lf ,
+and
+.BR union\ libcolour_colour_llf ,
+.I .ydbdr
+is used for YDbDr colours.
+.P
+.IR .Y ,
+.IR .Db ,
+and
+.I .Dr
+hold the Y (luma), Db, and Dr values, respectively.
+.P
+Y is 0 in black and 1 in white.
+Db is the difference (with a factor) between Y and blue.
+Dr is the difference (with a factor) between Y and red.
+.P
+YDbDr is additive, since it is linearly isomorphic
+to CIE 1931 XYZ. It's white point is the
+CIE Standard Illuminant D65. Additionally, conversion
+between YDbDr and YUV is done with a diagonal matrix
+multiplication.
+.SH SEE ALSO
+.BR libcolour (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >

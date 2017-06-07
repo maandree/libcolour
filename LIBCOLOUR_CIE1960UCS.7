@@ -1,0 +1,67 @@
+.TH LIBCOLOUR_CIE1960UCS 7 libcolour
+.SH NAME
+LIBCOLOUR_CIE1960UCS - CIE 1960 UCS
+.SH DESCRIPTION
+CIE 1960 UCS
+colours are presented with either of
+.nf
+
+	\fBtypedef struct libcolour_cie1960ucs_f libcolour_cie1960ucs_f_t;\fP
+	\fBtypedef struct libcolour_cie1960ucs_lf libcolour_cie1960ucs_lf_t;\fP
+	\fBtypedef struct libcolour_cie1960ucs_llf libcolour_cie1960ucs_llf_t;\fP
+
+.fi
+These
+.BR struct s
+use
+.BR float ,
+.BR double ,
+and
+.BR long\ double ,
+respecitively, for the values stored in them,
+and are otherwise identical.
+.B struct libcolour_cie1960ucs_f
+is defined as
+.nf
+
+	\fBstruct libcolour_cie1960ucs_f {\fP
+		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
+		\fBfloat\fP \fIu\fP\fB;\fP
+		\fBfloat\fP \fIv\fP\fB;\fP
+		\fBfloat\fP \fIY\fP\fB;\fP
+	\fB};\fP
+
+.fi
+.I .model
+shall be set to
+.BR LIBCOLOUR_CIE1960UCS .
+In
+.BR union\ libcolour_colour_f ,
+.BR union\ libcolour_colour_lf ,
+and
+.BR union\ libcolour_colour_llf ,
+.I .cie1960ucs
+is used for CIE 1960 UCS colours.
+.P
+.IR .u ,
+.IR .v ,
+and
+.I .Y
+hold the u, v, and, Y (luma) values.
+.P
+Y is 0 in black and 1 in white.
+u is defined as 4X / (X + 15Y + 3Z), and
+v is defined as 6X / (X + 15Y + 3Z), where
+X, Y, and Z are CIE 1931 XYZ values.
+.P
+The Y value is not part of CIE 1960 UCS,
+but is added, and borrowed from CIE 1931 XYZ
+and CIE xyY, so that colours of all lumas
+can be specified.
+.P
+CIE 1960 UCS is not additive.
+.SH SEE ALSO
+.BR libcolour (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >

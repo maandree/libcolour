@@ -1,0 +1,70 @@
+.TH LIBCOLOUR_CIELAB 7 libcolour
+.SH NAME
+LIBCOLOUR_CIELAB - CIE L*a*b*
+.SH DESCRIPTION
+CIE L*a*b*
+colours are presented with either of
+.nf
+
+	\fBtypedef struct libcolour_cielab_f libcolour_cielab_f_t;\fP
+	\fBtypedef struct libcolour_cielab_lf libcolour_cielab_lf_t;\fP
+	\fBtypedef struct libcolour_cielab_llf libcolour_cielab_llf_t;\fP
+
+.fi
+These
+.BR struct s
+use
+.BR float ,
+.BR double ,
+and
+.BR long\ double ,
+respecitively, for the values stored in them,
+and are otherwise identical.
+.B struct libcolour_cielab_f
+is defined as
+.nf
+
+	\fBstruct libcolour_cielab_f {\fP
+		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
+		\fBfloat\fP \fIL\fP\fB;\fP
+		\fBfloat\fP \fIa\fP\fB;\fP
+		\fBfloat\fP \fIb\fP\fB;\fP
+	\fB};\fP
+
+.fi
+.I .model
+shall be set to
+.BR LIBCOLOUR_CIELAB .
+In
+.BR union\ libcolour_colour_f ,
+.BR union\ libcolour_colour_lf ,
+and
+.BR union\ libcolour_colour_llf ,
+.I .cielab
+is used for CIE L*a*b* colours.
+.P
+.IR .L ,
+.IR .a ,
+and
+.I .b
+hold the L*, a*, and b* values, respectively.
+.P
+L* is 0 in black and 100 in white.
+Negative a* values are green,
+positive a* values are red.
+Negative b* values are blue,
+positive b* values are yellow.
+.P
+CIE L*a*b* is not additive, since conversion from
+CIE 1931 XYZ is non-linear. It’s white point is the
+CIE Standard Illuminant D50.
+.P
+CIE L*a*b* approximates human colour perception with a
+lightness parameter (L*) and two chromaticity parameters
+(a* and b*), it is therefore useful in image
+manipulation applications.
+.SH SEE ALSO
+.BR libcolour (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >

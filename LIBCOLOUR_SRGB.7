@@ -1,0 +1,75 @@
+.TH LIBCOLOUR_SRGB 7 libcolour
+.SH NAME
+LIBCOLOUR_SRGB - Standard RGB
+.SH DESCRIPTION
+sRGB colours are presented with either of
+.nf
+
+	\fBtypedef struct libcolour_srgb_f libcolour_srgb_f_t;\fP
+	\fBtypedef struct libcolour_srgb_lf libcolour_srgb_lf_t;\fP
+	\fBtypedef struct libcolour_srgb_llf libcolour_srgb_llf_t;\fP
+
+.fi
+These
+.BR struct s
+use
+.BR float ,
+.BR double ,
+and
+.BR long\ double ,
+respecitively, for the values stored in them,
+and are otherwise identical.
+.B struct libcolour_srgb_f
+is defined as
+.nf
+
+	\fBstruct libcolour_srgb_f {\fP
+		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
+		\fBfloat\fP \fIR\fP\fB;\fP
+		\fBfloat\fP \fIG\fP\fB;\fP
+		\fBfloat\fP \fIB\fP\fB;\fP
+		\fBint\fP \fIwith_transfer\fP\fB;\fP
+	\fB};\fP
+
+.fi
+.I .model
+shall be set to
+.BR LIBCOLOUR_SRGB .
+In
+.BR union\ libcolour_colour_f ,
+.BR union\ libcolour_colour_lf ,
+and
+.BR union\ libcolour_colour_llf ,
+.I .srgb
+is used for sRGB colours.
+.P
+.IR .R ,
+.IR .G ,
+and
+.I .B
+hold the red, green, and blue values, respectively,
+and shall have a value between 0 and 1, inclusively,
+for the colour to be in gamut.
+.I .with_transfer
+shall be set to a non-zero value if the sRGB transfer
+function (\(dqgamma function\(dq) is applied, and zero
+otherwise, meaning colours are linearly encoded.
+.P
+The RGB color model, of which sRGB is a specific colour
+space, is an additive colour model, that is, without a
+transfer function applied, linearily isomorphic to
+CIE 1931 XYZ.
+.P
+This is the colour model and colour space normally
+used on computers, it is however not the colour space
+your monitor have, although it is close to it. sRGB
+is designed after the human eye, but fails to take
+into account how the brain process the input to figure
+out which colour it actually receives.
+.SH SEE ALSO
+.BR libcolour (7),
+.BR libcolour_srgb_encode (3),
+.BR libcolour_srgb_decode (3)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >
