@@ -1,0 +1,95 @@
+.TH LIBCOLOUR_CIELCHUV 7 libcolour
+.SH NAME
+LIBCOLOUR_CIELCHUV - CIE LChuv
+.SH DESCRIPTION
+CIE LCh_uv [\(aq_\(aq denotes subscript of
+subsequent characters] (also known as CIE HLC_uv)
+colours are presented with either of
+.nf
+
+	\fBtypedef struct libcolour_cielchuv_f libcolour_cielchuv_f_t;\fP
+	\fBtypedef struct libcolour_cielchuv_lf libcolour_cielchuv_lf_t;\fP
+	\fBtypedef struct libcolour_cielchuv_llf libcolour_cielchuv_llf_t;\fP
+
+.fi
+These
+.BR struct s
+use
+.BR float ,
+.BR double ,
+and
+.BR long\ double ,
+respecitively, for the values stored in them,
+and are otherwise identical.
+.B struct libcolour_cielchuv_f
+is defined as
+.nf
+
+	\fBstruct libcolour_cielchuv_f {\fP
+		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
+		\fBfloat\fP \fIL\fP\fB;\fP
+		\fBfloat\fP \fIC\fP\fB;\fP
+		\fBfloat\fP \fIh\fP\fB;\fP
+		\fBstruct libcolour_ciexyz\fP \fIwhite\fP\fB;\fP
+		\fBdouble\fP \fIone_revolution\fP\fB;\fP
+	\fB};\fP
+
+.fi
+.I .model
+shall be set to
+.BR LIBCOLOUR_CIELCHUV .
+In
+.BR union\ libcolour_colour_f ,
+.BR union\ libcolour_colour_lf ,
+and
+.BR union\ libcolour_colour_llf ,
+.I .cielchuv
+is used for CIE LChuv colours.
+.P
+.IR .L ,
+.IR .C ,
+and
+.I .h
+hold the L* (luma), C*_uv (chroma), and
+h_uv (hue) values, respectively,
+.I .white
+is the white point, and
+.I .one_revolution
+the The value lowest positive values of
+.I .h
+that is equivalent to 0. 360 if the hue is measured
+in degrees, 400 if the hue is measured in gon, and
+2 pi if the hue is measured radian. Any value can
+be used.
+.I .white
+and
+.I .one_revolution
+are not part of the colour, but rather part of
+the colour space.
+.P
+L* is 0 in black and 100 in white.
+.P
+The call
+.BI libcolour_proper(& c )
+on a
+.B struct libcolour_cielchuv_t
+.I c
+sets
+.I c.white.model
+to
+.BR LIBCOLOUR_CIEXYZ ,
+and if
+.I c.one_revolution
+is 0, it is set to 360.
+Zero is always returned in this case.
+.P
+CIE LCh_uv approximates uniform human colour
+perception using cylindrical representation.
+.P
+CIE LCh_uv is not additive. It is a cylindrical
+representation of CIE 1976 (L*, u*, v*).
+.SH SEE ALSO
+.BR libcolour (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >

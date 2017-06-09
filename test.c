@@ -13,6 +13,21 @@
 #define libcolour_unmarshal libcolour_unmarshal_lf
 
 
+
+#define SLOPE transfer.regular.slope
+#define TRANSITIONINV transfer.regular.transitioninv
+#define TRANSITION transfer.regular.transition
+#define GAMMA transfer.regular.gamma
+#define OFFSET transfer.regular.offset
+#define TO_ENCODED_RED transfer.custom.to_encoded_red
+#define TO_DECODED_RED transfer.custom.to_decoded_red
+#define TO_ENCODED_GREEN transfer.custom.to_encoded_green
+#define TO_DECODED_GREEN transfer.custom.to_decoded_green
+#define TO_ENCODED_BLUE transfer.custom.to_encoded_blue
+#define TO_DECODED_BLUE transfer.custom.to_decoded_blue
+
+
+
 #ifndef SKIP_2CONVERT
 static int
 test_2convert(libcolour_colour_t *c1, libcolour_colour_t *c2, libcolour_colour_t *c3)
@@ -391,15 +406,15 @@ main(int argc, char *argv[])
 	if (c2.rgb.white_r != 1 || c2.rgb.white_g != 1 || c2.rgb.white_b != 1 ||
 	    c2.rgb.red.model != LIBCOLOUR_CIEXYY || c2.rgb.green.model != LIBCOLOUR_CIEXYY ||
 	    c2.rgb.blue.model != LIBCOLOUR_CIEXYY || c2.rgb.white.model != LIBCOLOUR_CIEXYY ||
-	    c2.rgb.colour_space != LIBCOLOUR_RGB_COLOUR_SPACE_SRGB || c2.rgb.gamma != 2.4 ||
-	    c2.rgb.encoding_type != LIBCOLOUR_ENCODING_TYPE_REGULAR || c2.rgb.slope != 12.92
-	    || c2.rgb.offset != 0.055 || c2.rgb.transitioninv != c2.rgb.transition * c2.rgb.slope ||
-	    !ftest(c2.rgb.transition, 0.00313067, 0.00000001)) {
+	    c2.rgb.colour_space != LIBCOLOUR_RGB_COLOUR_SPACE_SRGB || c2.rgb.GAMMA != 2.4 ||
+	    c2.rgb.encoding_type != LIBCOLOUR_ENCODING_TYPE_REGULAR || c2.rgb.SLOPE != 12.92
+	    || c2.rgb.OFFSET != 0.055 || c2.rgb.TRANSITIONINV != c2.rgb.TRANSITION * c2.rgb.SLOPE ||
+	    !ftest(c2.rgb.TRANSITION, 0.00313067, 0.00000001)) {
 		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
 		goto colour_spaces_done;
 	}
-	t1 = c2.rgb.transition * c2.rgb.slope;
-	t2 = (1 + c2.rgb.offset) * pow(c2.rgb.transition, 1 / c2.rgb.gamma) - c2.rgb.offset;
+	t1 = c2.rgb.TRANSITION * c2.rgb.SLOPE;
+	t2 = (1 + c2.rgb.OFFSET) * pow(c2.rgb.TRANSITION, 1 / c2.rgb.GAMMA) - c2.rgb.OFFSET;
 	if (!ftest(t1, t2, 0.0000001) || c2.rgb.white.Y != 1 ||
 	    c2.rgb.red.x != 0.64 || c2.rgb.red.y != 0.33 || !ftest(c2.rgb.red.Y, 0.21265, 0.00005) ||
 	    c2.rgb.green.x != 0.30 || c2.rgb.green.y != 0.60 || !ftest(c2.rgb.green.Y, 0.71515, 0.00005) ||
@@ -546,14 +561,14 @@ main(int argc, char *argv[])
 	}
 
 	c1.rgb.encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-	c1.rgb.gamma = 2.2;
+	c1.rgb.GAMMA = 2.2;
 	c1.rgb.with_transfer = 0;
 	c1.rgb.R = 0.25;
 	c1.rgb.G = 0.5;
 	c1.rgb.B = 0.75;
 	c4 = c3 = c2 = c1;
 	c2.rgb.with_transfer = c3.srgb.with_transfer = 1;
-	c3.rgb.gamma = c4.rgb.gamma = 1.8;
+	c3.rgb.GAMMA = c4.rgb.GAMMA = 1.8;
 	if (libcolour_convert(&c1, &c2))
 		goto fail;
 	if (libcolour_convert(&c2, &c3))
@@ -621,12 +636,12 @@ colour_spaces_done:
 	if (libcolour_get_rgb_colour_space(&c1.rgb, LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2))
 		goto fail;
 	c3 = c1;
-	c1.rgb.to_encoded_red = NULL;
-	c1.rgb.to_encoded_green = NULL;
-	c1.rgb.to_encoded_blue = NULL;
-	c1.rgb.to_decoded_red = NULL;
-	c1.rgb.to_decoded_green = NULL;
-	c1.rgb.to_decoded_blue = NULL;
+	c1.rgb.TO_ENCODED_RED = NULL;
+	c1.rgb.TO_ENCODED_GREEN = NULL;
+	c1.rgb.TO_ENCODED_BLUE = NULL;
+	c1.rgb.TO_DECODED_RED = NULL;
+	c1.rgb.TO_DECODED_GREEN = NULL;
+	c1.rgb.TO_DECODED_BLUE = NULL;
 	if (libcolour_marshal(&c1, NULL) > sizeof(buf)) {
 		printf("libcolour_marshal failed\n"), rc = 0;
 		goto marshal_done;

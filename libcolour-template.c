@@ -16,7 +16,22 @@
 #endif
 
 
-#define MARSHAL_VERSION  0
+#define MARSHAL_VERSION 0
+
+
+
+#define SLOPE transfer.regular.slope
+#define TRANSITIONINV transfer.regular.transitioninv
+#define TRANSITION transfer.regular.transition
+#define GAMMA transfer.regular.gamma
+#define OFFSET transfer.regular.offset
+#define TO_ENCODED_RED transfer.custom.to_encoded_red
+#define TO_DECODED_RED transfer.custom.to_decoded_red
+#define TO_ENCODED_GREEN transfer.custom.to_encoded_green
+#define TO_DECODED_GREEN transfer.custom.to_decoded_green
+#define TO_ENCODED_BLUE transfer.custom.to_encoded_blue
+#define TO_DECODED_BLUE transfer.custom.to_decoded_blue
+
 
 
 TYPE
@@ -338,8 +353,8 @@ get_transfer_function(libcolour_colour_t *cs)
 	if (cs->model == LIBCOLOUR_RGB) {
 		switch (cs->rgb.colour_space) {
 		case LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2:
-			cs->rgb.to_encoded_red = cs->rgb.to_encoded_green = cs->rgb.to_encoded_blue = transfer_function_l_star;
-			cs->rgb.to_decoded_red = cs->rgb.to_decoded_green = cs->rgb.to_decoded_blue = invtransfer_function_l_star;
+			cs->rgb.TO_ENCODED_RED = cs->rgb.TO_ENCODED_GREEN = cs->rgb.TO_ENCODED_BLUE = transfer_function_l_star;
+			cs->rgb.TO_DECODED_RED = cs->rgb.TO_DECODED_GREEN = cs->rgb.TO_DECODED_BLUE = invtransfer_function_l_star;
 			break;
 		case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_PQ:
 		case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_PQ:
@@ -349,8 +364,8 @@ get_transfer_function(libcolour_colour_t *cs)
 			/* TODO http://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2100-0-201607-I!!PDF-E.pdf */
 			break;
 		case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_HLG:
-			cs->rgb.to_encoded_red = cs->rgb.to_encoded_green = cs->rgb.to_encoded_blue = transfer_function_oetf_hlg;
-			cs->rgb.to_decoded_red = cs->rgb.to_decoded_green = cs->rgb.to_decoded_blue = invtransfer_function_oetf_hlg;
+			cs->rgb.TO_ENCODED_RED = cs->rgb.TO_ENCODED_GREEN = cs->rgb.TO_ENCODED_BLUE = transfer_function_oetf_hlg;
+			cs->rgb.TO_DECODED_RED = cs->rgb.TO_DECODED_GREEN = cs->rgb.TO_DECODED_BLUE = invtransfer_function_oetf_hlg;
 			break;
 		default:
 			break;
@@ -369,21 +384,21 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		if (get_matrices(cs))
 			return -1;
 		if (cs->encoding_type == LIBCOLOUR_ENCODING_TYPE_REGULAR)
-			cs->transitioninv = cs->transition * cs->slope;
+			cs->TRANSITIONINV = cs->TRANSITION * cs->SLOPE;
 		return 0;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX:
 		if (invert(cs->Minv, cs->M, 3) || get_primaries(cs))
 			return -1;
 		if (cs->encoding_type == LIBCOLOUR_ENCODING_TYPE_REGULAR)
-			cs->transitioninv = cs->transition * cs->slope;
+			cs->TRANSITIONINV = cs->TRANSITION * cs->SLOPE;
 		return 0;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX:
 		if (invert(cs->M, cs->Minv, 3) || get_primaries(cs))
 			return -1;
 		if (cs->encoding_type == LIBCOLOUR_ENCODING_TYPE_REGULAR)
-			cs->transitioninv = cs->transition * cs->slope;
+			cs->TRANSITIONINV = cs->TRANSITION * cs->SLOPE;
 		return 0;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_SRGB:
@@ -392,10 +407,10 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1500, 0.0600);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_REGULAR;
-		cs->offset = D(0.055);
-		cs->gamma = D(2.4);
-		cs->slope = D(12.92);
-		cs->transition = D(0.0031306684425217108);
+		cs->OFFSET = D(0.055);
+		cs->GAMMA = D(2.4);
+		cs->SLOPE = D(12.92);
+		cs->TRANSITION = D(0.0031306684425217108);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_ADOBE_RGB:
@@ -404,7 +419,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1500, 0.0600);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.2);
+		cs->GAMMA = D(2.2);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_APPLE_RGB:
@@ -413,7 +428,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1550, 0.0700);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(1.8);
+		cs->GAMMA = D(1.8);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_BEST_RGB:
@@ -422,7 +437,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1300, 0.0350);
 		cs->white = LIBCOLOUR_ILLUMINANT_D50;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.2);
+		cs->GAMMA = D(2.2);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_BETA_RGB:
@@ -431,7 +446,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1265, 0.0352);
 		cs->white = LIBCOLOUR_ILLUMINANT_D50;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.2);
+		cs->GAMMA = D(2.2);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_BRUCE_RGB:
@@ -440,7 +455,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1500, 0.0600);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.2);
+		cs->GAMMA = D(2.2);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_CIE_RGB:
@@ -449,7 +464,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1670, 0.0090);
 		cs->white = LIBCOLOUR_ILLUMINANT_E;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.2);
+		cs->GAMMA = D(2.2);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_COLORMATCH_RGB:
@@ -458,7 +473,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1500, 0.0750);
 		cs->white = LIBCOLOUR_ILLUMINANT_D50;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(1.8);
+		cs->GAMMA = D(1.8);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_D65:
@@ -467,7 +482,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1500, 0.0600);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.6);
+		cs->GAMMA = D(2.6);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_THEATER:
@@ -476,7 +491,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1500, 0.0600);
 		cs->white = XYY(0.314, 0.351);
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.6);
+		cs->GAMMA = D(2.6);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_DON_RGB_4:
@@ -485,7 +500,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1300, 0.0350);
 		cs->white = LIBCOLOUR_ILLUMINANT_D50;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.2);
+		cs->GAMMA = D(2.2);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB:
@@ -494,7 +509,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1400, 0.0800);
 		cs->white = LIBCOLOUR_ILLUMINANT_D50;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(1.8);
+		cs->GAMMA = D(1.8);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2:
@@ -511,7 +526,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1100, 0.0050);
 		cs->white = LIBCOLOUR_ILLUMINANT_D50;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.2);
+		cs->GAMMA = D(2.2);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_625_LINE:
@@ -520,10 +535,10 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1500, 0.0060);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_REGULAR;
-		cs->gamma = 1 / D(0.45);
-		cs->offset = D(0.09929682680944);
-		cs->slope = D(4.5);
-		cs->transition = D(0.018053968510807);
+		cs->GAMMA = 1 / D(0.45);
+		cs->OFFSET = D(0.09929682680944);
+		cs->SLOPE = D(4.5);
+		cs->TRANSITION = D(0.018053968510807);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_525_LINE:
@@ -532,10 +547,10 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1550, 0.0700);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_REGULAR;
-		cs->gamma = 1 / D(0.45);
-		cs->offset = D(0.09929682680944);
-		cs->slope = D(4.5);
-		cs->transition = D(0.018053968510807);
+		cs->GAMMA = 1 / D(0.45);
+		cs->OFFSET = D(0.09929682680944);
+		cs->SLOPE = D(4.5);
+		cs->TRANSITION = D(0.018053968510807);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_709:
@@ -544,10 +559,10 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1500, 0.0600);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_REGULAR;
-		cs->gamma = 1 / D(0.45);
-		cs->offset = D(0.09929682680944);
-		cs->slope = D(4.5);
-		cs->transition = D(0.018053968510807);
+		cs->GAMMA = 1 / D(0.45);
+		cs->OFFSET = D(0.09929682680944);
+		cs->SLOPE = D(4.5);
+		cs->TRANSITION = D(0.018053968510807);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2020:
@@ -556,10 +571,10 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1310, 0.0460);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_REGULAR;
-		cs->gamma = 1 / D(0.45);
-		cs->offset = D(0.09929682680944);
-		cs->slope = D(4.5);
-		cs->transition = D(0.018053968510807);
+		cs->GAMMA = 1 / D(0.45);
+		cs->OFFSET = D(0.09929682680944);
+		cs->SLOPE = D(4.5);
+		cs->TRANSITION = D(0.018053968510807);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_PQ:
@@ -589,10 +604,10 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1400, 0.0800);
 		cs->white = LIBCOLOUR_ILLUMINANT_C;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_REGULAR;
-		cs->gamma = 1 / D(0.45);
-		cs->offset = D(0.09929682680944);
-		cs->slope = D(4.5);
-		cs->transition = D(0.018053968510807);
+		cs->GAMMA = 1 / D(0.45);
+		cs->OFFSET = D(0.09929682680944);
+		cs->SLOPE = D(4.5);
+		cs->TRANSITION = D(0.018053968510807);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_PAL_SECAM_RGB:
@@ -601,10 +616,10 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1500, 0.0600);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_REGULAR;
-		cs->gamma = 1 / D(0.45);
-		cs->offset = D(0.09929682680944);
-		cs->slope = D(4.5);
-		cs->transition = D(0.018053968510807);
+		cs->GAMMA = 1 / D(0.45);
+		cs->OFFSET = D(0.09929682680944);
+		cs->SLOPE = D(4.5);
+		cs->TRANSITION = D(0.018053968510807);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_PROPHOTO_RGB:
@@ -613,7 +628,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.0366, 0.0001);
 		cs->white = LIBCOLOUR_ILLUMINANT_D50;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(1.8);
+		cs->GAMMA = D(1.8);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_SGI_RGB:
@@ -622,7 +637,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1550, 0.0700);
 		cs->white = LIBCOLOUR_ILLUMINANT_D50;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(1.47);
+		cs->GAMMA = D(1.47);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_SMPTE_240M_RGB:
@@ -631,10 +646,10 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1550, 0.0700);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_REGULAR;
-		cs->gamma = 1 / D(0.45);
-		cs->offset = D(0.1115721957735072);
-		cs->slope = D(4.0);
-		cs->transition = D(0.022821585552393633);
+		cs->GAMMA = 1 / D(0.45);
+		cs->OFFSET = D(0.1115721957735072);
+		cs->SLOPE = D(4.0);
+		cs->TRANSITION = D(0.022821585552393633);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_SMPTE_C_RGB:
@@ -643,10 +658,10 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1550, 0.0700);
 		cs->white = LIBCOLOUR_ILLUMINANT_D65;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_REGULAR;
-		cs->gamma = 1 / D(0.45);
-		cs->offset = D(0.09929682680944);
-		cs->slope = D(4.5);
-		cs->transition = D(0.018053968510807);
+		cs->GAMMA = 1 / D(0.45);
+		cs->OFFSET = D(0.09929682680944);
+		cs->SLOPE = D(4.5);
+		cs->TRANSITION = D(0.018053968510807);
 		break;
 
 	case LIBCOLOUR_RGB_COLOUR_SPACE_WIDE_GAMUT_RGB:
@@ -655,7 +670,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		cs->blue  = XYY(0.1570, 0.0180);
 		cs->white = LIBCOLOUR_ILLUMINANT_D50;
 		cs->encoding_type = LIBCOLOUR_ENCODING_TYPE_SIMPLE;
-		cs->gamma = D(2.19921875);
+		cs->GAMMA = D(2.19921875);
 		break;
 
 	default:
@@ -663,7 +678,7 @@ libcolour_get_rgb_colour_space(libcolour_rgb_t *cs, libcolour_rgb_colour_space_t
 		return -1;
 	}
 	if (cs->encoding_type == LIBCOLOUR_ENCODING_TYPE_REGULAR)
-		cs->transitioninv = cs->transition * cs->slope;
+		cs->TRANSITIONINV = cs->TRANSITION * cs->SLOPE;
 	cs->colour_space = space;
 	cs->white_r = cs->white_g = cs->white_b = 1;
 	if (get_matrices(cs) || libcolour_proper((libcolour_colour_t *)cs))
@@ -722,8 +737,8 @@ libcolour_unmarshal(libcolour_colour_t *colour, const void *buf)
 	}
 	if (colour) {
 		if (colour->model == LIBCOLOUR_RGB) {
-			colour->rgb.to_encoded_red = colour->rgb.to_encoded_green = colour->rgb.to_encoded_blue = NULL;
-			colour->rgb.to_decoded_red = colour->rgb.to_decoded_green = colour->rgb.to_decoded_blue = NULL;
+			colour->rgb.TO_ENCODED_RED = colour->rgb.TO_ENCODED_GREEN = colour->rgb.TO_ENCODED_BLUE = NULL;
+			colour->rgb.TO_DECODED_RED = colour->rgb.TO_DECODED_GREEN = colour->rgb.TO_DECODED_BLUE = NULL;
 		}
 		get_transfer_function(colour);
 	}

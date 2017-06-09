@@ -396,17 +396,26 @@ typedef struct libcolour_rgb_##RES {\
 	TYPE B;\
 	int with_transfer;\
 	enum libcolour_encoding_type encoding_type;\
-	TYPE gamma;\
-	TYPE offset;\
-	TYPE slope;\
-	TYPE transition;\
-	TYPE transitioninv;\
-	TYPE (*to_encoded_red)(TYPE);\
-	TYPE (*to_decoded_red)(TYPE);\
-	TYPE (*to_encoded_green)(TYPE);\
-	TYPE (*to_decoded_green)(TYPE);\
-	TYPE (*to_encoded_blue)(TYPE);\
-	TYPE (*to_decoded_blue)(TYPE);\
+	union {\
+		struct {\
+			TYPE gamma;\
+		} simple;\
+		struct {\
+			TYPE gamma;\
+			TYPE offset;\
+			TYPE slope;\
+			TYPE transition;\
+			TYPE transitioninv;\
+		} regular;\
+		struct {\
+			TYPE (*to_encoded_red)(TYPE);\
+			TYPE (*to_decoded_red)(TYPE);\
+			TYPE (*to_encoded_green)(TYPE);\
+			TYPE (*to_decoded_green)(TYPE);\
+			TYPE (*to_encoded_blue)(TYPE);\
+			TYPE (*to_decoded_blue)(TYPE);\
+		} custom;\
+	} transfer;\
 	struct libcolour_ciexyy_##RES red;\
 	struct libcolour_ciexyy_##RES green;\
 	struct libcolour_ciexyy_##RES blue;\

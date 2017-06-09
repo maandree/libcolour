@@ -1,0 +1,202 @@
+.TH LIBCOLOUR_RGB 7 libcolour
+.SH NAME
+LIBCOLOUR_RGB - Generic RGB
+.SH DESCRIPTION
+Generic RGB colours are presented with either of
+.nf
+
+	\fBtypedef struct libcolour_rgb_f libcolour_rgb_f_t;\fP
+	\fBtypedef struct libcolour_rgb_lf libcolour_rgb_lf_t;\fP
+	\fBtypedef struct libcolour_rgb_llf libcolour_rgb_llf_t;\fP
+
+.fi
+These
+.BR struct s
+use
+.BR float ,
+.BR double ,
+and
+.BR long\ double ,
+respecitively, for the values stored in them,
+and are otherwise identical.
+.B struct libcolour_rgb_f
+is defined as
+.nf
+
+	\fBstruct libcolour_rgb_f {\fP
+		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
+		\fBfloat\fP \fIR\fP\fB;\fP
+		\fBfloat\fP \fIG\fP\fB;\fP
+		\fBfloat\fP \fIB\fP\fB;\fP
+		\fBint\fP \fIwith_transfer\fP\fB;\fP
+		\fBenum libcolour_encoding_type\fP \fIencoding_type\fP\fB;\fP
+		\fBunion {\fP
+			\fBstruct {\fP
+				\fBfloat\fP \fIgamma\fP\fB;\fP
+			\fB}\fP \fIsimple\fB;\fP
+			\fBstruct {\fP
+				\fBfloat\fP \fIgamma\fP\fB;\fP
+				\fBfloat\fP \fIoffset\fP\fB;\fP
+				\fBfloat\fP \fIslope\fP\fB;\fP
+				\fBfloat\fP \fItransition\fP\fB;\fP
+				\fBfloat\fP \fItransitioninv\fP\fB;\fP
+			\fB}\fP \fIregular\fB;\fP
+			\fBstruct {\fP
+				\fBfloat (*\fP\fIto_encoded_red\fP\fB)(float);\fP
+				\fBfloat (*\fP\fIto_decoded_red\fP\fB)(float);\fP
+				\fBfloat (*\fP\fIto_encoded_green\fP\fB)(float);\fP
+				\fBfloat (*\fP\fIto_decoded_green\fP\fB)(float);\fP
+				\fBfloat (*\fP\fIto_encoded_blue\fP\fB)(float);\fP
+				\fBfloat (*\fP\fIto_decoded_blue\fP\fB)(float);\fP
+			\fB}\fP \fIcustom\fB;\fP
+		\fB}\fP \fItransfer\fB;\fP
+		\fBstruct libcolour_ciexyy\fP \fIred\fP\fB;\fP
+		\fBstruct libcolour_ciexyy\fP \fIgreen\fP\fB;\fP
+		\fBstruct libcolour_ciexyy\fP \fIblue\fP\fB;\fP
+		\fBstruct libcolour_ciexyy\fP \fIwhite\fP\fB;\fP
+		\fBfloat\fP \fIwhite_r\fP\fB;\fP
+		\fBfloat\fP \fIwhite_g\fP\fB;\fP
+		\fBfloat\fP \fIwhite_b\fP\fB;\fP
+		\fBfloat\fP \fIM\fP\fB[3][3];\fP
+		\fBfloat\fP \fIMinv\fP\fB[3][3];\fP
+		\fBenum libcolour_rgb_colour_space\fP \fIcolour_space\fP\fB;\fP
+	\fB};\fP
+
+.fi
+.I .model
+shall be set to
+.BR LIBCOLOUR_RGB .
+In
+.BR union\ libcolour_colour_f ,
+.BR union\ libcolour_colour_lf ,
+and
+.BR union\ libcolour_colour_llf ,
+.I .rgb
+is used for generic RGB colours.
+.P
+.IR .R ,
+.IR .G ,
+and
+.I .B
+hold the red, green, and blue values, respectively,
+and shall have a value between 0 and 1, inclusively,
+for the colour to be in gamut.
+.I .with_transfer
+shall be set to a non-zero value if the specified transfer
+function (\(dqgamma function\(dq) is applied, and zero
+otherwise, meaning colours are linearly encoded.
+.P
+.I .encoding_type
+shall be set to one of the following values:
+.TP
+.B LIBCOLOUR_ENCODING_TYPE_LINEAR
+The colour space does not have a transfer function.
+.TP
+.B LIBCOLOUR_ENCODING_TYPE_SIMPLE
+The colour space uses a simple gamma transfer function
+that only uses the
+.I .transfer.simple.gamma
+parameter.
+.TP
+.B LIBCOLOUR_ENCODING_TYPE_REGULAR
+The colour space uses a linear-gamma hybrid transfer
+function that uses the
+.IR .transfer.simple.gamma ,
+.IR .transfer.simple.offset ,
+.IR .transfer.simple.slope ,
+and
+.I .transfer.simple.transition
+parameters as well as
+.IR .transfer.simple.transitioninv ,
+the inverse value of the
+.I .transfer.simple.transition parameter of the transfer
+function, that is, where the transition takes place in
+the encoded, rather than linear, values. This value is
+set automatically.
+.TP
+.B LIBCOLOUR_ENCODING_TYPE_CUSTOM
+The colour space uses a custom transfer function. When
+this value is used,
+.IR .transfer.custom.to_encoded_red ,
+.IR .transfer.custom.to_encoded_green ,
+and
+.IR .transfer.custom.to_encoded_blue
+shall be set to the function used to apply the red,
+green, and blue channels' transfer functions to a value,
+respectively, and
+.IR .transfer.custom.to_decoded_red ,
+.IR .transfer.custom.to_decoded_green ,
+and
+.IR .transfer.custom.to_decoded_blue
+shall be set to the inverse of those functions.
+.P
+The colour space is defined by
+.I .red
+(the red primary),
+.I .green
+(the green primary),
+.I .blue
+(the blue primary),
+.I .white
+(the white point), and the RGB value of for the white
+point, which is specified by
+.I .white_r
+(the red value for the white point),
+.I .white_g
+(the green value for the white point),
+and
+.IR .white_b
+(the blue value for the white point).
+.IR .white.Y ,
+.IR .white_r ,
+.IR .white_g ,
+and
+.IR .white_b
+should usually be 1.
+.I .M
+is derived from these values, it is the matrix that is
+to convert a colour from the specified RGB colour space
+to CIE 1931 YXZ.
+.I .Minv
+is derived from
+.I .M
+is used to convert in the opposite direction.
+.IR .colour_space ,
+which is set automatically, is the colour space.
+.P
+.BR libcolour_get_rgb_colour_space (3)
+is used to set the transfer function and colour space
+parameters.
+.P
+The RGB colour model is an additive colour model, that is,
+without a transfer function applied, linearily isomorphic
+to CIE 1931 XYZ.
+.P
+The call
+.BI libcolour_proper(& c )
+on a
+.B struct libcolour_rgb_t
+.I c
+(done automatically for predefined colour spaces) sets
+.IR c.red.model ,
+.IR c.green.model ,
+and
+.I c.blue.model
+to
+.BR LIBCOLOUR_CIEXYY ,
+and calculate and sets the Y values for
+.IR c.red ,
+.IR c.green ,
+and
+.IR c.blue .
+Zero is always normally returned, but of there is something
+wrong with with the values of the primaries, −1 is returned
+and
+.I errno
+is set to
+.BR EDOM .
+.SH SEE ALSO
+.BR libcolour (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >

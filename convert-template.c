@@ -20,8 +20,8 @@
 #define PI2         (2 * D(3.14159265358979323846))
 #define WASDIV0(X)  (xisinf(X) || xisnan(X))
 
-#define REGULAR(S, T)    ((T) <= (S)->transition ? (S)->slope * (T) : (1 + (S)->offset) * xpow((T), 1 / (S)->gamma) - (S)->offset)
-#define INVREGULAR(S, T) ((T) <= (S)->transitioninv ? (T) / (S)->slope : xpow(((T) + (S)->offset) / (1 + (S)->offset), (S)->gamma))
+#define REGULAR(S, T)    ((T) <= (S)->TRANSITION ? (S)->SLOPE * (T) : (1 + (S)->OFFSET) * xpow((T), 1 / (S)->GAMMA) - (S)->OFFSET)
+#define INVREGULAR(S, T) ((T) <= (S)->TRANSITIONINV ? (T) / (S)->SLOPE : xpow(((T) + (S)->OFFSET) / (1 + (S)->OFFSET), (S)->GAMMA))
 
 #define TRANSFORM(X, Y, Z, A, B, C, R1C1, R1C2, R1C3, R2C1, R2C2, R2C3, R3C1, R3C2, R3C3)\
 	do {\
@@ -30,6 +30,20 @@
 		(Y) = D(R2C1) * a__ + D(R2C2) * b__ + D(R2C3) * c__;\
 		(Z) = D(R3C1) * a__ + D(R3C2) * b__ + D(R3C3) * c__;\
 	} while (0)
+
+
+
+#define SLOPE transfer.regular.slope
+#define TRANSITIONINV transfer.regular.transitioninv
+#define TRANSITION transfer.regular.transition
+#define GAMMA transfer.regular.gamma
+#define OFFSET transfer.regular.offset
+#define TO_ENCODED_RED transfer.custom.to_encoded_red
+#define TO_DECODED_RED transfer.custom.to_decoded_red
+#define TO_ENCODED_GREEN transfer.custom.to_encoded_green
+#define TO_DECODED_GREEN transfer.custom.to_decoded_green
+#define TO_ENCODED_BLUE transfer.custom.to_encoded_blue
+#define TO_DECODED_BLUE transfer.custom.to_decoded_blue
 
 
 
@@ -73,9 +87,9 @@ rgb_encode(libcolour_rgb_t *restrict colour, const libcolour_rgb_t *restrict spa
 		if (colour->G < 0)  g_sign = -1, colour->G = -colour->G;
 		if (colour->B < 0)  b_sign = -1, colour->B = -colour->B;
 		if (space->encoding_type == LIBCOLOUR_ENCODING_TYPE_SIMPLE) {
-			colour->R = xpow(colour->R, 1 / space->gamma);
-			colour->G = xpow(colour->G, 1 / space->gamma);
-			colour->B = xpow(colour->B, 1 / space->gamma);
+			colour->R = xpow(colour->R, 1 / space->GAMMA);
+			colour->G = xpow(colour->G, 1 / space->GAMMA);
+			colour->B = xpow(colour->B, 1 / space->GAMMA);
 		} else {
 			colour->R = REGULAR(space, colour->R);
 			colour->G = REGULAR(space, colour->G);
@@ -86,9 +100,9 @@ rgb_encode(libcolour_rgb_t *restrict colour, const libcolour_rgb_t *restrict spa
 		colour->B *= b_sign;
 		break;
 	case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
-		colour->R = (space->to_encoded_red)(colour->R);
-		colour->G = (space->to_encoded_green)(colour->G);
-		colour->B = (space->to_encoded_blue)(colour->B);
+		colour->R = (space->TO_ENCODED_RED)(colour->R);
+		colour->G = (space->TO_ENCODED_GREEN)(colour->G);
+		colour->B = (space->TO_ENCODED_BLUE)(colour->B);
 		break;
 	default:
 		fprintf(stderr, "libcolour: invalid encoding type\n");
@@ -109,9 +123,9 @@ rgb_decode(libcolour_rgb_t *restrict colour, const libcolour_rgb_t *restrict spa
 		if (colour->G < 0)  g_sign = -1, colour->G = -colour->G;
 		if (colour->B < 0)  b_sign = -1, colour->B = -colour->B;
 		if (space->encoding_type == LIBCOLOUR_ENCODING_TYPE_SIMPLE) {
-			colour->R = xpow(colour->R, space->gamma);
-			colour->G = xpow(colour->G, space->gamma);
-			colour->B = xpow(colour->B, space->gamma);
+			colour->R = xpow(colour->R, space->GAMMA);
+			colour->G = xpow(colour->G, space->GAMMA);
+			colour->B = xpow(colour->B, space->GAMMA);
 		} else {
 			colour->R = INVREGULAR(space, colour->R);
 			colour->G = INVREGULAR(space, colour->G);
@@ -122,9 +136,9 @@ rgb_decode(libcolour_rgb_t *restrict colour, const libcolour_rgb_t *restrict spa
 		colour->B *= b_sign;
 		break;
 	case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
-		colour->R = (space->to_decoded_red)(colour->R);
-		colour->G = (space->to_decoded_green)(colour->G);
-		colour->B = (space->to_decoded_blue)(colour->B);
+		colour->R = (space->TO_DECODED_RED)(colour->R);
+		colour->G = (space->TO_DECODED_GREEN)(colour->G);
+		colour->B = (space->TO_DECODED_BLUE)(colour->B);
 		break;
 	default:
 		fprintf(stderr, "libcolour: invalid encoding type\n");
@@ -139,19 +153,19 @@ rgb_same_transfer(const libcolour_rgb_t *restrict a, const libcolour_rgb_t *rest
 		return 0;
 	switch (a->encoding_type) {
 	case LIBCOLOUR_ENCODING_TYPE_SIMPLE:
-		return a->gamma == b->gamma;
+		return a->GAMMA == b->GAMMA;
 	case LIBCOLOUR_ENCODING_TYPE_REGULAR:
-		return a->gamma      == b->gamma  &&
-		       a->offset     == b->offset &&
-		       a->slope      == b->slope  &&
-		       a->transition == b->transition;
+		return a->GAMMA      == b->GAMMA  &&
+		       a->OFFSET     == b->OFFSET &&
+		       a->SLOPE      == b->SLOPE  &&
+		       a->TRANSITION == b->TRANSITION;
 	case LIBCOLOUR_ENCODING_TYPE_CUSTOM:
-		return a->to_encoded_red   == b->to_encoded_red   &&
-		       a->to_encoded_green == b->to_encoded_green &&
-		       a->to_encoded_blue  == b->to_encoded_blue  &&
-		       a->to_decoded_red   == b->to_decoded_red   &&
-		       a->to_decoded_green == b->to_decoded_green &&
-		       a->to_decoded_blue  == b->to_decoded_blue;
+		return a->TO_ENCODED_RED   == b->TO_ENCODED_RED   &&
+		       a->TO_ENCODED_GREEN == b->TO_ENCODED_GREEN &&
+		       a->TO_ENCODED_BLUE  == b->TO_ENCODED_BLUE  &&
+		       a->TO_DECODED_RED   == b->TO_DECODED_RED   &&
+		       a->TO_DECODED_GREEN == b->TO_DECODED_GREEN &&
+		       a->TO_DECODED_BLUE  == b->TO_DECODED_BLUE;
 	default:
 		return 1;
 	}
