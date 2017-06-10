@@ -486,7 +486,7 @@ LIBCOLOUR_DEF(long double, llf)
 	LIBCOLOUR_GENERIC(libcolour_delta_e, (A), (const void *)(A), (const void *)(B), (void *)(E))
 
 #define libcolour_proper(COLOUR)\
-	LIBCOLOUR_GENERIC(libcolour_delta_e, (COLOUR), (const void *)(COLOUR))
+	LIBCOLOUR_GENERIC(libcolour_proper, (COLOUR), (const void *)(COLOUR))
 
 #define libcolour_get_rgb_colour_space(CS, SPACE)\
 	LIBCOLOUR_GENERIC(libcolour_get_rgb_colour_space, (CS), (void *)(CS), (SPACE))
