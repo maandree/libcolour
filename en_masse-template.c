@@ -69,6 +69,7 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 		out1 = in1;
 		out2 = in2;
 		out3 = in3;
+		out_alpha = in_alpha;
 	} else if (alpha_mode == LIBCOLOUR_CONVERT_EN_MASSE_NO_ALPHA) {
 		out1 = va_arg(args, TYPE *);
 		out2 = out1 + 1;
@@ -92,7 +93,7 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 	va_end(args);
 
 	switch (from->model) {
-#define X(C, T, N) case C: memcpy(&tfrom, from, sizeof(T));
+#define X(C, T, N) case C: memcpy(&tfrom, from, sizeof(T)); break;
 	LIST_MODELS(X)
 #undef X
 	default:
@@ -101,7 +102,7 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 	}
 
 	switch (to->model) {
-#define X(C, T, N) case C: memcpy(&tto, to, sizeof(T));
+#define X(C, T, N) case C: memcpy(&tto, to, sizeof(T)); break;
 	LIST_MODELS(X)
 #undef X
 	default:

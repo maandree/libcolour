@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 
@@ -368,6 +369,72 @@ test_1convert(libcolour_colour_t *c1, libcolour_model_t model, const char *name1
 }
 
 
+static int
+test_en_masse(libcolour_colour_t *c1, libcolour_colour_t *c2, libcolour_colour_t *c3, int mode)
+{
+	double in1[8], in2[2], in3[2], in4[2], out1[8], out2[2], out3[2], out4[2];
+
+#define SET(R1, G1, B1, A1, R2, G2, B2, A2)\
+	((R1) = c1->srgb.R, (R2) = c2->srgb.R,\
+	 (G1) = c1->srgb.G, (G2) = c2->srgb.G,\
+	 (B1) = c1->srgb.B, (B2) = c2->srgb.B,\
+	 (A1) = 0.4, (A2) = 0.6)
+
+#define CHECK(C, RR, GG, BB, AA, A)\
+	do {\
+		if (libcolour_convert((C), c3))\
+			printf("libcolour_convert failed\n");\
+		if ((mode & 3) == LIBCOLOUR_CONVERT_EN_MASSE_NO_ALPHA)\
+			(AA) = (A);\
+		if ((mode & 3) == LIBCOLOUR_CONVERT_EN_MASSE_SEPARATED)\
+			(AA) = (A);\
+		if ((RR) != c3->srgb.R || (GG) != c3->srgb.G || (BB) != c3->srgb.B || (AA) != (A))\
+			return printf("libcolour_convert_en_masse(mode=%i) failed, "\
+				      "got (%lf, %lf, %lf, %lf), "\
+				      "expected (%lf, %lf, %lf, %lf)\n",\
+				      mode, (RR), (GG), (BB), (AA),\
+				      c3->srgb.R, c3->srgb.G, c3->srgb.B, (A)), -1;\
+	} while (0)
+
+#define TEST(R1, G1, B1, A1, R2, G2, B2, A2, ...)\
+	do {\
+		SET(in##R1, in##G1, in##B1, in##A1, in##R2, in##G2, in##B2, in##A2);\
+		if (libcolour_convert_en_masse(c1, c3, mode, 2, __VA_ARGS__))\
+			return printf("libcolour_convert_en_masse(mode=%i) failed", mode), -2;\
+		if (mode & LIBCOLOUR_CONVERT_EN_MASSE_NO_OVERRIDE) {\
+			CHECK(c1, out##R1, out##G1, out##B1, out##A1, 0.4);\
+			CHECK(c2, out##R2, out##G2, out##B2, out##A2, 0.6);\
+		} else {\
+			CHECK(c1, in##R1, in##G1, in##B1, in##A1, 0.4);\
+			CHECK(c2, in##R2, in##G2, in##B2, in##A2, 0.6);\
+		}\
+	} while (0)
+
+	switch (mode & 3) {
+	case LIBCOLOUR_CONVERT_EN_MASSE_NO_ALPHA:
+		TEST(1[0], 1[1], 1[2], 1[6], 1[3], 1[4], 1[5], 1[7], in1, out1);
+		break;
+	case LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_FIRST:
+		TEST(1[1], 1[2], 1[3], 1[0], 1[5], 1[6], 1[7], 1[4], in1, out1);
+		break;
+	case LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_LAST:
+		TEST(1[0], 1[1], 1[2], 1[3], 1[4], 1[5], 1[6], 1[7], in1, out1);
+		break;
+	case LIBCOLOUR_CONVERT_EN_MASSE_SEPARATED:
+		TEST(1[0], 2[0], 3[0], 4[0], 1[1], 2[1], 3[1], 4[1], in1, in2, in3, out1, out2, out3);
+		break;
+	default:
+		abort();
+	}
+
+#undef SET
+#undef CHECK
+#undef TEST
+
+	return 0;
+}
+
+
 /**
  * Test libcolour
  * 
@@ -378,7 +445,7 @@ test_1convert(libcolour_colour_t *c1, libcolour_model_t model, const char *name1
 int
 main(int argc, char *argv[])
 {
-	int r, rc = 0;
+	int r, rc = 0, i;
 	libcolour_colour_t c1, c2, c3, c4;
 	double t1, t2;
 	size_t n;
@@ -665,7 +732,21 @@ colour_spaces_done:
 	}
  marshal_done:
 
-	/* TODO test libcolour_convert_en_masse */
+	c1.srgb.model = LIBCOLOUR_SRGB;
+	c1.srgb.R = 0.8;
+	c1.srgb.G = 0.7;
+	c1.srgb.B = 0.6;
+	c1.srgb.with_transfer = 1;
+	c2.srgb.model = LIBCOLOUR_SRGB;
+	c2.srgb.R = 0.1;
+	c2.srgb.G = 0.2;
+	c2.srgb.B = 0.3;
+	c2.srgb.with_transfer = 1;
+	c3.model = LIBCOLOUR_CIEXYZ;
+	for (i = 0; i < 15; i++)
+		if (test_en_masse(&c1, &c2, &c3, i))
+			goto en_masse_done;
+ en_masse_done:
 
 	return rc;
  fail:
