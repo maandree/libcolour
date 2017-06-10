@@ -1,64 +1,10 @@
 /* See LICENSE file for copyright and license details. */
 
-#if defined(__GNUC__) && !defined(__clang__)
-# pragma GCC diagnostic ignored "-Wfloat-equal"
-#elif defined(__clang__)
-# pragma clang diagnostic ignored "-Wcomma"
-# pragma clang diagnostic ignored "-Wfloat-equal"
-# pragma clang diagnostic ignored "-Wvla"
-# pragma clang diagnostic ignored "-Wtautological-compare"
-# pragma clang diagnostic ignored "-Wcovered-switch-default"
-# pragma clang diagnostic ignored "-Wfloat-conversion"
-# pragma clang diagnostic ignored "-Wconversion"
-# pragma clang diagnostic ignored "-Wdouble-promotion"
-# pragma clang diagnostic ignored "-Wswitch-enum"
-# pragma clang diagnostic ignored "-Wcast-align"
-#endif
-
-
 #define MARSHAL_VERSION 1
 
 
-
-#define SLOPE transfer.regular.slope
-#define TRANSITIONINV transfer.regular.transitioninv
-#define TRANSITION transfer.regular.transition
-#define GAMMA transfer.regular.gamma
-#define OFFSET transfer.regular.offset
-#define TO_ENCODED_RED transfer.custom.to_encoded_red
-#define TO_DECODED_RED transfer.custom.to_decoded_red
-#define TO_ENCODED_GREEN transfer.custom.to_encoded_green
-#define TO_DECODED_GREEN transfer.custom.to_decoded_green
-#define TO_ENCODED_BLUE transfer.custom.to_encoded_blue
-#define TO_DECODED_BLUE transfer.custom.to_decoded_blue
-
-
-
-TYPE
-libcolour_srgb_encode(TYPE t)
-{
-	TYPE sign = 1;
-	if (t < 0) {
-		t = -t;
-		sign = -1;
-	}
-	t = t <= D(0.0031306684425217108) ? D(12.92) * t :
-		D(1.055) * xpow(t, 1 / D(2.4)) - D(0.055);
-	return t * sign;
-}
-
-TYPE
-libcolour_srgb_decode(TYPE t)
-{
-	TYPE sign = 1;
-	if (t < 0) {
-		t = -t;
-		sign = -1;
-	}
-	t = t <= D(0.0031306684425217108) * D(12.92) ? t / D(12.92) :
-		xpow((t + D(0.055)) / D(1.055), D(2.4));
-	return t * sign;
-}
+TYPE libcolour_srgb_encode(TYPE t) { return srgb_encode(t); }
+TYPE libcolour_srgb_decode(TYPE t) { return srgb_decode(t); }
 
 
 int

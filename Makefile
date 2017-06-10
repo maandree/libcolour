@@ -11,7 +11,8 @@ OBJ =\
 	long-double.o
 
 HDR =\
-	libcolour.h
+	libcolour.h\
+	common.h
 
 TEMPLATES =\
 	convert-template.c\

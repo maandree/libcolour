@@ -1,22 +1,5 @@
 /* See LICENSE file for copyright and license details. */
 
-#if defined(__GNUC__) && !defined(__clang__)
-# pragma GCC diagnostic ignored "-Wfloat-equal"
-#elif defined(__clang__)
-# pragma clang diagnostic ignored "-Wcomma"
-# pragma clang diagnostic ignored "-Wfloat-equal"
-# pragma clang diagnostic ignored "-Wvla"
-# pragma clang diagnostic ignored "-Wtautological-compare"
-# pragma clang diagnostic ignored "-Wcovered-switch-default"
-# pragma clang diagnostic ignored "-Wfloat-conversion"
-# pragma clang diagnostic ignored "-Wconversion"
-# pragma clang diagnostic ignored "-Wdouble-promotion"
-# pragma clang diagnostic ignored "-Wswitch-enum"
-# pragma clang diagnostic ignored "-Wcast-align"
-#endif
-
-
-
 int
 libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colour_t *to,
 			   libcolour_convert_en_masse_mode_t mode, size_t n, ...)

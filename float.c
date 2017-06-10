@@ -81,6 +81,7 @@
 #define libcolour_unmarshal            libcolour_unmarshal_f
 #define libcolour_convert_en_masse     libcolour_convert_en_masse_f
 
+#include "common.h"
 #include "convert-template.c"
 #include "libcolour-template.c"
 #include "en_masse-template.c"
