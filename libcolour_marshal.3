@@ -1,0 +1,86 @@
+.TH LIBCOLOUR_MARSHAL 3 libcolour
+.SH NAME
+libcolour_marshal - Marshal a colour record
+.SH SYNOPSIS
+.nf
+#include <libcolour.h>
+
+size_t \fBlibcolour_marshal_f\fP(const libcolour_colour_f_t *\fIcolour\fP, void *\fIbuffer\fP);
+size_t \fBlibcolour_marshal_lf\fP(const libcolour_colour_lf_t *\fIcolour\fP, void *\fIbuffer\fP);
+size_t \fBlibcolour_marshal_llf\fP(const libcolour_colour_ll_ft *\fIcolour\fP, void *\fIbuffer\fP);
+
+#define \fBlibcolour_marshal\fP(\fIcolour\fP, \fIbuffer\fP)\\
+	(_Generic((\fIvalue\fP),\\
+	          const libcolour_colour_f_t *:   \fBlibcolour_marshal_f\fP(\fIcolour\fP, \fIbuffer\fP),\\
+	          const libcolour_colour_lf_t *:  \fBlibcolour_marshal_lf\fP(\fIcolour\fP, \fIbuffer\fP),\\
+	          const libcolour_colour_llf_t *: \fBlibcolour_marshal_llf\fP(\fIcolour\fP, \fIbuffer\fP)))
+	          /* list is incomplete */
+.fi
+.SH DESCRIPTION
+.B libcolour_marshal
+and its non-generic functions stores a
+.I colour
+into a
+.IR buffer ,
+and returns the number of bytes written. If
+.B NULL
+is given instead of a
+.IR buffer ,
+the number of bytes that would have been written
+is returned.
+.P
+These function will always write an
+.B int
+that is used to identify the version of libcolour
+so it can be decoded by future versions.
+.P
+In addition to this
+.IR int ,
+all the content of the structure is copied, so
+uninitialised values can be copied. However, it
+will never copy more than the size of the structure
+used to represent colours with used colour model.
+For example, is the
+.I .model
+member if the colour is set to
+.BR LIBCOLOUR_SRGB ,
+no more than
+.BR sizeof(libcolour_srgb_f_t) ,
+.BR sizeof(libcolour_srgb_lf_t) ,
+or
+.BR sizeof(libcolour_srgb_llf_t) ,
+depending on which function is called,
+is written in addition to the initial
+.IR int .
+If the value of
+.I .model
+is invalid, 0 is returned and
+.I errno
+is set to
+.IR EINVAL .
+.P
+The written data is machine dependant.
+.SH RETURN VALUES
+Upon successful completion, the number of bytes
+written to
+.I buffer
+is returned, or if
+.I buffer
+is
+.BR NULL ,
+the number of bytes needed to to store the
+.IR colour .
+On error, 0 is returned and
+.I errno
+is set to indicate the error.
+.SH ERRORS
+.TP
+.B EINVAL
+.I .model
+is invalid.
+.SH SEE ALSO
+.BR libcolour (7),
+.BR libcolour_unmarshal (3)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >

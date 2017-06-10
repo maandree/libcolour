@@ -1,0 +1,62 @@
+.TH LIBCOLOUR_UNMARSHAL 3 libcolour
+.SH NAME
+libcolour_unmarshal - Unmarshal a colour record
+.SH SYNOPSIS
+.nf
+#include <libcolour.h>
+
+size_t \fBlibcolour_unmarshal_f\fP(libcolour_colour_f_t *\fIcolour\fP, const void *\fIbuffer\fP);
+size_t \fBlibcolour_unmarshal_lf\fP(libcolour_colour_lf_t *\fIcolour\fP, const void *\fIbuffer\fP);
+size_t \fBlibcolour_unmarshal_llf\fP(libcolour_colour_ll_ft *\fIcolour\fP, const void *\fIbuffer\fP);
+
+#define \fBlibcolour_unmarshal\fP(\fIcolour\fP, \fIbuffer\fP)\\
+	(_Generic((\fIvalue\fP),\\
+	          libcolour_colour_f_t *:   \fBlibcolour_unmarshal_f\fP(\fIcolour\fP, \fIbuffer\fP),\\
+	          libcolour_colour_lf_t *:  \fBlibcolour_unmarshal_lf\fP(\fIcolour\fP, \fIbuffer\fP),\\
+	          libcolour_colour_llf_t *: \fBlibcolour_unmarshal_llf\fP(\fIcolour\fP, \fIbuffer\fP)))
+	          /* list is incomplete */
+.fi
+.SH DESCRIPTION
+.B libcolour_unmarshal
+and its non-generic functions restores a
+.I colour
+from a
+.IR buffer
+and returns the number of bytes read.
+If
+.I colour
+is
+.BR NULL ,
+no
+.I colour
+is restored, the same value is returned.
+.P
+If the stored colour uses a custom (not pre-defined)
+RGB colour space with custom a transfer function,
+the user must set them after calling any of
+these functions.
+.SH RETURN VALUES
+Upon successful completion, the number of bytes
+read from
+.I buffer
+is returned.
+On error, 0 is returned and
+.I errno
+is set to indicate the error.
+.SH ERRORS
+.TP
+.B EINVAL
+The stored
+.I .model
+is not recognised.
+.TP
+.B EINVAL
+The libcolour version, indicated by the first bytes in
+.BR buffer ,
+is not recognised.
+.SH SEE ALSO
+.BR libcolour (7),
+.BR libcolour_unmarshal (3)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >
