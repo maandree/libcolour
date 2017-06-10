@@ -1,0 +1,215 @@
+.TH LIBCOLOUR_GET_RGB_COLOUR_SPACE 3 libcolour
+.SH NAME
+libcolour_get_rgb_colour_space - Select RGB colour space
+.SH SYNOPSIS
+.nf
+#include <libcolour.h>
+
+int \fBlibcolour_get_rgb_colour_space_f\fP(libcolour_rgb_f_t *\fIcolour\fP,
+                                     libcolour_rgb_colour_space_t \fIspace\fP);
+int \fBlibcolour_get_rgb_colour_space_lf\fP(libcolour_rgb_lf_t *\fIcolour\fP,
+                                      libcolour_rgb_colour_space_t \fIspace\fP);
+int \fBlibcolour_get_rgb_colour_space_llf\fP(libcolour_rgb_llf_t *\fIcolour\fP,
+                                       libcolour_rgb_colour_space_t \fIspace\fP);
+
+#define \fBlibcolour_get_rgb_colour_space\fP(\fIcolour\fP, \fIspace\fP)\\
+	(_Generic((\fIcolour\fP),\\
+	          libcolour_rgb_f_t *:   \fBlibcolour_get_rgb_colour_space_f\fP(\fIcolour\fP, \fIspace\fP),\\
+	          libcolour_rgb_lf_t *:  \fBlibcolour_get_rgb_colour_space_lf\fP(\fIcolour\fP, \fIspace\fP),\\
+	          libcolour_rgb_llf_t *: \fBlibcolour_get_rgb_colour_space_llf\fP(\fIcolour\fP, \fIspace\fP)))
+	          /* list is incomplete */
+.fi
+.SH DESCRIPTION
+.B libcolour_get_rgb_colour_space
+Sets the members of
+.I colour
+that specifies the colour space and transfer
+function according the specified RGB colour
+.IR space .
+.P
+The recognised RGB colour spaces are:
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_SRGB
+The sRGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ADOBE_RGB
+The Adobe RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_APPLE_RGB
+The Apple RGB (1998) colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_BEST_RGB
+The Best RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_BETA_RGB
+The Beta RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_BRUCE_RGB
+The Bruce RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_CIE_RGB
+The CIE 1931 RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_COLORMATCH_RGB
+The ColorMatch RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_D65
+The DCI-P3 D65 colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_DCI_P3_THEATER
+The DCI-P3 Theater colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_DON_RGB_4
+The Don RGB 4 colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB
+The ECI RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ECI_RGB_V2
+The ECI RGB v2 colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_EKTA_SPACE_PS5
+The Ekta Space PS5 colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_625_LINE
+The ITU-R Recommendation BT.601, 625 line colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_601_525_LINE
+The ITU-R Recommendation BT.601, 525 line colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_709
+The ITU-R Recommendation BT.709 colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2020
+The ITU-R Recommendation BT.2020 colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_PQ
+The ITU-R Recommendation BT.2100 colour space, using the
+perceptual quantization (PQ) elctro-optical transfer function (EOTF).
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_PQ
+The ITU-R Recommendation BT.2100 colour space, using the
+perceptual quantization (PQ) opto-optical transfer function (OOTF).
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_PQ
+The ITU-R Recommendation BT.2100 colour space, using the
+perceptual quantization (PQ) opto-electronic transfer function (OETF).
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_EOTF_HLG
+The ITU-R Recommendation BT.2100 colour space, using the
+Hybrid Log-Gamma (HLG) elctro-optical transfer function (EOTF).
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OOTF_HLG
+The ITU-R Recommendation BT.2100 colour space, using the
+Hybrid Log-Gamma (HLG) opto-optical transfer function (OOTF).
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_ITU_R_BT_2100_OETF_HLG
+The ITU-R Recommendation BT.2100 colour space, using the
+Hybrid Log-Gamma (HLG) opto-electronic transfer function (OETF).
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_LIGHTROOM_RGB
+The Lightroom RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_NTSC_RGB
+The NTSC RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_PAL_SECAM_RGB
+The PAL/SECAM RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_PROPHOTO_RGB
+The ProPhoto RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_SGI_RGB
+The SGI RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_SMPTE_240M_RGB
+The SMPTE 240M RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_SMPTE_C_RGB
+The SMPTE C RGB colour space.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_WIDE_GAMUT_RGB
+The wide-gamut RGB colour space, also known as Adobe Wide Gamut RGB.
+.P
+Additionally, it is possible to select a custom RGB
+colour space by setting
+.I space
+to one of the following values:
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS
+The colour space is derived from the values of
+.IR colour->red ,
+.IR colour->green ,
+.IR colour->blue ,
+.IR colour->white ,
+.IR colour->white_r ,
+.IR colour->white_g ,
+and
+.IR colour->white_b .
+The transfer functions, and parameters, must be set
+manually.
+.I colour->colour_space
+must be set to any negative value,
+.B LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS
+(zero),
+.BR LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX ,
+or
+.BR LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX .
+.IR colour->red.Y ,
+.IR colour->green.Y ,
+.IR colour->blue.Y
+can be any value, the function will set them to
+the correct value.
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX
+The colour space is derived from the values of
+.IR colour->M ,
+.IR colour->white_r ,
+.IR colour->white_g ,
+and
+.IR colour->white_b .
+The transfer functions, and parameters, must be set
+manually.
+.I colour->colour_space
+must be set to any negative value,
+.B LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS
+(zero),
+.BR LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX ,
+or
+.BR LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX .
+.TP
+.B LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX
+The colour space is derived from the values of
+.IR colour->Minv ,
+.IR colour->white_r ,
+.IR colour->white_g ,
+and
+.IR colour->white_b .
+The transfer functions, and parameters, must be set
+manually.
+.I colour->colour_space
+must be set to any negative value,
+.B LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MEASUREMENTS
+(zero),
+.BR LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_MATRIX ,
+or
+.BR LIBCOLOUR_RGB_COLOUR_SPACE_CUSTOM_FROM_INV_MATRIX .
+.SH RETURN VALUES
+Upon successful completion, the functions returns 0.
+Otherwise the function return -1 with
+.I errno
+set to indicate the error.
+.SH ERRORS
+.TP
+.B EDOM
+The function tried to invert an non-invertable matrix.
+.TP
+.B EINVAL
+.I space
+does not refer to a recognised RGB colour space.
+.SH SEE ALSO
+.BR libcolour (7),
+.BR LIBCOLOUR_RGB (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >
