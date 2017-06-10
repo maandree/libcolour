@@ -14,9 +14,9 @@ int \fBlibcolour_convert_llf\fP(const libcolour_colour_llf_t *restrict \fIfrom\f
 
 #define \fBlibcolour_convert\fP(\fIfrom\fP, \fIto\fP)\\
 	(_Generic((\fIfrom\fP),\\
-	          libcolour_colour_f_t *:   \fBlibcolour_convert_f\fP(\fIcolour\fP),\\
-	          libcolour_colour_lf_t *:  \fBlibcolour_convert_lf\fP(\fIcolour\fP),\\
-	          libcolour_colour_llf_t *: \fBlibcolour_convert_llf\fP(\fIcolour\fP)))
+	          libcolour_colour_f_t *:   \fBlibcolour_convert_f\fP(\fIfrom\fP, \fIto\fP),\\
+	          libcolour_colour_lf_t *:  \fBlibcolour_convert_lf\fP(\fIfrom\fP, \fIto\fP),\\
+	          libcolour_colour_llf_t *: \fBlibcolour_convert_llf\fP(\fIfrom\fP, \fIto\fP)))
 	          /* list is incomplete */
 .fi
 .SH DESCRIPTION
@@ -57,7 +57,8 @@ and
 .I to
 most use the same floating-point type.
 .SH SEE ALSO
-.BR libcolour (7)
+.BR libcolour (7),
+.BR libcolour_convert_en_masse (3)
 .SH AUTHORS
 Mattias Andrée
 .RI < maandree@kth.se >

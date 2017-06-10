@@ -1,0 +1,147 @@
+.TH LIBCOLOUR_CONVERT_EN_MASSE 3 libcolour
+.SH NAME
+libcolour_convert_en_masse - Colour space and colour model conversion for many colours
+.SH SYNOPSIS
+.nf
+#include <libcolour.h>
+
+int \fBlibcolour_convert_en_masse_f\fP(const libcolour_colour_f_t *restrict \fIfrom\fP,
+                                 const libcolour_colour_f_t *restrict \fIto\fP,
+                                 libcolour_convert_en_masse_mode_t \fImode\fP,
+                                 size_t \fIn\fP, ...);
+int \fBlibcolour_convert_en_masse_lf\fP(const libcolour_colour_lf_t *restrict \fIfrom\fP,
+                                  const libcolour_colour_lf_t *restrict \fIto\fP,
+                                  libcolour_convert_en_masse_mode_t \fImode\fP,
+                                  size_t \fIn\fP, ...);
+int \fBlibcolour_convert_en_masse_llf\fP(const libcolour_colour_llf_t *restrict \fIfrom\fP,
+                                   const libcolour_colour_llf_t *restrict \fIto\fP,
+                                   libcolour_convert_en_masse_mode_t \fImode\fP,
+                                   size_t \fIn\fP, ...);
+
+#define \fBlibcolour_convert_en_masse\fP(\fIfrom\fP, \fIto\fP, \fImode\fP, \fIn\fP, ...)\\
+	(_Generic((\fIfrom\fP),\\
+	          const libcolour_colour_f_t *:\\
+                          \fBlibcolour_convert_en_masse_f\fP(\fIfrom\fP, \fIto\fP, \fImode\fP, \fIn\fP, __VA_ARGS__),\\
+	          const libcolour_colour_lf_t *:\\
+                          \fBlibcolour_convert_en_masse_lf\fP(\fIfrom\fP, \fIto\fP, \fImode\fP, \fIn\fP, __VA_ARGS__),\\
+	          const libcolour_colour_llf_t *:\\
+                          \fBlibcolour_convert_en_masse_llf\fP(\fIfrom\fP, \fIto\fP, \fImode\fP, \fIn\fP, __VA_ARGS__)))
+	          /* list is incomplete */
+.fi
+.SH DESCRIPTION
+.B libcolour_convert_en_masse
+and its non-generic functions converts
+.I n
+colours from the colour space and transfer function
+specified in
+.I from
+to the colour space and transfer function specified in
+.IR to .
+.I mode
+specifies the behaviour of the functions. It shall
+be the
+.B OR
+the any, or none, of the following values:
+.TP
+.B LIBCOLOUR_CONVERT_EN_MASSE_ON_CPU
+Perform convertion on CPU rather than on GPU.
+.TP
+.B LIBCOLOUR_CONVERT_EN_MASSE_NO_OVERRIDE
+Output parameters are listed after input parameters,
+rather than using the input parametrs as the
+output parameters. These will have the same type
+as the input parameters.
+.P
+and one of the following values:
+.TP
+.B LIBCOLOUR_CONVERT_EN_MASSE_NO_ALPHA
+The parameter after
+.I n
+is
+.BR float\ * ,
+.BR double\ * ,
+or
+.BR long\ double\ * ,
+depending of the which function is called.
+The argument shall be the values of the colour,
+without any alpha channel, repeated
+.I n
+times (once per colour).
+For example, if
+.BI ( from->model ==LIBCOLOUR_RGB)
+and if
+.BI ( n ==2)
+the values in the pointer shall be
+.BI { colour[0].red ,
+.IB colour[0].green ,
+.IB colour[0].blue ,
+.IB colour[1].red ,
+.IB colour[1].green ,
+.IB colour[1].blue }
+for an imaginary
+.BR libcolour_rgb_f_t \ \fIcolour[2]\fP,
+.BR libcolour_rgb_lf_t \ \fIcolour[2]\fP,
+or
+.BR libcolour_rgb_llf_t \ \fIcolour[2]\fP,
+depending on which function is called.
+.TP
+.B LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_FIRST
+Same as
+.BR LIBCOLOUR_CONVERT_EN_MASSE_NO_ALPHA ,
+except before each red channel value (in the
+case of RGB that is, the first channel value in
+general) there is an alpha channel value that
+will not be modified.
+.TP
+.B LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_LAST
+Same as
+.BR LIBCOLOUR_CONVERT_EN_MASSE_NO_ALPHA ,
+except after each blue channel value (in the
+case of RGB that is, the last cannel value in
+general) there is an alpha channel value that
+will not be modified.
+.TP
+.B LIBCOLOUR_CONVERT_EN_MASSE_SEPARATED
+After the parameter
+.I n
+there is one parameter per channel, these
+parameters are of the type
+.BR float\ * ,
+.BR double\ * ,
+or
+.BR long\ double\ * ,
+depending of the which function is called.
+Each parameter shall be a pointer with
+.I n
+elements, one per colour to convert.
+.SH RETURN VALUES
+Upon successful completion, the functions returns 0.
+Otherwise the function return -1 with
+.I errno
+set to indicate the error.
+.SH ERRORS
+.TP
+.B EINVAL
+.I from->model
+or
+.I to->model
+does not refer to a recognised colour model.
+.SH NOTES
+.B libcolour_convert_en_masse
+cannot convert between
+.BR float ,
+.BR double ,
+and
+.BR long\ double ,
+.I from
+and
+.I to
+most use the same floating-point type.
+.P
+GPU acceleration is currently not implemented.
+.SH SEE ALSO
+.BR libcolour (7),
+.BR libcolour_convert (3)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >

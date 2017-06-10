@@ -224,6 +224,10 @@ FUNCTIONS
 	libcolour_convert(3)
 		Colour space and colour model conversion.
 
+	libcolour_convert_en_masse(3)
+		Colour space and colour model conversion for many
+		colours.
+
 	libcolour_srgb_encode(3)
 		Apply the sRGB transfer function.
 

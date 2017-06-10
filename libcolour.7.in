@@ -366,6 +366,10 @@ Philips TL83, Ultralume 30.
 .BR libcolour_convert (3)
 Colour space and colour model conversion.
 .TP
+.BR libcolour_convert_en_masse (3)
+Colour space and colour model conversion
+for many colours.
+.TP
 .BR libcolour_srgb_encode (3)
 Apply the sRGB transfer function.
 .TP

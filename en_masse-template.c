@@ -26,9 +26,9 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 	int on_cpu = mode & LIBCOLOUR_CONVERT_EN_MASSE_ON_CPU;
 	int no_override = mode & LIBCOLOUR_CONVERT_EN_MASSE_NO_OVERRIDE;
 	va_list args;
-	TYPE *in1, *in2, *in3;
-	TYPE *out1, *out2, *out3;
-	size_t width;
+	TYPE *in1, *in2, *in3, *in_alpha = NULL;
+	TYPE *out1, *out2, *out3, *out_alpha = NULL;
+	size_t width, i;
 
 	if ((unsigned int)mode > 15U) {
 		errno = EINVAL;
@@ -47,15 +47,16 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 		in3 = in1 + 2;
 		width = 3;
 	} else if (alpha_mode == LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_FIRST) {
-		in1 = va_arg(args, TYPE *);
-		in2 = in1 + 2;
-		in3 = in1 + 3;
-		in1 = in1 + 1;
+		in_alpha = va_arg(args, TYPE *);
+		in1 = in_alpha + 1;
+		in2 = in_alpha + 2;
+		in3 = in_alpha + 3;
 		width = 4;
 	} else if (alpha_mode == LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_LAST) {
 		in1 = va_arg(args, TYPE *);
 		in2 = in1 + 1;
 		in3 = in1 + 2;
+		in_alpha = in1 + 3;
 		width = 4;
 	} else {
 		in1 = va_arg(args, TYPE *);
@@ -73,14 +74,15 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 		out2 = out1 + 1;
 		out3 = out1 + 2;
 	} else if (alpha_mode == LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_FIRST) {
-		out1 = va_arg(args, TYPE *);
-		out2 = out1 + 2;
-		out3 = out1 + 3;
-		out1 = out1 + 1;
+		out_alpha = va_arg(args, TYPE *);
+		out1 = out_alpha + 1;
+		out2 = out_alpha + 2;
+		out3 = out_alpha + 3;
 	} else if (alpha_mode == LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_LAST) {
 		out1 = va_arg(args, TYPE *);
 		out2 = out1 + 1;
 		out3 = out1 + 2;
+		out_alpha = out1 + 3;
 	} else {
 		out1 = va_arg(args, TYPE *);
 		out2 = va_arg(args, TYPE *);
@@ -105,6 +107,14 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 	default:
 		errno = EINVAL;
 		return -1;
+	}
+
+	if (in_alpha != out_alpha) {
+		for (i = 0; i < n; i++) {
+			*out_alpha = *in_alpha;
+			in_alpha += width;
+			out_alpha += width;
+		}
 	}
 
 	while (n--) {
