@@ -1,0 +1,47 @@
+.TH LIBCOLOUR_PROPER 3 libcolour
+.SH NAME
+libcolour_proper - Set any member that is set incorrectly
+.SH SYNOPSIS
+.nf
+#include <libcolour.h>
+
+int \fBlibcolour_proper_f\fP(libcolour_colour_f_t *\fIcolour\fP);
+int \fBlibcolour_proper_lf\fP(libcolour_colour_lf_t *\fIcolour\fP);
+int \fBlibcolour_proper_llf\fP(libcolour_colour_llf_t *\fIcolour\fP);
+
+#define \fBlibcolour_proper\fP(\fIcolour\fP)\\
+	(_Generic((\fIcolour\fP),\\
+	          libcolour_colour_f_t *:   \fBlibcolour_proper_f\fP(\fIcolour\fP),\\
+	          libcolour_colour_lf_t *:  \fBlibcolour_proper_lf\fP(\fIcolour\fP),\\
+	          libcolour_colour_llf_t *: \fBlibcolour_proper_llf\fP(\fIcolour\fP)))
+	          /* list is incomplete */
+.fi
+.SH DESCRIPTION
+.B libcolour_proper
+and its non-generic functions sets any member or
+submember of
+.I colour
+that is set incorrectly. When calling the macro
+.B libcolour_proper
+(but not the non-generic function),
+.I colour.model
+is set to the correct value if the type
+.I colour
+is one of the colour
+.IR struct s
+and not on the the
+.IR union s.
+.SH RETURN VALUES
+Upon successful completion, the functions returns 0.
+Otherwise the function return -1 with
+.I errno
+set to indicate the error.
+.SH ERRORS
+.TP
+.B EDOM
+The function tried to invert an non-invertable matrix.
+.SH SEE ALSO
+.BR libcolour (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >
