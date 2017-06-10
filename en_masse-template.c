@@ -108,13 +108,19 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 	}
 
 	while (n--) {
-		tfrom.rgb.R = in1[n * width];
-		tfrom.rgb.G = in2[n * width];
-		tfrom.rgb.B = in3[n * width];
+		tfrom.rgb.R = *in1;
+		tfrom.rgb.G = *in2;
+		tfrom.rgb.B = *in3;
 		libcolour_convert(&tfrom, &tto);
-		out1[n * width] = tto.rgb.R;
-		out2[n * width] = tto.rgb.G;
-		out3[n * width] = tto.rgb.B;
+		*out1 = tto.rgb.R;
+		*out2 = tto.rgb.G;
+		*out3 = tto.rgb.B;
+		in1 += width;
+		in2 += width;
+		in3 += width;
+		out1 += width;
+		out2 += width;
+		out3 += width;
 	}
 
 	(void) on_cpu;
