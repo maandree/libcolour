@@ -665,9 +665,11 @@ colour_spaces_done:
 	}
  marshal_done:
 
+	/* TODO test libcolour_convert_en_masse */
+
 	return rc;
  fail:
 	perror(*argv);
-	return 2;
 	(void) argc;
+	return 2;
 }

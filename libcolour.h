@@ -290,6 +290,22 @@ typedef enum libcolour_rgb_colour_space {
 } libcolour_rgb_colour_space_t;
 
 
+typedef enum libcolour_convert_en_masse_mode {
+	LIBCOLOUR_CONVERT_EN_MASSE_NO_ALPHA    = 0x0000,
+#define LIBCOLOUR_CONVERT_EN_MASSE_NO_ALPHA LIBCOLOUR_CONVERT_EN_MASSE_NO_ALPHA
+	LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_FIRST = 0x0001,
+#define LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_FIRST LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_FIRST
+	LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_LAST  = 0x0002,
+#define LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_LAST LIBCOLOUR_CONVERT_EN_MASSE_ALPHA_LAST
+	LIBCOLOUR_CONVERT_EN_MASSE_SEPARATED   = 0x0003,
+#define LIBCOLOUR_CONVERT_EN_MASSE_SEPARATED LIBCOLOUR_CONVERT_EN_MASSE_SEPARATED
+	LIBCOLOUR_CONVERT_EN_MASSE_ON_CPU      = 0x0004,
+#define LIBCOLOUR_CONVERT_EN_MASSE_ON_CPU LIBCOLOUR_CONVERT_EN_MASSE_ON_CPU
+	LIBCOLOUR_CONVERT_EN_MASSE_NO_OVERRIDE = 0x0008
+#define LIBCOLOUR_CONVERT_EN_MASSE_NO_OVERRIDE LIBCOLOUR_CONVERT_EN_MASSE_NO_OVERRIDE
+} libcolour_convert_en_masse_mode_t;
+
+
 #define LIBCOLOUR_X(C, T, N) T N;
 #define LIBCOLOUR_DEF(TYPE, RES) \
 typedef struct libcolour_srgb_##RES {\
@@ -442,7 +458,9 @@ int libcolour_delta_e_##RES(const libcolour_colour_##RES##_t *, const libcolour_
 int libcolour_proper_##RES(libcolour_colour_##RES##_t *);\
 int libcolour_get_rgb_colour_space_##RES(libcolour_rgb_##RES##_t *, libcolour_rgb_colour_space_t);\
 size_t libcolour_marshal_##RES(const libcolour_colour_##RES##_t *, void *);\
-size_t libcolour_unmarshal_##RES(libcolour_colour_##RES##_t *, const void *);
+size_t libcolour_unmarshal_##RES(libcolour_colour_##RES##_t *, const void *);\
+int libcolour_convert_en_masse_##RES(const libcolour_colour_##RES##_t *from, const libcolour_colour_##RES##_t *to,\
+                                     libcolour_convert_en_masse_mode_t mode, size_t n, ...);
 
 LIBCOLOUR_DEF(float, f)
 LIBCOLOUR_DEF(double, lf)
@@ -493,6 +511,10 @@ LIBCOLOUR_DEF(long double, llf)
 
 #define libcolour_unmarshal(COLOUR, BUF)\
 	LIBCOLOUR_GENERIC(libcolour_unmarshal, (COLOUR), (void *)(COLOUR), (const void *)(BUF))
+
+#define libcolour_convert_en_masse(FROM, TO, MODE, N, ...)\
+	LIBCOLOUR_GENERIC(libcolour_convert_en_masse, (FROM), (const void *)(FROM),\
+			  (const void *)(TO), (MODE), (N), __VA_ARGS__)
 
 
 static inline int

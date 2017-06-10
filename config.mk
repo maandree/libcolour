@@ -1,5 +1,5 @@
 VERSION_MAJOR = 2
-VERSION_MINOR = 0
+VERSION_MINOR = 1
 
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man

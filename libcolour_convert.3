@@ -5,9 +5,12 @@ libcolour_convert - Colour space and colour model conversion
 .nf
 #include <libcolour.h>
 
-int \fBlibcolour_convert_f\fP(const libcolour_colour_f_t *\fIfrom\fP, libcolour_colour_f_t *\fIto\fP);
-int \fBlibcolour_convert_lf\fP(const libcolour_colour_lf_t *\fIfrom\fP, libcolour_colour_lf_t *\fIto\fP);
-int \fBlibcolour_convert_llf\fP(const libcolour_colour_llf_t *\fIfrom\fP, libcolour_colour_llf_t *\fIto\fP);
+int \fBlibcolour_convert_f\fP(const libcolour_colour_f_t *restrict \fIfrom\fP,
+                        libcolour_colour_f_t *restrict \fIto\fP);
+int \fBlibcolour_convert_lf\fP(const libcolour_colour_lf_t *restrict \fIfrom\fP,
+                         libcolour_colour_lf_t *restrict \fIto\fP);
+int \fBlibcolour_convert_llf\fP(const libcolour_colour_llf_t *restrict \fIfrom\fP,
+                          libcolour_colour_llf_t *restrict \fIto\fP);
 
 #define \fBlibcolour_convert\fP(\fIfrom\fP, \fIto\fP)\\
 	(_Generic((\fIfrom\fP),\\

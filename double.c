@@ -4,6 +4,7 @@
 #include <alloca.h>
 #include <errno.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -68,6 +69,7 @@
 #undef libcolour_get_rgb_colour_space
 #undef libcolour_marshal
 #undef libcolour_unmarshal
+#undef libcolour_convert_en_masse
 
 #define libcolour_convert              libcolour_convert_lf
 #define libcolour_srgb_encode          libcolour_srgb_encode_lf
@@ -77,6 +79,8 @@
 #define libcolour_get_rgb_colour_space libcolour_get_rgb_colour_space_lf
 #define libcolour_marshal              libcolour_marshal_lf
 #define libcolour_unmarshal            libcolour_unmarshal_lf
+#define libcolour_convert_en_masse     libcolour_convert_en_masse_lf
 
 #include "convert-template.c"
 #include "libcolour-template.c"
+#include "en_masse-template.c"

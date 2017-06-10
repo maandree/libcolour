@@ -15,6 +15,7 @@ HDR =\
 
 TEMPLATES =\
 	convert-template.c\
+	en_masse-template.c\
 	libcolour-template.c
 
 MAN7 =\
@@ -42,7 +43,8 @@ MAN3 =\
 	libcolour_proper.3\
 	libcolour_get_rgb_colour_space.3\
 	libcolour_marshal.3\
-	libcolour_unmarshal.3
+	libcolour_unmarshal.3\
+	libcolour_convert_en_masse.3
 
 MAN3_SYMLINKS =\
 	libcolour_convert_f.3\
@@ -68,7 +70,10 @@ MAN3_SYMLINKS =\
 	libcolour_marshal_llf.3\
 	libcolour_unmarshal_f.3\
 	libcolour_unmarshal_lf.3\
-	libcolour_unmarshal_llf.3
+	libcolour_unmarshal_llf.3\
+	libcolour_convert_en_masse_f.3\
+	libcolour_convert_en_masse_lf.3\
+	libcolour_convert_en_masse_llf.3
 
 
 all: libcolour.a libcolour.so.$(SO_VERSION) libcolour.7 test
@@ -154,6 +159,9 @@ install: libcolour.a libcolour.so.$(SO_VERSION) libcolour.7
 	ln -sf -- libcolour_unmarshal.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_unmarshal_f.3"
 	ln -sf -- libcolour_unmarshal.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_unmarshal_lf.3"
 	ln -sf -- libcolour_unmarshal.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_unmarshal_llf.3"
+	ln -sf -- libcolour_convert_en_masse.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_en_masse_f.3"
+	ln -sf -- libcolour_convert_en_masse.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_en_masse_lf.3"
+	ln -sf -- libcolour_convert_en_masse.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_en_masse_llf.3"
 
 
 uninstall:
