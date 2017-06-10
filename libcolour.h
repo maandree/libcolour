@@ -468,9 +468,9 @@ LIBCOLOUR_DEF(long double, llf)
 
 #define LIBCOLOUR_GENERIC(FUNC, REF, ...)\
 	(_Generic((REF),\
-		  LIBCOLOUR_GENERIC__(long double, llf, FUNC##_llf(__VA_ARGS__)),\
-		  LIBCOLOUR_GENERIC__(double,      lf,  FUNC##_lf(__VA_ARGS__)),\
-		  LIBCOLOUR_GENERIC__(float,       f,   FUNC##_f(__VA_ARGS__))))
+	          LIBCOLOUR_GENERIC__(long double, llf, FUNC##_llf(__VA_ARGS__)),\
+	          LIBCOLOUR_GENERIC__(double,      lf,  FUNC##_lf(__VA_ARGS__)),\
+	          LIBCOLOUR_GENERIC__(float,       f,   FUNC##_f(__VA_ARGS__))))
 
 
 #define libcolour_convert(FROM, TO)\
@@ -485,9 +485,6 @@ LIBCOLOUR_DEF(long double, llf)
 #define libcolour_delta_e(A, B, E)\
 	LIBCOLOUR_GENERIC(libcolour_delta_e, (A), (const void *)(A), (const void *)(B), (void *)(E))
 
-#define libcolour_proper(COLOUR)\
-	LIBCOLOUR_GENERIC(libcolour_proper, (COLOUR), (const void *)(COLOUR))
-
 #define libcolour_get_rgb_colour_space(CS, SPACE)\
 	LIBCOLOUR_GENERIC(libcolour_get_rgb_colour_space, (CS), (void *)(CS), (SPACE))
 
@@ -496,6 +493,43 @@ LIBCOLOUR_DEF(long double, llf)
 
 #define libcolour_unmarshal(COLOUR, BUF)\
 	LIBCOLOUR_GENERIC(libcolour_unmarshal, (COLOUR), (void *)(COLOUR), (const void *)(BUF))
+
+
+static inline int
+libcolour_proper_f__(union libcolour_colour_f *colour, enum libcolour_model model)
+{
+	colour->model = model;
+	return libcolour_proper_f(colour);
+}
+
+static inline int
+libcolour_proper_lf__(union libcolour_colour_lf *colour, enum libcolour_model model)
+{
+	colour->model = model;
+	return libcolour_proper_lf(colour);
+}
+
+static inline int
+libcolour_proper_llf__(union libcolour_colour_llf *colour, enum libcolour_model model)
+{
+	colour->model = model;
+	return libcolour_proper_llf(colour);
+}
+
+#define LIBCOLOUR_F(C, T, N, COLOUR) T *: libcolour_proper_f__((void *)(COLOUR), (C))),
+#define LIBCOLOUR_LF(C, T, N, COLOUR) T *: libcolour_proper_lf__((void *)(COLOUR), (C))),
+#define LIBCOLOUR_LLF(C, T, N, COLOUR) T *: libcolour_proper_llf__((void *)(COLOUR), (C))),
+#define libcolour_proper(COLOUR)\
+	(_Generic((COLOUR),\
+	          LIBCOLOUR_LIST_MODELS_N(LIBCOLOUR_F, f, (COLOUR))\
+	          LIBCOLOUR_LIST_MODELS_N(LIBCOLOUR_LF, lf, (COLOUR))\
+	          LIBCOLOUR_LIST_MODELS_N(LIBCOLOUR_LLF, llf, (COLOUR))\
+	          union libcolour_colour_f *: libcolour_proper_f((void *)(COLOUR)),\
+	          union libcolour_colour_lf *: libcolour_proper_lf((void *)(COLOUR)),\
+	          union libcolour_colour_llf *: libcolour_proper_llf((void *)(COLOUR))))
+#undef LIBCOLOUR_F
+#undef LIBCOLOUR_LF
+#undef LIBCOLOUR_LLF
 
 
 
