@@ -6,9 +6,9 @@ CIE 1931 XYZ (also known simply as CIE XYZ)
 colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_ciexyz_f libcolour_ciexyz_f_t;\fP
-	\fBtypedef struct libcolour_ciexyz_lf libcolour_ciexyz_lf_t;\fP
-	\fBtypedef struct libcolour_ciexyz_llf libcolour_ciexyz_llf_t;\fP
+	typedef struct libcolour_ciexyz_f libcolour_ciexyz_f_t;
+	typedef struct libcolour_ciexyz_lf libcolour_ciexyz_lf_t;
+	typedef struct libcolour_ciexyz_llf libcolour_ciexyz_llf_t;
 
 .fi
 These
@@ -24,12 +24,12 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_ciexyz_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIX\fP\fB;\fP
-		\fBfloat\fP \fIY\fP\fB;\fP
-		\fBfloat\fP \fIZ\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_ciexyz_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIX\fP;
+		float \fIY\fP;
+		float \fIZ\fP;
+	};
 
 .fi
 .I .model

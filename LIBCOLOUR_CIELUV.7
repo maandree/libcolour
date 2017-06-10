@@ -6,9 +6,9 @@ CIE 1976 (L*, u*, v*) (also known simply as CIE L*u*v*)
 colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_cieluv_f libcolour_cieluv_f_t;\fP
-	\fBtypedef struct libcolour_cieluv_lf libcolour_cieluv_lf_t;\fP
-	\fBtypedef struct libcolour_cieluv_llf libcolour_cieluv_llf_t;\fP
+	typedef struct libcolour_cieluv_f libcolour_cieluv_f_t;
+	typedef struct libcolour_cieluv_lf libcolour_cieluv_lf_t;
+	typedef struct libcolour_cieluv_llf libcolour_cieluv_llf_t;
 
 .fi
 These
@@ -24,13 +24,13 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_cieluv_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIL\fP\fB;\fP
-		\fBfloat\fP \fIu\fP\fB;\fP
-		\fBfloat\fP \fIv\fP\fB;\fP
-		\fBstruct libcolour_ciexyz\fP \fIwhite\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_cieluv_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIL\fP;
+		float \fIu\fP;
+		float \fIv\fP;
+		struct libcolour_ciexyz \fIwhite\fP;
+	};
 
 .fi
 .I .model

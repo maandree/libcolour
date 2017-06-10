@@ -6,9 +6,9 @@ YPbPr [the \(aqb\(a and the \(aqr\(aq should be in subscript and capitalised]
 colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_ypbpr_f libcolour_ypbpr_f_t;\fP
-	\fBtypedef struct libcolour_ypbpr_lf libcolour_ypbpr_lf_t;\fP
-	\fBtypedef struct libcolour_ypbpr_llf libcolour_ypbpr_llf_t;\fP
+	typedef struct libcolour_ypbpr_f libcolour_ypbpr_f_t;
+	typedef struct libcolour_ypbpr_lf libcolour_ypbpr_lf_t;
+	typedef struct libcolour_ypbpr_llf libcolour_ypbpr_llf_t;
 
 .fi
 These
@@ -24,12 +24,12 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_ypbpr_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIY\fP\fB;\fP
-		\fBfloat\fP \fIPb\fP\fB;\fP
-		\fBfloat\fP \fIPr\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_ypbpr_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIY\fP;
+		float \fIPb\fP;
+		float \fIPr\fP;
+	};
 
 .fi
 .I .model

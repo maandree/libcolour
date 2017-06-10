@@ -5,9 +5,9 @@ LIBCOLOUR_YDBDR - YDbDr
 YDbDr colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_ydbdr_f libcolour_ydbdr_f_t;\fP
-	\fBtypedef struct libcolour_ydbdr_lf libcolour_ydbdr_lf_t;\fP
-	\fBtypedef struct libcolour_ydbdr_llf libcolour_ydbdr_llf_t;\fP
+	typedef struct libcolour_ydbdr_f libcolour_ydbdr_f_t;
+	typedef struct libcolour_ydbdr_lf libcolour_ydbdr_lf_t;
+	typedef struct libcolour_ydbdr_llf libcolour_ydbdr_llf_t;
 
 .fi
 These
@@ -23,12 +23,12 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_ydbdr_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIY\fP\fB;\fP
-		\fBfloat\fP \fIDb\fP\fB;\fP
-		\fBfloat\fP \fIDr\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_ydbdr_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIY\fP;
+		float \fIDb\fP;
+		float \fIDr\fP;
+	};
 
 .fi
 .I .model

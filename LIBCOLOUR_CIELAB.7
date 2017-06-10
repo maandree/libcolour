@@ -6,9 +6,9 @@ CIE L*a*b*
 colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_cielab_f libcolour_cielab_f_t;\fP
-	\fBtypedef struct libcolour_cielab_lf libcolour_cielab_lf_t;\fP
-	\fBtypedef struct libcolour_cielab_llf libcolour_cielab_llf_t;\fP
+	typedef struct libcolour_cielab_f libcolour_cielab_f_t;
+	typedef struct libcolour_cielab_lf libcolour_cielab_lf_t;
+	typedef struct libcolour_cielab_llf libcolour_cielab_llf_t;
 
 .fi
 These
@@ -24,12 +24,12 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_cielab_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIL\fP\fB;\fP
-		\fBfloat\fP \fIa\fP\fB;\fP
-		\fBfloat\fP \fIb\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_cielab_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIL\fP;
+		float \fIa\fP;
+		float \fIb\fP;
+	};
 
 .fi
 .I .model

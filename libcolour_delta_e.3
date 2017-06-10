@@ -1,0 +1,42 @@
+.TH LIBCOLOUR_DELTA_E 3 libcolour
+.SH NAME
+libcolour_delta_e - Calculate the delta E*_ab distance
+.SH SYNOPSIS
+.nf
+#include <libcolour.h>
+
+int \fBlibcolour_delta_e_f\fP(const libcolour_colour_f_t *\fIa\fP,
+                        const libcolour_colour_f_t *\fIb\fP, float *\fIresult\fP);
+int \fBlibcolour_delta_e_lf\fP(const libcolour_colour_lf_t *\fIa\fP,
+                         const libcolour_colour_lf_t *\fIb\fP, double *\fIresult\fP);
+int \fBlibcolour_delta_e_llf\fP(const libcolour_colour_llf_t *\fIa\fP,
+                          const libcolour_colour_llf_t *\fIb\fP, long double *\fIresult\fP);
+
+#define \fBlibcolour_delta_e\fP(\fIa\fP, \fIb\fP, \fIresult\fP)\\
+	(_Generic((\fIa\fP),\\
+	          const libcolour_colour_f_t *:   \fBlibcolour_delta_e_f\fP(\fIa\fP, \fIb\fP, \fIresult\fP),\\
+	          const libcolour_colour_lf_t *:  \fBlibcolour_delta_e_lf\fP(\fIa\fP, \fIb\fP, \fIresult\fP),\\
+	          const libcolour_colour_llf_t *: \fBlibcolour_delta_e_llf\fP(\fIa\fP, \fIb\fP, \fIresult\fP)))
+.fi
+.SH DESCRIPTION
+.B libcolour_delta_e
+and its non-generic functions calculate the delta E*_ab
+.RB [ _
+denotes that the following characters shall be subscripted]
+(the distance in CIE L*a*b*) of two colours, and stores the
+distance in
+.IR *result .
+.SH RETURN VALUES
+Upon successful completion, the functions returns 0.
+Otherwise the function return -1 with
+.I errno
+set to indicate the error.
+.SH ERRORS
+These functions fail if and only if
+.BR libcolour_convert (3)
+fails.
+.SH SEE ALSO
+.BR libcolour (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >

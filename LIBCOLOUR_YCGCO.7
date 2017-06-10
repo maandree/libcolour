@@ -5,9 +5,9 @@ LIBCOLOUR_YCGCO - YCgCo
 YCgCo colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_ycgco_f libcolour_ycgco_f_t;\fP
-	\fBtypedef struct libcolour_ycgco_lf libcolour_ycgco_lf_t;\fP
-	\fBtypedef struct libcolour_ycgco_llf libcolour_ycgco_llf_t;\fP
+	typedef struct libcolour_ycgco_f libcolour_ycgco_f_t;
+	typedef struct libcolour_ycgco_lf libcolour_ycgco_lf_t;
+	typedef struct libcolour_ycgco_llf libcolour_ycgco_llf_t;
 
 .fi
 These
@@ -23,12 +23,12 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_ycgco_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIY\fP\fB;\fP
-		\fBfloat\fP \fICg\fP\fB;\fP
-		\fBfloat\fP \fICo\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_ycgco_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIY\fP;
+		float \fICg\fP;
+		float \fICo\fP;
+	};
 
 .fi
 .I .model

@@ -5,9 +5,9 @@ LIBCOLOUR_CIEXYY - CIE xyY
 CIE xyY colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_ciexyy_f libcolour_ciexyy_f_t;\fP
-	\fBtypedef struct libcolour_ciexyy_lf libcolour_ciexyy_lf_t;\fP
-	\fBtypedef struct libcolour_ciexyy_llf libcolour_ciexyy_llf_t;\fP
+	typedef struct libcolour_ciexyy_f libcolour_ciexyy_f_t;
+	typedef struct libcolour_ciexyy_lf libcolour_ciexyy_lf_t;
+	typedef struct libcolour_ciexyy_llf libcolour_ciexyy_llf_t;
 
 .fi
 These
@@ -23,12 +23,12 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_ciexyy_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIx\fP\fB;\fP
-		\fBfloat\fP \fIy\fP\fB;\fP
-		\fBfloat\fP \fIY\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_ciexyy_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIx\fP;
+		float \fIy\fP;
+		float \fIY\fP;
+	};
 
 .fi
 .I .model

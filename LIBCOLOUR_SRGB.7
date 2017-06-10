@@ -5,9 +5,9 @@ LIBCOLOUR_SRGB - Standard RGB
 sRGB colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_srgb_f libcolour_srgb_f_t;\fP
-	\fBtypedef struct libcolour_srgb_lf libcolour_srgb_lf_t;\fP
-	\fBtypedef struct libcolour_srgb_llf libcolour_srgb_llf_t;\fP
+	typedef struct libcolour_srgb_f libcolour_srgb_f_t;
+	typedef struct libcolour_srgb_lf libcolour_srgb_lf_t;
+	typedef struct libcolour_srgb_llf libcolour_srgb_llf_t;
 
 .fi
 These
@@ -23,13 +23,13 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_srgb_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIR\fP\fB;\fP
-		\fBfloat\fP \fIG\fP\fB;\fP
-		\fBfloat\fP \fIB\fP\fB;\fP
-		\fBint\fP \fIwith_transfer\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_srgb_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIR\fP;
+		float \fIG\fP;
+		float \fIB\fP;
+		int \fIwith_transfer\fP;
+	};
 
 .fi
 .I .model

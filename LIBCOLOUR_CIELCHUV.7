@@ -7,9 +7,9 @@ subsequent characters] (also known as CIE HLC_uv)
 colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_cielchuv_f libcolour_cielchuv_f_t;\fP
-	\fBtypedef struct libcolour_cielchuv_lf libcolour_cielchuv_lf_t;\fP
-	\fBtypedef struct libcolour_cielchuv_llf libcolour_cielchuv_llf_t;\fP
+	typedef struct libcolour_cielchuv_f libcolour_cielchuv_f_t;
+	typedef struct libcolour_cielchuv_lf libcolour_cielchuv_lf_t;
+	typedef struct libcolour_cielchuv_llf libcolour_cielchuv_llf_t;
 
 .fi
 These
@@ -25,14 +25,14 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_cielchuv_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIL\fP\fB;\fP
-		\fBfloat\fP \fIC\fP\fB;\fP
-		\fBfloat\fP \fIh\fP\fB;\fP
-		\fBstruct libcolour_ciexyz\fP \fIwhite\fP\fB;\fP
-		\fBdouble\fP \fIone_revolution\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_cielchuv_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIL\fP;
+		float \fIC\fP;
+		float \fIh\fP;
+		struct libcolour_ciexyz \fIwhite\fP;
+		double \fIone_revolution\fP;
+	};
 
 .fi
 .I .model

@@ -5,9 +5,9 @@ LIBCOLOUR_YUV - YUV
 YUV colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_yuv_f libcolour_yuv_f_t;\fP
-	\fBtypedef struct libcolour_yuv_lf libcolour_yuv_lf_t;\fP
-	\fBtypedef struct libcolour_yuv_llf libcolour_yuv_llf_t;\fP
+	typedef struct libcolour_yuv_f libcolour_yuv_f_t;
+	typedef struct libcolour_yuv_lf libcolour_yuv_lf_t;
+	typedef struct libcolour_yuv_llf libcolour_yuv_llf_t;
 
 .fi
 These
@@ -23,12 +23,12 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_yuv_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIY\fP\fB;\fP
-		\fBfloat\fP \fIU\fP\fB;\fP
-		\fBfloat\fP \fIV\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_yuv_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIY\fP;
+		float \fIU\fP;
+		float \fIV\fP;
+	};
 
 .fi
 .I .model

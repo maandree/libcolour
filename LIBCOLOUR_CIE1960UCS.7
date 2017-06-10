@@ -6,9 +6,9 @@ CIE 1960 UCS
 colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_cie1960ucs_f libcolour_cie1960ucs_f_t;\fP
-	\fBtypedef struct libcolour_cie1960ucs_lf libcolour_cie1960ucs_lf_t;\fP
-	\fBtypedef struct libcolour_cie1960ucs_llf libcolour_cie1960ucs_llf_t;\fP
+	typedef struct libcolour_cie1960ucs_f libcolour_cie1960ucs_f_t;
+	typedef struct libcolour_cie1960ucs_lf libcolour_cie1960ucs_lf_t;
+	typedef struct libcolour_cie1960ucs_llf libcolour_cie1960ucs_llf_t;
 
 .fi
 These
@@ -24,12 +24,12 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_cie1960ucs_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIu\fP\fB;\fP
-		\fBfloat\fP \fIv\fP\fB;\fP
-		\fBfloat\fP \fIY\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_cie1960ucs_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIu\fP;
+		float \fIv\fP;
+		float \fIY\fP;
+	};
 
 .fi
 .I .model

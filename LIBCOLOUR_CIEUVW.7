@@ -6,9 +6,9 @@ CIE 1964 (U*, V*, W*) (also known simply as CIE UVW)
 colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_cieuvw_f libcolour_cieuvw_f_t;\fP
-	\fBtypedef struct libcolour_cieuvw_lf libcolour_cieuvw_lf_t;\fP
-	\fBtypedef struct libcolour_cieuvw_llf libcolour_cieuvw_llf_t;\fP
+	typedef struct libcolour_cieuvw_f libcolour_cieuvw_f_t;
+	typedef struct libcolour_cieuvw_lf libcolour_cieuvw_lf_t;
+	typedef struct libcolour_cieuvw_llf libcolour_cieuvw_llf_t;
 
 .fi
 These
@@ -24,14 +24,14 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_cieuvw_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIU\fP\fB;\fP
-		\fBfloat\fP \fIV\fP\fB;\fP
-		\fBfloat\fP \fIW\fP\fB;\fP
-		\fBfloat\fP \fIu0\fP\fB;\fP
-		\fBfloat\fP \fIv0\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_cieuvw_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIU\fP;
+		float \fIV\fP;
+		float \fIW\fP;
+		float \fIu0\fP;
+		float \fIv0\fP;
+	};
 
 .fi
 .I .model

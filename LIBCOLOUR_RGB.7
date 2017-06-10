@@ -5,9 +5,9 @@ LIBCOLOUR_RGB - Generic RGB
 Generic RGB colours are presented with either of
 .nf
 
-	\fBtypedef struct libcolour_rgb_f libcolour_rgb_f_t;\fP
-	\fBtypedef struct libcolour_rgb_lf libcolour_rgb_lf_t;\fP
-	\fBtypedef struct libcolour_rgb_llf libcolour_rgb_llf_t;\fP
+	typedef struct libcolour_rgb_f libcolour_rgb_f_t;
+	typedef struct libcolour_rgb_lf libcolour_rgb_lf_t;
+	typedef struct libcolour_rgb_llf libcolour_rgb_llf_t;
 
 .fi
 These
@@ -23,44 +23,44 @@ and are otherwise identical.
 is defined as
 .nf
 
-	\fBstruct libcolour_rgb_f {\fP
-		\fBenum libcolour_model\fP \fImodel\fP\fB;\fP
-		\fBfloat\fP \fIR\fP\fB;\fP
-		\fBfloat\fP \fIG\fP\fB;\fP
-		\fBfloat\fP \fIB\fP\fB;\fP
-		\fBint\fP \fIwith_transfer\fP\fB;\fP
-		\fBenum libcolour_encoding_type\fP \fIencoding_type\fP\fB;\fP
-		\fBunion {\fP
-			\fBstruct {\fP
-				\fBfloat\fP \fIgamma\fP\fB;\fP
-			\fB}\fP \fIsimple\fB;\fP
-			\fBstruct {\fP
-				\fBfloat\fP \fIgamma\fP\fB;\fP
-				\fBfloat\fP \fIoffset\fP\fB;\fP
-				\fBfloat\fP \fIslope\fP\fB;\fP
-				\fBfloat\fP \fItransition\fP\fB;\fP
-				\fBfloat\fP \fItransitioninv\fP\fB;\fP
-			\fB}\fP \fIregular\fB;\fP
-			\fBstruct {\fP
-				\fBfloat (*\fP\fIto_encoded_red\fP\fB)(float);\fP
-				\fBfloat (*\fP\fIto_decoded_red\fP\fB)(float);\fP
-				\fBfloat (*\fP\fIto_encoded_green\fP\fB)(float);\fP
-				\fBfloat (*\fP\fIto_decoded_green\fP\fB)(float);\fP
-				\fBfloat (*\fP\fIto_encoded_blue\fP\fB)(float);\fP
-				\fBfloat (*\fP\fIto_decoded_blue\fP\fB)(float);\fP
-			\fB}\fP \fIcustom\fB;\fP
-		\fB}\fP \fItransfer\fB;\fP
-		\fBstruct libcolour_ciexyy\fP \fIred\fP\fB;\fP
-		\fBstruct libcolour_ciexyy\fP \fIgreen\fP\fB;\fP
-		\fBstruct libcolour_ciexyy\fP \fIblue\fP\fB;\fP
-		\fBstruct libcolour_ciexyy\fP \fIwhite\fP\fB;\fP
-		\fBfloat\fP \fIwhite_r\fP\fB;\fP
-		\fBfloat\fP \fIwhite_g\fP\fB;\fP
-		\fBfloat\fP \fIwhite_b\fP\fB;\fP
-		\fBfloat\fP \fIM\fP\fB[3][3];\fP
-		\fBfloat\fP \fIMinv\fP\fB[3][3];\fP
-		\fBenum libcolour_rgb_colour_space\fP \fIcolour_space\fP\fB;\fP
-	\fB};\fP
+	struct libcolour_rgb_f {
+		enum libcolour_model \fImodel\fP;
+		float \fIR\fP;
+		float \fIG\fP;
+		float \fIB\fP;
+		int \fIwith_transfer\fP;
+		enum libcolour_encoding_type \fIencoding_type\fP;
+		union {
+			struct {
+				float \fIgamma\fP;
+			} \fIsimple\fP;
+			struct {
+				float \fIgamma\fP;
+				float \fIoffset\fP;
+				float \fIslope\fP;
+				float \fItransition\fP;
+				float \fItransitioninv\fP;
+			} \fIregular\fP;
+			struct {
+				float (*\fIto_encoded_red\fP)(float);
+				float (*\fIto_decoded_red\fP)(float);
+				float (*\fIto_encoded_green\fP)(float);
+				float (*\fIto_decoded_green\fP)(float);
+				float (*\fIto_encoded_blue\fP)(float);
+				float (*\fIto_decoded_blue\fP)(float);
+			} \fIcustom\fP;
+		} \fItransfer\fP;
+		struct libcolour_ciexyy \fIred\fP;
+		struct libcolour_ciexyy \fIgreen\fP;
+		struct libcolour_ciexyy \fIblue\fP;
+		struct libcolour_ciexyy \fIwhite\fP;
+		float \fIwhite_r\fP;
+		float \fIwhite_g\fP;
+		float \fIwhite_b\fP;
+		float \fIM\fP[3][3];
+		float \fIMinv\fP[3][3];
+		enum libcolour_rgb_colour_space \fIcolour_space\fP;
+	};
 
 .fi
 .I .model

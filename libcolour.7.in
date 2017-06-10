@@ -373,7 +373,7 @@ Apply the sRGB transfer function.
 Unapply the sRGB transfer function.
 .TP
 .BR libcolour_delta_e (3)
-Calculate delta E*_ab distance.
+Calculate the delta E*_ab distance.
 .TP
 .BR libcolour_proper (3)
 Sets any member or submember that may

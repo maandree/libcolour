@@ -1,0 +1,35 @@
+.TH LIBCOLOUR_SRGB_ENCODE 3 libcolour
+.SH NAME
+libcolour_srgb_encode - Apply the sRGB transfer function
+.SH SYNOPSIS
+.nf
+#include <libcolour.h>
+
+float       \fBlibcolour_srgb_encode_f\fP(float \fIvalue\fP);
+double      \fBlibcolour_srgb_encode_lf\fP(double \fIvalue\fP);
+long double \fBlibcolour_srgb_encode_llf\fP(long double \fIvalue\fP);
+
+#define \fBlibcolour_srgb_encode\fP(\fIvalue\fP)\\
+	(_Generic((\fIvalue\fP),\\
+	          float:       \fBlibcolour_srgb_encode_f\fP(\fIvalue\fP),\\
+	          double:      \fBlibcolour_srgb_encode_lf\fP(\fIvalue\fP),\\
+	          long double: \fBlibcolour_srgb_encode_llf\fP(\fIvalue\fP)))
+.fi
+.SH DESCRIPTION
+.B libcolour_srgb_encode
+and its non-generic functions apply the sRGB transfer
+function to a
+.IR value .
+If
+.I value
+is negative, the transfer function is applied to the
+absolute value of
+.I value
+and the negative of the result is returned.
+.SH SEE ALSO
+.BR libcolour (7),
+.BR libcolour_srgb_decode (3),
+.BR LIBCOLOUR_SRGB (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >
