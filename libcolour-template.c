@@ -16,7 +16,7 @@
 #endif
 
 
-#define MARSHAL_VERSION 0
+#define MARSHAL_VERSION 1
 
 
 
@@ -710,6 +710,95 @@ libcolour_marshal(const libcolour_colour_t *colour, void *buf)
 }
 
 
+static size_t
+libcolour_unmarshal_version_0_rgb(void *colour, const void *buf)
+{
+	libcolour_rgb_t *c = colour;
+	struct old_rgb {
+		enum libcolour_model model;
+		TYPE R;
+		TYPE G;
+		TYPE B;
+		int with_transfer;
+		enum libcolour_encoding_type encoding_type;
+		TYPE gamma;
+		TYPE offset;
+		TYPE slope;
+		TYPE transition;
+		TYPE transitioninv;
+		TYPE (*to_encoded_red)(TYPE);
+		TYPE (*to_decoded_red)(TYPE);
+		TYPE (*to_encoded_green)(TYPE);
+		TYPE (*to_decoded_green)(TYPE);
+		TYPE (*to_encoded_blue)(TYPE);
+		TYPE (*to_decoded_blue)(TYPE);
+		libcolour_ciexyy_t red;
+		libcolour_ciexyy_t green;
+		libcolour_ciexyy_t blue;
+		libcolour_ciexyy_t white;
+		TYPE white_r;
+		TYPE white_g;
+		TYPE white_b;
+		TYPE M[3][3];
+		TYPE Minv[3][3];
+		enum libcolour_rgb_colour_space colour_space;
+	} old_c;
+	if (c) {
+		memcpy(&old_c, (const char *)buf + sizeof(int), sizeof(old_c));
+		memset(&c->transfer, 0, sizeof(c->transfer));
+		c->model = old_c.model;
+		c->R = old_c.R;
+		c->G = old_c.G;
+		c->B = old_c.B;
+		c->with_transfer = old_c.with_transfer;
+		c->encoding_type = old_c.encoding_type;
+		if (c->encoding_type == LIBCOLOUR_ENCODING_TYPE_SIMPLE) {
+			c->transfer.simple.gamma = old_c.gamma;
+		} else if (c->encoding_type == LIBCOLOUR_ENCODING_TYPE_REGULAR) {
+			c->transfer.regular.gamma = old_c.gamma;
+			c->transfer.regular.offset = old_c.offset;
+			c->transfer.regular.slope = old_c.slope;
+			c->transfer.regular.transition = old_c.transition;
+			c->transfer.regular.transitioninv = old_c.transitioninv;
+		} else if (c->encoding_type == LIBCOLOUR_ENCODING_TYPE_CUSTOM) {
+			c->transfer.custom.to_encoded_red = old_c.to_encoded_red;
+			c->transfer.custom.to_decoded_red = old_c.to_decoded_red;
+			c->transfer.custom.to_encoded_green = old_c.to_encoded_green;
+			c->transfer.custom.to_decoded_green = old_c.to_decoded_green;
+			c->transfer.custom.to_encoded_blue = old_c.to_encoded_blue;
+			c->transfer.custom.to_decoded_blue = old_c.to_decoded_blue;
+		}
+		c->red = old_c.red;
+		c->green = old_c.green;
+		c->blue = old_c.blue;
+		c->white = old_c.white;
+		c->white_r = old_c.white_r;
+		c->white_g = old_c.white_g;
+		c->white_b = old_c.white_b;
+		c->M[0][0] = old_c.M[0][0];
+		c->M[0][1] = old_c.M[0][1];
+		c->M[0][2] = old_c.M[0][2];
+		c->M[1][0] = old_c.M[1][0];
+		c->M[1][1] = old_c.M[1][1];
+		c->M[1][2] = old_c.M[1][2];
+		c->M[2][0] = old_c.M[2][0];
+		c->M[2][1] = old_c.M[2][1];
+		c->M[2][2] = old_c.M[2][2];
+		c->Minv[0][0] = old_c.Minv[0][0];
+		c->Minv[0][1] = old_c.Minv[0][1];
+		c->Minv[0][2] = old_c.Minv[0][2];
+		c->Minv[1][0] = old_c.Minv[1][0];
+		c->Minv[1][1] = old_c.Minv[1][1];
+		c->Minv[1][2] = old_c.Minv[1][2];
+		c->Minv[2][0] = old_c.Minv[2][0];
+		c->Minv[2][1] = old_c.Minv[2][1];
+		c->Minv[2][2] = old_c.Minv[2][2];
+		c->colour_space = old_c.colour_space;
+	}
+	return sizeof(int) + sizeof(old_c);
+}
+
+
 size_t
 libcolour_unmarshal(libcolour_colour_t *colour, const void *buf)
 {
@@ -717,7 +806,7 @@ libcolour_unmarshal(libcolour_colour_t *colour, const void *buf)
 	size_t r;
 	int ver;
 	ver = *(const int *)buf;
-	if (ver != MARSHAL_VERSION) {
+	if (ver < 0 || ver > MARSHAL_VERSION) {
 		errno = EINVAL;
 		return 0;
 	}
@@ -725,6 +814,10 @@ libcolour_unmarshal(libcolour_colour_t *colour, const void *buf)
 	switch (model) {
 #define X(C, T, N)\
 		case C:\
+			if (C == LIBCOLOUR_RGB && ver == 0) {\
+				r = libcolour_unmarshal_version_0_rgb(colour, buf);\
+				break;\
+			}\
 			if (colour)\
 				memcpy(colour, (const char *)buf + sizeof(int), sizeof(T));\
 			r = sizeof(int) + sizeof(T);\
