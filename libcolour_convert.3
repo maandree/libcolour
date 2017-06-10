@@ -1,0 +1,60 @@
+.TH LIBCOLOUR_CONVERT 3 libcolour
+.SH NAME
+libcolour_convert - Colour space and colour model conversion
+.SH SYNOPSIS
+.nf
+#include <libcolour.h>
+
+int \fBlibcolour_convert_f\fP(const libcolour_colour_f_t *\fIfrom\fP, libcolour_colour_f_t *\fIto\fP);
+int \fBlibcolour_convert_lf\fP(const libcolour_colour_lf_t *\fIfrom\fP, libcolour_colour_lf_t *\fIto\fP);
+int \fBlibcolour_convert_llf\fP(const libcolour_colour_llf_t *\fIfrom\fP, libcolour_colour_llf_t *\fIto\fP);
+
+#define \fBlibcolour_convert\fP(\fIfrom\fP, \fIto\fP)\\
+	(_Generic((\fIfrom\fP),\\
+	          libcolour_colour_f_t *:   \fBlibcolour_convert_f\fP(\fIcolour\fP),\\
+	          libcolour_colour_lf_t *:  \fBlibcolour_convert_lf\fP(\fIcolour\fP),\\
+	          libcolour_colour_llf_t *: \fBlibcolour_convert_llf\fP(\fIcolour\fP)))
+	          /* list is incomplete */
+.fi
+.SH DESCRIPTION
+.B libcolour_convert
+and its non-generic functions converts the colour
+stored in
+.I from
+to the colour space specified in
+.I to
+and stores the new colour values in
+.IR to .
+Additionally, the the transfer function is applied
+or unapplied if specified differently in
+.I from
+and
+.IR to .
+.SH RETURN VALUES
+Upon successful completion, the functions returns 0.
+Otherwise the function return -1 with
+.I errno
+set to indicate the error.
+.SH ERRORS
+.TP
+.B EINVAL
+.I from->model
+or
+.I to->model
+does not refer to a recognised colour model.
+.SH NOTES
+.B libcolour_convert
+cannot convert between
+.BR float ,
+.BR double ,
+and
+.BR long\ double ,
+.I from
+and
+.I to
+most use the same floating-point type.
+.SH SEE ALSO
+.BR libcolour (7)
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >
