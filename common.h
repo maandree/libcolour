@@ -318,9 +318,10 @@
 
 #define YUV_TO_YDBDR(FROM_Y, FROM_U, FROM_V, TO_Y, TO_DB, TO_DR)\
 	do {\
+		TYPE U__ = (FROM_U), V__ = (FROM_V);\
 		(TO_Y)  = (FROM_Y);\
-		(TO_DB) = (FROM_U) *  D(3.069);\
-		(TO_DR) = (FROM_V) * D(-2.169);\
+		(TO_DB) = U__ *  D(3.069);\
+		(TO_DR) = V__ * D(-2.169);\
 	} while (0)
 
 #define CIEXYZ_TO_YDBDR(FROM_X, FROM_Y, FROM_Z, TO_Y, TO_DB, TO_DR)\
@@ -337,9 +338,10 @@
 
 #define YDBDR_TO_YUV(FROM_Y, FROM_DB, FROM_DR, TO_Y, TO_U, TO_V)\
 	do {\
+		TYPE DB__ = (FROM_DB), DR__ = (FROM_DR);\
 		(TO_Y) = (FROM_Y);\
-		(TO_U) = (FROM_DB) /  D(3.069);\
-		(TO_V) = (FROM_DR) / D(-2.169);\
+		(TO_U) = DB__ /  D(3.069);\
+		(TO_V) = DR__ / D(-2.169);\
 	} while (0)
 
 #define SRGB_TO_YUV(FROM_R, FROM_G, FROM_B, TO_Y, TO_U, TO_V)\
@@ -439,11 +441,12 @@
 
 #define CIE1960UCS_TO_CIEUVW(FROM_U, FROM_V, FROM_Y, TO_U, TO_V, TO_W, TO_U0, TO_V0)\
 	do {\
+		TYPE U__ = (FROM_U), V__ = (FROM_V), u0__ = (TO_U0), v0__ = (TO_V0);\
 		TYPE Y__ = 25 * xcbrt((FROM_Y)) - 17;\
 		TYPE w__ = Y__ * 13;\
-		to->U = w__ * ((FROM_U) - (TO_U0));\
-		to->V = w__ * ((FROM_V) - (TO_V0));\
-		to->W = Y__;\
+		(to->U) = w__ * (U__ - u0__);\
+		(to->V) = w__ * (V__ - v0__);\
+		(to->W) = Y__;\
 	} while (0)
 
 
