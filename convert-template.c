@@ -408,7 +408,8 @@ to_cielchuv(const libcolour_colour_t *restrict from, libcolour_cielchuv_t *restr
 				one_revolution = to->one_revolution;
 				*to = from->cielchuv;
 				to->one_revolution = one_revolution;
-				to->h = to->h / from->cielchuv.one_revolution * one_revolution;
+				to->h *= one_revolution;
+				to->h /= from->cielchuv.one_revolution;
 			}
 			break;
 		}
