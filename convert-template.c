@@ -16,6 +16,24 @@ static void to_cie1960ucs(const libcolour_colour_t *restrict from, libcolour_cie
 static void to_cieuvw(const libcolour_colour_t *restrict from, libcolour_cieuvw_t *restrict to);
 
 
+#define CONV_0(MACRO, FROM, TO)\
+	MACRO(((const libcolour_rgb_t *)(FROM))->R,\
+	      ((const libcolour_rgb_t *)(FROM))->G,\
+	      ((const libcolour_rgb_t *)(FROM))->B,\
+	      ((libcolour_rgb_t *)(TO))->R,\
+	      ((libcolour_rgb_t *)(TO))->G,\
+	      ((libcolour_rgb_t *)(TO))->B)
+
+#define CONV_N(MACRO, FROM, TO, ...)\
+	MACRO(((const libcolour_rgb_t *)(FROM))->R,\
+	      ((const libcolour_rgb_t *)(FROM))->G,\
+	      ((const libcolour_rgb_t *)(FROM))->B,\
+	      ((libcolour_rgb_t *)(TO))->R,\
+	      ((libcolour_rgb_t *)(TO))->G,\
+	      ((libcolour_rgb_t *)(TO))->B,\
+	      __VA_ARGS__)
+
+
 static void
 rgb_encode(libcolour_rgb_t *restrict colour, const libcolour_rgb_t *restrict space)
 {
@@ -136,7 +154,7 @@ to_rgb(const libcolour_colour_t *restrict from, libcolour_rgb_t *restrict to)
 		from = (const void *)&tmp;
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_RGB(from->ciexyz.X, from->ciexyz.Y, from->ciexyz.Z, to->R, to->G, to->B, to->Minv);
+		CONV_N(CIEXYZ_TO_RGB, from, to, to->Minv);
 		break;
 	}
 
@@ -161,7 +179,7 @@ to_srgb(const libcolour_colour_t *restrict from, libcolour_srgb_t *restrict to)
 		from = (const void *)&tmp_ciexyz;
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_SRGB(from->ciexyz.X, from->ciexyz.Y, from->ciexyz.Z, to->R, to->G, to->B);
+		CONV_0(CIEXYZ_TO_SRGB, from, to);
 		break;
 	case LIBCOLOUR_SRGB:
 	srgb_to_srgb:
@@ -178,19 +196,19 @@ to_srgb(const libcolour_colour_t *restrict from, libcolour_srgb_t *restrict to)
 		}
 		return;
 	case LIBCOLOUR_YIQ:
-		YIQ_TO_SRGB(from->yiq.Y, from->yiq.I, from->yiq.Q, to->R, to->G, to->B);
+		CONV_0(YIQ_TO_SRGB, from, to);
 		break;
 	case LIBCOLOUR_YDBDR:
-		YDBDR_TO_SRGB(from->ydbdr.Y, from->ydbdr.Db, from->ydbdr.Dr, to->R, to->G, to->B);
+		CONV_0(YDBDR_TO_SRGB, from, to);
 		break;
 	case LIBCOLOUR_YPBPR:
-		YPBPR_TO_SRGB(from->ypbpr.Y, from->ypbpr.Pb, from->ypbpr.Pr, to->R, to->G, to->B);
+		CONV_0(YPBPR_TO_SRGB, from, to);
 		break;
 	case LIBCOLOUR_YUV:
-		YUV_TO_SRGB(from->yuv.Y, from->yuv.U, from->yuv.V, to->R, to->G, to->B);
+		CONV_0(YUV_TO_SRGB, from, to);
 		break;
 	case LIBCOLOUR_YCGCO:
-		YCGCO_TO_SRGB(from->ycgco.Y, from->ycgco.Cg, from->ycgco.Co, to->R, to->G, to->B);
+		CONV_0(YCGCO_TO_SRGB, from, to);
 		break;
 	}
 	if (to->with_transfer) {
@@ -234,7 +252,7 @@ to_ciexyy(const libcolour_colour_t *restrict from, libcolour_ciexyy_t *restrict 
 		from = (const void *)&tmp2;
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_CIEXYY(from->ciexyz.X, from->ciexyz.Y, from->ciexyz.Z, to->x, to->y, to->Y);
+		CONV_0(CIEXYZ_TO_CIEXYY, from, to);
 		break;
 	}
 }
@@ -276,13 +294,13 @@ to_ciexyz(const libcolour_colour_t *restrict from, libcolour_ciexyz_t *restrict 
 		SRGB_TO_CIEXYZ(R, G, B, to->X, to->Y, to->Z);
 		break;
 	case LIBCOLOUR_CIEXYY:
-		CIEXYY_TO_CIEXYZ(from->ciexyy.x, from->ciexyy.y, from->ciexyy.Y, to->X, to->Y, to->Z);
+		CONV_0(CIEXYY_TO_CIEXYZ, from, to);
 		break;
 	case LIBCOLOUR_CIEXYZ:
 		*to = from->ciexyz;
 		break;
 	case LIBCOLOUR_CIELAB:
-		CIELAB_TO_CIEXYZ(from->cielab.L, from->cielab.a, from->cielab.b, to->X, to->Y, to->Z);
+		CONV_0(CIELAB_TO_CIEXYZ, from, to);
 		break;
 	case LIBCOLOUR_CIELCHUV:
 		tmp.cieluv.model = LIBCOLOUR_CIELUV;
@@ -291,23 +309,22 @@ to_ciexyz(const libcolour_colour_t *restrict from, libcolour_ciexyz_t *restrict 
 		from = (const void *)&tmp.cieluv;
 		/* fall through */
 	case LIBCOLOUR_CIELUV:
-		CIELUV_TO_CIEXYZ(from->cieluv.L, from->cieluv.u, from->cieluv.v, to->X, to->Y, to->Z,
-				 from->cieluv.white.X, from->cieluv.white.Y, from->cieluv.white.Z);
+		CONV_N(CIELUV_TO_CIEXYZ, from, to, from->cieluv.white.X, from->cieluv.white.Y, from->cieluv.white.Z);
 		break;
 	case LIBCOLOUR_YIQ:
-		YIQ_TO_CIEXYZ(from->yiq.Y, from->yiq.I, from->yiq.Q, to->X, to->Y, to->Z);
+		CONV_0(YIQ_TO_CIEXYZ, from, to);
 		break;
 	case LIBCOLOUR_YDBDR:
-		YDBDR_TO_CIEXYZ(from->ydbdr.Y, from->ydbdr.Db, from->ydbdr.Dr, to->X, to->Y, to->Z);
+		CONV_0(YDBDR_TO_CIEXYZ, from, to);
 		break;
 	case LIBCOLOUR_YUV:
-		YUV_TO_CIEXYZ(from->yuv.Y, from->yuv.U, from->yuv.V, to->X, to->Y, to->Z);
+		CONV_0(YUV_TO_CIEXYZ, from, to);
 		break;
 	case LIBCOLOUR_YPBPR:
-		YPBPR_TO_CIEXYZ(from->ypbpr.Y, from->ypbpr.Pb, from->ypbpr.Pr, to->X, to->Y, to->Z);
+		CONV_0(YPBPR_TO_CIEXYZ, from, to);
 		break;
 	case LIBCOLOUR_YCGCO:
-		YCGCO_TO_CIEXYZ(from->ycgco.Y, from->ycgco.Cg, from->ycgco.Co, to->X, to->Y, to->Z);
+		CONV_0(YCGCO_TO_CIEXYZ, from, to);
 		break;
 	case LIBCOLOUR_CIEUVW:
 		tmp.cie1960ucs.model = LIBCOLOUR_CIE1960UCS;
@@ -315,7 +332,7 @@ to_ciexyz(const libcolour_colour_t *restrict from, libcolour_ciexyz_t *restrict 
 		from = (const void *)&tmp.cie1960ucs;
 		/* fall through */
 	case LIBCOLOUR_CIE1960UCS:
-		CIE1960UCS_TO_CIEXYZ(from->cie1960ucs.u, from->cie1960ucs.v, from->cie1960ucs.Y, to->X, to->Y, to->Z);
+		CONV_0(CIE1960UCS_TO_CIEXYZ, from, to);
 		break;
 	}
 }
@@ -332,7 +349,7 @@ to_cielab(const libcolour_colour_t *restrict from, libcolour_cielab_t *restrict 
 		from = (const void *)&tmp;
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_CIELAB(from->ciexyz.X, from->ciexyz.Y, from->ciexyz.Z, to->L, to->a, to->b);
+		CONV_0(CIEXYZ_TO_CIELAB, from, to);
 		break;
 	case LIBCOLOUR_CIELAB:
 		*to = from->cielab;
@@ -380,8 +397,7 @@ to_cieluv(const libcolour_colour_t *restrict from, libcolour_cieluv_t *restrict 
 		from = (const void *)&tmp;
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_CIELUV(from->ciexyz.X, from->ciexyz.Y, from->ciexyz.Z,
-				 to->L, to->u, to->v, to->white.X, to->white.Y, to->white.Z);
+		CONV_N(CIEXYZ_TO_CIELUV, from, to, to->white.X, to->white.Y, to->white.Z);
 		break;
 	}
 }
@@ -391,7 +407,7 @@ static void
 to_cielchuv(const libcolour_colour_t *restrict from, libcolour_cielchuv_t *restrict to)
 {
 	libcolour_cieluv_t tmp1, tmp2;
-	TYPE one_revolution, L, u, v;
+	TYPE one_revolution;
 	switch (from->model) {
 	case LIBCOLOUR_CIELCHUV:
 		if (to->white.X == from->cielchuv.white.X &&
@@ -421,11 +437,9 @@ to_cielchuv(const libcolour_colour_t *restrict from, libcolour_cielchuv_t *restr
 			tmp2.model = LIBCOLOUR_CIELUV;
 			tmp2.white = to->white;
 			to_cieluv(from, &tmp2);
-			L = tmp2.L, u = tmp2.u, v = tmp2.v;
-		} else {
-			L = from->cieluv.L, u = from->cieluv.u, v = from->cieluv.v;
+			from = (const void *)&tmp2;
 		}
-		CIELUV_TO_CIELCHUV(L, u, v, to->L, to->C, to->h, to->one_revolution);
+		CONV_N(CIELUV_TO_CIELCHUV, from, to, to->one_revolution);
 		break;
 	}
 }
@@ -444,14 +458,14 @@ to_yiq(const libcolour_colour_t *restrict from, libcolour_yiq_t *restrict to)
 			tmp.srgb.with_transfer = 0;
 			to_srgb(from, &tmp.srgb);
 		}
-		SRGB_TO_YIQ(tmp.srgb.R, tmp.srgb.G, tmp.srgb.B, to->Y, to->I, to->Q);
+		CONV_0(SRGB_TO_YIQ, &tmp, to);
 		break;
 	default:
 		tmp.model = LIBCOLOUR_CIEXYZ;
 		to_ciexyz(from, &tmp.ciexyz);
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_YIQ(tmp.ciexyz.X, tmp.ciexyz.Y, tmp.ciexyz.Z, to->Y, to->I, to->Q);
+		CONV_0(CIEXYZ_TO_YIQ, &tmp, to);
 		break;
 	}
 }
@@ -470,17 +484,17 @@ to_ydbdr(const libcolour_colour_t *restrict from, libcolour_ydbdr_t *restrict to
 			tmp.srgb.with_transfer = 0;
 			to_srgb(from, &tmp.srgb);
 		}
-		SRGB_TO_YDBDR(tmp.srgb.R, tmp.srgb.G, tmp.srgb.B, to->Y, to->Db, to->Dr);
+		CONV_0(SRGB_TO_YDBDR, &tmp, to);
 		break;
 	case LIBCOLOUR_YUV:
-		YUV_TO_YDBDR(tmp.yuv.Y, tmp.yuv.U, tmp.yuv.V, to->Y, to->Db, to->Dr);
+		CONV_0(YUV_TO_YDBDR, &tmp, to);
 		break;
 	default:
 		tmp.model = LIBCOLOUR_CIEXYZ;
 		to_ciexyz(from, &tmp.ciexyz);
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_YDBDR(tmp.ciexyz.X, tmp.ciexyz.Y, tmp.ciexyz.Z, to->Y, to->Db, to->Dr);
+		CONV_0(CIEXYZ_TO_YDBDR, &tmp, to);
 		break;
 	}
 }
@@ -495,21 +509,21 @@ to_yuv(const libcolour_colour_t *restrict from, libcolour_yuv_t *restrict to)
 		*to = from->yuv;
 		break;
 	case LIBCOLOUR_YDBDR:
-		YDBDR_TO_YUV(from->ydbdr.Y, from->ydbdr.Db, from->ydbdr.Dr, to->Y, to->U, to->V);
+		CONV_0(YDBDR_TO_YUV, from, to);
 		break;
 	case LIBCOLOUR_SRGB:
 		if (tmp.srgb.with_transfer) {
 			tmp.srgb.with_transfer = 0;
 			to_srgb(from, &tmp.srgb);
 		}
-		SRGB_TO_YUV(tmp.srgb.R, tmp.srgb.G, tmp.srgb.B, to->Y, to->U, to->V);
+		CONV_0(SRGB_TO_YUV, &tmp, to);
 		break;
 	default:
 		tmp.model = LIBCOLOUR_CIEXYZ;
 		to_ciexyz(from, &tmp.ciexyz);
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_YUV(tmp.ciexyz.X, tmp.ciexyz.Y, tmp.ciexyz.Z, to->Y, to->U, to->V);
+		CONV_0(CIEXYZ_TO_YUV, &tmp, to);
 		break;
 	}
 }
@@ -528,14 +542,14 @@ to_ypbpr(const libcolour_colour_t *restrict from, libcolour_ypbpr_t *restrict to
 			tmp.srgb.with_transfer = 0;
 			to_srgb(from, &tmp.srgb);
 		}
-		SRGB_TO_YPBPR(tmp.srgb.R, tmp.srgb.G, tmp.srgb.B, to->Y, to->Pb, to->Pr);
+		CONV_0(SRGB_TO_YPBPR, &tmp, to);
 		break;
 	default:
 		tmp.model = LIBCOLOUR_CIEXYZ;
 		to_ciexyz(from, &tmp.ciexyz);
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_YPBPR(tmp.ciexyz.X, tmp.ciexyz.Y, tmp.ciexyz.Z, to->Y, to->Pb, to->Pr);
+		CONV_0(CIEXYZ_TO_YPBPR, &tmp, to);
 		break;
 	}
 }
@@ -554,14 +568,14 @@ to_ycgco(const libcolour_colour_t *restrict from, libcolour_ycgco_t *restrict to
 			tmp.srgb.with_transfer = 0;
 			to_srgb(from, &tmp.srgb);
 		}
-		SRGB_TO_YCGCO(tmp.srgb.R, tmp.srgb.G, tmp.srgb.B, to->Y, to->Cg, to->Co);
+		CONV_0(SRGB_TO_YCGCO, &tmp, to);
 		break;
 	default:
 		tmp.model = LIBCOLOUR_CIEXYZ;
 		to_ciexyz(from, &tmp.ciexyz);
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_YCGCO(tmp.ciexyz.X, tmp.ciexyz.Y, tmp.ciexyz.Z, to->Y, to->Cg, to->Co);
+		CONV_0(CIEXYZ_TO_YCGCO, &tmp, to);
 		break;
 	}
 }
@@ -576,15 +590,14 @@ to_cie1960ucs(const libcolour_colour_t *restrict from, libcolour_cie1960ucs_t *r
 		*to = from->cie1960ucs;
 		return;
 	case LIBCOLOUR_CIEUVW:
-		CIEUVW_TO_CIE1960UCS(from->cieuvw.U, from->cieuvw.V, from->cieuvw.W,
-				     to->u, to->v, to->Y, from->cieuvw.u0, from->cieuvw.v0);
+		CONV_N(CIEUVW_TO_CIE1960UCS, from, to, from->cieuvw.u0, from->cieuvw.v0);
 		return;
 	default:
 		tmp.model = LIBCOLOUR_CIEXYZ;
 		to_ciexyz(from, &tmp.ciexyz);
 		/* fall through */
 	case LIBCOLOUR_CIEXYZ:
-		CIEXYZ_TO_CIE1960UCS(tmp.ciexyz.X, tmp.ciexyz.Y, tmp.ciexyz.Z, to->u, to->v, to->Y);
+		CONV_0(CIEXYZ_TO_CIE1960UCS, &tmp, to);
 		return;
 	}
 }
@@ -596,16 +609,14 @@ to_cieuvw(const libcolour_colour_t *restrict from, libcolour_cieuvw_t *restrict 
 	libcolour_colour_t tmp = *from;
 	switch (from->model) {
 	case LIBCOLOUR_CIEUVW:
-		CIEUVW_TO_CIEUVW(from->cieuvw.U, from->cieuvw.V, from->cieuvw.W, to->U, to->V, to->W,
-				 from->cieuvw.u0, from->cieuvw.v0, to->u0, to->v0);
+		CONV_N(CIEUVW_TO_CIEUVW, from, to, from->cieuvw.u0, from->cieuvw.v0, to->u0, to->v0);
 		break;
 	default:
 		tmp.model = LIBCOLOUR_CIE1960UCS;
 		to_cie1960ucs(from, &tmp.cie1960ucs);
 		/* fall through */
 	case LIBCOLOUR_CIE1960UCS:
-		CIE1960UCS_TO_CIEUVW(tmp.cie1960ucs.u, tmp.cie1960ucs.v, tmp.cie1960ucs.Y,
-				     to->U, to->V, to->W, to->u0, to->v0);
+		CONV_N(CIE1960UCS_TO_CIEUVW, &tmp, to, to->u0, to->v0);
 		break;
 	}
 }
