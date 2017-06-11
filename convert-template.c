@@ -1,19 +1,8 @@
 /* See LICENSE file for copyright and license details. */
 
-static void to_rgb(const libcolour_colour_t *restrict from, libcolour_rgb_t *restrict to);
-static void to_srgb(const libcolour_colour_t *restrict from, libcolour_srgb_t *restrict to);
-static void to_ciexyy(const libcolour_colour_t *restrict from, libcolour_ciexyy_t *restrict to);
-static void to_ciexyz(const libcolour_colour_t *restrict from, libcolour_ciexyz_t *restrict to);
-static void to_cielab(const libcolour_colour_t *restrict from, libcolour_cielab_t *restrict to);
-static void to_cieluv(const libcolour_colour_t *restrict from, libcolour_cieluv_t *restrict to);
-static void to_cielchuv(const libcolour_colour_t *restrict from, libcolour_cielchuv_t *restrict to);
-static void to_yiq(const libcolour_colour_t *restrict from, libcolour_yiq_t *restrict to);
-static void to_ydbdr(const libcolour_colour_t *restrict from, libcolour_ydbdr_t *restrict to);
-static void to_yuv(const libcolour_colour_t *restrict from, libcolour_yuv_t *restrict to);
-static void to_ypbpr(const libcolour_colour_t *restrict from, libcolour_ypbpr_t *restrict to);
-static void to_ycgco(const libcolour_colour_t *restrict from, libcolour_ycgco_t *restrict to);
-static void to_cie1960ucs(const libcolour_colour_t *restrict from, libcolour_cie1960ucs_t *restrict to);
-static void to_cieuvw(const libcolour_colour_t *restrict from, libcolour_cieuvw_t *restrict to);
+#define X(C, T, N) static void to_##N(const libcolour_colour_t *restrict from, T *restrict to);
+LIST_MODELS(X)
+#undef X
 
 
 #define CONV_0(MACRO, FROM, TO)\
