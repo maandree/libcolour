@@ -22,4 +22,4 @@ Support for generic additive colour spaces (3 channels and more)
 Support for generic subtractive colour spaces (3 channels and more)
 
 GPU accelerate libcolour_convert_en_masse
-Premulti matrices for faster conversion from and to RGB
+Premultiply matrices for faster conversion from and to RGB
