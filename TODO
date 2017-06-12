@@ -5,6 +5,7 @@ Colour models and colour spaces:
 	YCbCr
 	TSL
 	Y'UV
+	Y'IQ
 	Hunter 1948 color space (see Wikipedia article on CIELAB; see http://www.konicaminolta.com/instruments/knowledge/color/part4/06.html)
 	Hunter Rdab
 	CIELCh (CIEHLC) (see Wikipedia article on CIELAB)
