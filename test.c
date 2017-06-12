@@ -11,6 +11,8 @@
 
 #define libcolour_colour_t  libcolour_colour_lf_t
 #define libcolour_rgb_t     libcolour_rgb_lf_t
+#define libcolour_srgb_t    libcolour_srgb_lf_t
+#define libcolour_ciexyy_t  libcolour_ciexyy_lf_t
 #define libcolour_unmarshal libcolour_unmarshal_lf
 
 
@@ -87,7 +89,7 @@ test_2convert(libcolour_colour_t *c1, libcolour_colour_t *c2, libcolour_colour_t
 		return 0;
 	return 1;
 }
-  
+
 
 static int
 test_2convert_11(libcolour_colour_t *c1, libcolour_model_t model)
@@ -112,7 +114,7 @@ test_2convert_11(libcolour_colour_t *c1, libcolour_model_t model)
 		return r1 & r2;
 	case LIBCOLOUR_CIELCHUV:
 		c2.cielchuv.one_revolution = 360.;
-		/* fall though */
+		/* fall through */
 	case LIBCOLOUR_CIELUV:
 		c2.cieluv.white.model = LIBCOLOUR_CIEXYZ;
 		c2.cieluv.white.X = 1.0294;
@@ -143,7 +145,7 @@ test_2convert_1n(libcolour_model_t model, const char *model_name, double ch1, do
 	case LIBCOLOUR_CIELCHUV:
 		if (ch3 > 0.9999)
 			return 1;
-		/* fall though */
+		/* fall through */
 	default:
 		c1.srgb.R = ch1, c1.srgb.G = ch2, c1.srgb.B = ch3;
 		break;
@@ -182,7 +184,7 @@ test_2convert_1n(libcolour_model_t model, const char *model_name, double ch1, do
 				c1.cieluv.white.Y = 1;
 				c1.cieluv.white.Z = 0.9118;
 			} else if (run == 3 && model == LIBCOLOUR_CIELCHUV) {
-				c1.cieluv.white.X = 1.03;
+				c1.cieluv.white.X = 1.03; 
 				c1.cieluv.white.Y = 0.8;
 				c1.cieluv.white.Z = 0.92;
 			} else {
@@ -435,6 +437,47 @@ test_en_masse(libcolour_colour_t *c1, libcolour_colour_t *c2, libcolour_colour_t
 }
 
 
+static int
+test_partitioned_en_masse(void)
+{
+	libcolour_srgb_t from;
+	libcolour_ciexyy_t to;
+	double ch1[32], ch2[32], ch3[32];
+	int i;
+
+	from.model = LIBCOLOUR_SRGB;
+	from.with_transfer = 0;
+	to.model = LIBCOLOUR_CIEXYY;
+
+	for (i = 0; i < 32; i++) {
+		ch1[i] = (i + 1.) / 32.;
+		ch2[i] = (i + 1.) / 32.;
+		ch3[i] = (i + 1.) / 32.;
+	}
+
+	for (i =  3; i <  6; i++) ch1[i] = ch2[i] = ch3[i] = 0;
+	for (i = 20; i < 30; i++) ch1[i] = ch2[i] = ch3[i] = 0;
+
+	if (libcolour_convert_en_masse(&from, &to, LIBCOLOUR_CONVERT_EN_MASSE_SEPARATED, 32, ch1, ch2, ch3))
+		return -1;
+
+	for (i = 0; i < 32; i++) {
+		if ((3 <= i && i < 6) || (20 <= i && i < 30))
+			from.R = from.G = from.B = 0;
+		else
+			from.R = from.G = from.B = (i + 1.) / 32.;
+		if (libcolour_convert(&from, &to))
+			return -1;
+		if (ch1[i] != to.x || ch2[i] != to.y || ch3[i] != to.Y) {
+			printf("test_partitioned_en_masse failed at %i\n", i);
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+
 /**
  * Test libcolour
  * 
@@ -467,7 +510,7 @@ main(int argc, char *argv[])
 	c2.model = LIBCOLOUR_RGB;
 	c2.rgb.with_transfer = 0;
 	if (libcolour_get_rgb_colour_space(&c2.rgb, LIBCOLOUR_RGB_COLOUR_SPACE_SRGB)) {
-		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 1;
 		goto colour_spaces_done;
 	}
 	if (c2.rgb.white_r != 1 || c2.rgb.white_g != 1 || c2.rgb.white_b != 1 ||
@@ -477,7 +520,7 @@ main(int argc, char *argv[])
 	    c2.rgb.encoding_type != LIBCOLOUR_ENCODING_TYPE_REGULAR || c2.rgb.SLOPE != 12.92
 	    || c2.rgb.OFFSET != 0.055 || c2.rgb.TRANSITIONINV != c2.rgb.TRANSITION * c2.rgb.SLOPE ||
 	    !ftest(c2.rgb.TRANSITION, 0.00313067, 0.00000001)) {
-		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 1;
 		goto colour_spaces_done;
 	}
 	t1 = c2.rgb.TRANSITION * c2.rgb.SLOPE;
@@ -488,21 +531,21 @@ main(int argc, char *argv[])
 	    c2.rgb.blue.x != 0.15 || c2.rgb.blue.y != 0.06 || !ftest(c2.rgb.blue.Y, 0.07215, 0.00005) ||
 	    !ftest(c2.rgb.white.x, 0.312727, 0.000001) || !ftest(c2.rgb.white.y, 0.329023, 0.000001) ||
 	    !ftest(c2.rgb.red.Y + c2.rgb.green.Y + c2.rgb.blue.Y, 1, 0.00000001)) {
-		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 1;
 		goto colour_spaces_done;
 	}
 	if (libcolour_convert(&c1, &c2) ||
 	    !ftest(c1.srgb.R, c2.rgb.R, 0.0000001) ||
 	    !ftest(c1.srgb.G, c2.rgb.G, 0.0000001) ||
 	    !ftest(c1.srgb.B, c2.rgb.B, 0.0000001)) {
-		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 1;
 		goto colour_spaces_done;
 	}
 	if (libcolour_convert(&c2, &c1) ||
 	    !ftest(c1.srgb.R, c2.rgb.R, 0.0000001) ||
 	    !ftest(c1.srgb.G, c2.rgb.G, 0.0000001) ||
 	    !ftest(c1.srgb.B, c2.rgb.B, 0.0000001)) {
-		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 0;
+		printf("LIBCOLOUR_RGB_COLOUR_SPACE_SRGB failed\n"), rc = 1;
 		goto colour_spaces_done;
 	}
 
@@ -511,7 +554,7 @@ main(int argc, char *argv[])
 	c1.cielab.a =  40, c2.cielab.a = -10;
 	c1.cielab.b = -50, c2.cielab.b = -40;
 	if (libcolour_delta_e(&c1, &c2, &t1) || !ftest(t1, 71.4142842854285, 0.0000001))
-		printf("libcolour_delta_e failed\n"), rc = 0;
+		printf("libcolour_delta_e failed\n"), rc = 1;
 
 	rc &= test_rgb(LIBCOLOUR_RGB_COLOUR_SPACE_ADOBE_RGB, 0.3, 0.2, 0.9,
 		       0.379497, 0.282430, 0.914245, 0.195429, 0.098925, 0.790020);
@@ -609,7 +652,7 @@ main(int argc, char *argv[])
 		    !ftest(libcolour_srgb_encode(c1.rgb.R), c2.srgb.R, 0.00000000001) ||
 		    !ftest(libcolour_srgb_encode(c1.rgb.G), c2.srgb.G, 0.00000000001) ||
 		    !ftest(libcolour_srgb_encode(c1.rgb.B), c2.srgb.B, 0.00000000001)) {
-			printf("libcolour_srgb_encode failed\n"), rc = 0;
+			printf("libcolour_srgb_encode failed\n"), rc = 1;
 			goto colour_spaces_done;
 		}
 		if (libcolour_convert(&c2, &c1))
@@ -622,7 +665,7 @@ main(int argc, char *argv[])
 		    !ftest(libcolour_srgb_decode(c2.rgb.R), c1.srgb.R, 0.00000000001) ||
 		    !ftest(libcolour_srgb_decode(c2.rgb.G), c1.srgb.G, 0.00000000001) ||
 		    !ftest(libcolour_srgb_decode(c2.rgb.B), c1.srgb.B, 0.00000000001)) {
-			printf("libcolour_srgb_decode failed\n"), rc = 0;
+			printf("libcolour_srgb_decode failed\n"), rc = 1;
 			goto colour_spaces_done;
 		}
 	}
@@ -645,7 +688,7 @@ main(int argc, char *argv[])
 	if (!ftest(c1.rgb.R, c4.srgb.R, 0.0000001) ||
 	    !ftest(c1.rgb.G, c4.srgb.G, 0.0000001) ||
 	    !ftest(c1.rgb.B, c4.srgb.B, 0.0000001)) {
-		printf("libcolour_convert failed to convert between two transfer functions\n"), rc = 0;
+		printf("libcolour_convert failed to convert between two transfer functions\n"), rc = 1;
 		goto colour_spaces_done;
 	}
 
@@ -654,7 +697,7 @@ main(int argc, char *argv[])
 	if (!ftest(c1.rgb.R, c4.srgb.R, 0.0000001) ||
 	    !ftest(c1.rgb.G, c4.srgb.G, 0.0000001) ||
 	    !ftest(c1.rgb.B, c4.srgb.B, 0.0000001)) {
-		printf("libcolour_convert failed to convert when two different transfer functions are not applied\n"), rc = 0;
+		printf("libcolour_convert failed to convert when two different transfer functions are not applied\n"), rc = 1;
 		goto colour_spaces_done;
 	}
 
@@ -710,27 +753,27 @@ colour_spaces_done:
 	c1.rgb.TO_DECODED_GREEN = NULL;
 	c1.rgb.TO_DECODED_BLUE = NULL;
 	if (libcolour_marshal(&c1, NULL) > sizeof(buf)) {
-		printf("libcolour_marshal failed\n"), rc = 0;
+		printf("libcolour_marshal failed\n"), rc = 1;
 		goto marshal_done;
 	}
 	n = libcolour_marshal(&c1, buf);
 	if (n > sizeof(buf)) {
-		printf("libcolour_marshal failed\n"), rc = 0;
+		printf("libcolour_marshal failed\n"), rc = 1;
 		goto marshal_done;
 	}
 	if (libcolour_unmarshal(NULL, buf) != n) {
-		printf("libcolour_unmarshal failed\n"), rc = 0;
+		printf("libcolour_unmarshal failed\n"), rc = 1;
 		goto marshal_done;
 	}
 	if (libcolour_unmarshal(&c2, buf) != n) {
-		printf("libcolour_unmarshal failed\n"), rc = 0;
+		printf("libcolour_unmarshal failed\n"), rc = 1;
 		goto marshal_done;
 	}
 	if (memcmp(&c2, &c3, sizeof(c2))) {
-		printf("libcolour_(un)marshal failed\n"), rc = 0;
+		printf("libcolour_(un)marshal failed\n"), rc = 1;
 		goto marshal_done;
 	}
- marshal_done:
+marshal_done:
 
 	c1.srgb.model = LIBCOLOUR_SRGB;
 	c1.srgb.R = 0.8;
@@ -743,13 +786,21 @@ colour_spaces_done:
 	c2.srgb.B = 0.3;
 	c2.srgb.with_transfer = 1;
 	c3.model = LIBCOLOUR_CIEXYZ;
-	for (i = 0; i < 15; i++)
-		if (test_en_masse(&c1, &c2, &c3, i))
+	for (i = 0; i < 15; i++) {
+		if (test_en_masse(&c1, &c2, &c3, i)) {
+			rc = 1;
 			goto en_masse_done;
- en_masse_done:
+		}
+	}
+
+	if (test_partitioned_en_masse()) {
+		rc = 1;
+		goto en_masse_done;
+	}
+en_masse_done:
 
 	return rc;
- fail:
+fail:
 	perror(*argv);
 	(void) argc;
 	return 2;

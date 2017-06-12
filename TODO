@@ -21,5 +21,5 @@ Colour models and colour spaces:
 Support for generic additive colour spaces (3 channels and more)
 Support for generic subtractive colour spaces (3 channels and more)
 
-Improve performance of libcolour_convert_en_masse
 GPU accelerate libcolour_convert_en_masse
+Premulti matrices for faster conversion from and to RGB

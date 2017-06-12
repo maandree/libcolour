@@ -8,6 +8,18 @@ TYPE libcolour_srgb_decode(TYPE t) { return srgb_decode(t); }
 
 
 int
+libcolour_convert(const libcolour_colour_t *from, libcolour_colour_t *to)
+{
+	return libcolour_convert_en_masse(from, to,
+					  LIBCOLOUR_CONVERT_EN_MASSE_SEPARATED |
+					  LIBCOLOUR_CONVERT_EN_MASSE_ON_CPU |
+					  LIBCOLOUR_CONVERT_EN_MASSE_NO_OVERRIDE, 1,
+					  &from->srgb.R, &from->srgb.G, &from->srgb.B,
+					  &to->srgb.R, &to->srgb.G, &to->srgb.B);
+}
+
+
+int
 libcolour_delta_e(const libcolour_colour_t *a, const libcolour_colour_t *b, TYPE *e)
 {
 	libcolour_cielab_t u, v;

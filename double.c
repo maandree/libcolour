@@ -82,6 +82,6 @@
 #define libcolour_convert_en_masse     libcolour_convert_en_masse_lf
 
 #include "common.h"
-#include "convert-template.c"
+#include "conversions.h"
 #include "libcolour-template.c"
 #include "en_masse-template.c"

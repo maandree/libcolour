@@ -12,10 +12,10 @@ OBJ =\
 
 HDR =\
 	libcolour.h\
-	common.h
+	common.h\
+	conversions.h
 
 TEMPLATES =\
-	convert-template.c\
 	en_masse-template.c\
 	libcolour-template.c
 
