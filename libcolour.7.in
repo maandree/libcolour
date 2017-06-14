@@ -196,6 +196,10 @@ See
 CIE 1964 (U*, V*, W*)
 See
 .BR LIBCOLOUR_CIEUVW (7).
+.TP
+YES
+See
+.BR LIBCOLOUR_YES (7).
 .SH ILLUMINANTS
 .B libcolour
 provides a number of initialiser macros for standard

@@ -108,6 +108,9 @@ COLOUR MODELS
 	CIE 1964 (U*, V*, W*)
 		See LIBCOLOUR_CIEUVW(7).
 
+	YES
+		See LIBCOLOUR_YES(7).
+
 ILLUMINANTS
 	libcolour provides a number of initialiser macros for standard
 	illuminants. The following macros expand to a
