@@ -24,6 +24,7 @@
 #define libcolour_ycgco_t      libcolour_ycgco_lf_t
 #define libcolour_cie1960ucs_t libcolour_cie1960ucs_lf_t
 #define libcolour_cieuvw_t     libcolour_cieuvw_lf_t
+#define libcolour_yes_t        libcolour_yes_lf_t
 
 #define TYPE double
 #define LIST_MODELS(X) LIBCOLOUR_LIST_MODELS(X, lf)

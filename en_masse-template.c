@@ -55,6 +55,27 @@
 		}\
 	} while (0)
 
+#define DEFAULT_CONVERSION(FROM, TO)\
+	case LIBCOLOUR_##FROM:\
+		conversion_by_matrix(XARGUMENTS, FROM##_TO_##TO);\
+		break
+
+#define DEFAULT_CONVERSION_FROM_SRGB(TO)\
+	case LIBCOLOUR_SRGB:\
+		LINEAR_SRGB;\
+		conversion_by_matrix(XARGUMENTS, SRGB_TO_##TO);\
+		break
+
+#define DEFAULT_CONV_0(FROM, TO)\
+	case LIBCOLOUR_##FROM:\
+		CONV_0(FROM##_TO_##TO);\
+		break
+
+#define DEFAULT_CONV_N(FROM, TO, ...)\
+	case LIBCOLOUR_##FROM:\
+		CONV_N(FROM##_TO_##TO, __VA_ARGS__);\
+		break
+
 
 
 #define X(C, T, N) static void to_##N(const libcolour_colour_t *from, const T *to, XPARAMETERS);
@@ -221,12 +242,16 @@ to_srgb(PARAMETERS(colour, srgb))
 {
 	libcolour_srgb_t tmp;
 	switch (from->model) {
+	DEFAULT_CONVERSION(YCGCO, SRGB);
+	DEFAULT_CONVERSION(YDBDR, SRGB);
+	DEFAULT_CONVERSION(YES, SRGB);
+	DEFAULT_CONVERSION(YIQ, SRGB);
+	DEFAULT_CONVERSION(YUV, SRGB);
+	DEFAULT_CONV_0(YPBPR, SRGB);
 	default:
 		to_ciexyz(ARGUMENTS(from, NULL));
 		/* fall through */
-	case LIBCOLOUR_CIEXYZ:
-		conversion_by_matrix(XARGUMENTS, CIEXYZ_TO_SRGB);
-		break;
+	DEFAULT_CONVERSION(CIEXYZ, SRGB);
 	case LIBCOLOUR_SRGB:
 	srgb_to_srgb:
 		if (from->srgb.with_transfer != to->with_transfer) {
@@ -241,21 +266,6 @@ to_srgb(PARAMETERS(colour, srgb))
 			}
 		}
 		return;
-	case LIBCOLOUR_YIQ:
-		conversion_by_matrix(XARGUMENTS, YIQ_TO_SRGB);
-		break;
-	case LIBCOLOUR_YDBDR:
-		conversion_by_matrix(XARGUMENTS, YDBDR_TO_SRGB);
-		break;
-	case LIBCOLOUR_YPBPR:
-		CONV_0(YPBPR_TO_SRGB);
-		break;
-	case LIBCOLOUR_YUV:
-		conversion_by_matrix(XARGUMENTS, YUV_TO_SRGB);
-		break;
-	case LIBCOLOUR_YCGCO:
-		conversion_by_matrix(XARGUMENTS, YCGCO_TO_SRGB);
-		break;
 	}
 	if (to->with_transfer) {
 		tmp = *to;
@@ -317,6 +327,12 @@ to_ciexyz(PARAMETERS(colour, ciexyz))
 {
 	libcolour_colour_t tmp;
 	switch (from->model) {
+	DEFAULT_CONVERSION(YCGCO, CIEXYZ);
+	DEFAULT_CONVERSION(YDBDR, CIEXYZ);
+	DEFAULT_CONVERSION(YES, CIEXYZ);
+	DEFAULT_CONVERSION(YIQ, CIEXYZ);
+	DEFAULT_CONVERSION(YPBPR, CIEXYZ);
+	DEFAULT_CONVERSION(YUV, CIEXYZ);
 	case LIBCOLOUR_RGB:
 		if (from->rgb.with_transfer) {
 			tmp.rgb = from->rgb;
@@ -331,10 +347,7 @@ to_ciexyz(PARAMETERS(colour, ciexyz))
 		to_srgb(ARGUMENTS(from, &tmp.srgb));
 		from = (const void *)&tmp.srgb;
 		/* fall through */
-	case LIBCOLOUR_SRGB:
-		LINEAR_SRGB;
-		conversion_by_matrix(XARGUMENTS, SRGB_TO_CIEXYZ);
-		break;
+	DEFAULT_CONVERSION_FROM_SRGB(CIEXYZ);
 	case LIBCOLOUR_CIEXYY:
 		CONV_0(CIEXYY_TO_CIEXYZ);
 		break;
@@ -351,21 +364,6 @@ to_ciexyz(PARAMETERS(colour, ciexyz))
 		/* fall through */
 	case LIBCOLOUR_CIELUV:
 		CONV_N(CIELUV_TO_CIEXYZ, from->cieluv.white.X, from->cieluv.white.Y, from->cieluv.white.Z);
-		break;
-	case LIBCOLOUR_YIQ:
-		conversion_by_matrix(XARGUMENTS, YIQ_TO_CIEXYZ);
-		break;
-	case LIBCOLOUR_YDBDR:
-		conversion_by_matrix(XARGUMENTS, YDBDR_TO_CIEXYZ);
-		break;
-	case LIBCOLOUR_YUV:
-		conversion_by_matrix(XARGUMENTS, YUV_TO_CIEXYZ);
-		break;
-	case LIBCOLOUR_YPBPR:
-		conversion_by_matrix(XARGUMENTS, YPBPR_TO_CIEXYZ);
-		break;
-	case LIBCOLOUR_YCGCO:
-		conversion_by_matrix(XARGUMENTS, YCGCO_TO_CIEXYZ);
 		break;
 	case LIBCOLOUR_CIEUVW:
 		tmp.cie1960ucs.model = LIBCOLOUR_CIE1960UCS;
@@ -477,18 +475,18 @@ static void
 to_yiq(PARAMETERS(colour, yiq))
 {
 	switch (from->model) {
+	DEFAULT_CONVERSION_FROM_SRGB(YIQ);
+	DEFAULT_CONVERSION(YCGCO, YIQ);
+	DEFAULT_CONVERSION(YDBDR, YIQ);
+	DEFAULT_CONVERSION(YES, YIQ);
+	DEFAULT_CONVERSION(YPBPR, YIQ);
+	DEFAULT_CONVERSION(YUV, YIQ);
 	case LIBCOLOUR_YIQ:
-		break;
-	case LIBCOLOUR_SRGB:
-		LINEAR_SRGB;
-		conversion_by_matrix(XARGUMENTS, SRGB_TO_YIQ);
 		break;
 	default:
 		to_ciexyz(ARGUMENTS(from, NULL));
 		/* fall through */
-	case LIBCOLOUR_CIEXYZ:
-		conversion_by_matrix(XARGUMENTS, CIEXYZ_TO_YIQ);
-		break;
+	DEFAULT_CONVERSION(CIEXYZ, YIQ);
 	}
 }
 
@@ -497,11 +495,12 @@ static void
 to_ydbdr(PARAMETERS(colour, ydbdr))
 {
 	switch (from->model) {
+	DEFAULT_CONVERSION_FROM_SRGB(YDBDR);
+	DEFAULT_CONVERSION(YCGCO, YDBDR);
+	DEFAULT_CONVERSION(YES, YDBDR);
+	DEFAULT_CONVERSION(YIQ, YDBDR);
+	DEFAULT_CONVERSION(YPBPR, YDBDR);
 	case LIBCOLOUR_YDBDR:
-		break;
-	case LIBCOLOUR_SRGB:
-		LINEAR_SRGB;
-		conversion_by_matrix(XARGUMENTS, SRGB_TO_YDBDR);
 		break;
 	case LIBCOLOUR_YUV:
 		CONV_0(YUV_TO_YDBDR);
@@ -509,9 +508,7 @@ to_ydbdr(PARAMETERS(colour, ydbdr))
 	default:
 		to_ciexyz(ARGUMENTS(from, NULL));
 		/* fall through */
-	case LIBCOLOUR_CIEXYZ:
-		conversion_by_matrix(XARGUMENTS, CIEXYZ_TO_YDBDR);
-		break;
+	DEFAULT_CONVERSION(CIEXYZ, YDBDR);
 	}
 }
 
@@ -520,21 +517,20 @@ static void
 to_yuv(PARAMETERS(colour, yuv))
 {
 	switch (from->model) {
+	DEFAULT_CONVERSION_FROM_SRGB(YUV);
+	DEFAULT_CONVERSION(YCGCO, YUV);
+	DEFAULT_CONVERSION(YES, YUV);
+	DEFAULT_CONVERSION(YIQ, YUV);
+	DEFAULT_CONVERSION(YPBPR, YUV);
 	case LIBCOLOUR_YUV:
 		break;
 	case LIBCOLOUR_YDBDR:
 		CONV_0(YDBDR_TO_YUV);
 		break;
-	case LIBCOLOUR_SRGB:
-		LINEAR_SRGB;
-		conversion_by_matrix(XARGUMENTS, SRGB_TO_YUV);
-		break;
 	default:
 		to_ciexyz(ARGUMENTS(from, NULL));
 		/* fall through */
-	case LIBCOLOUR_CIEXYZ:
-		conversion_by_matrix(XARGUMENTS, CIEXYZ_TO_YUV);
-		break;
+	DEFAULT_CONVERSION(CIEXYZ, YUV);
 	}
 }
 
@@ -543,6 +539,11 @@ static void
 to_ypbpr(PARAMETERS(colour, ypbpr))
 {
 	switch (from->model) {
+	DEFAULT_CONVERSION(YCGCO, YPBPR);
+	DEFAULT_CONVERSION(YDBDR, YPBPR);
+	DEFAULT_CONVERSION(YES, YPBPR);
+	DEFAULT_CONVERSION(YIQ, YPBPR);
+	DEFAULT_CONVERSION(YUV, YPBPR);
 	case LIBCOLOUR_YPBPR:
 		break;
 	case LIBCOLOUR_SRGB:
@@ -552,9 +553,7 @@ to_ypbpr(PARAMETERS(colour, ypbpr))
 	default:
 		to_ciexyz(ARGUMENTS(from, NULL));
 		/* fall through */
-	case LIBCOLOUR_CIEXYZ:
-		conversion_by_matrix(XARGUMENTS, CIEXYZ_TO_YPBPR);
-		break;
+	DEFAULT_CONVERSION(CIEXYZ, YPBPR);
 	}
 }
 
@@ -563,18 +562,18 @@ static void
 to_ycgco(PARAMETERS(colour, ycgco))
 {
 	switch (from->model) {
+	DEFAULT_CONVERSION_FROM_SRGB(YCGCO);
+	DEFAULT_CONVERSION(YDBDR, YCGCO);
+	DEFAULT_CONVERSION(YES, YCGCO);
+	DEFAULT_CONVERSION(YIQ, YCGCO);
+	DEFAULT_CONVERSION(YPBPR, YCGCO);
+	DEFAULT_CONVERSION(YUV, YCGCO);
 	case LIBCOLOUR_YCGCO:
-		break;
-	case LIBCOLOUR_SRGB:
-		LINEAR_SRGB;
-		conversion_by_matrix(XARGUMENTS, SRGB_TO_YCGCO);
 		break;
 	default:
 		to_ciexyz(ARGUMENTS(from, NULL));
 		/* fall through */
-	case LIBCOLOUR_CIEXYZ:
-		conversion_by_matrix(XARGUMENTS, CIEXYZ_TO_YCGCO);
-		break;
+	DEFAULT_CONVERSION(CIEXYZ, YCGCO);
 	}
 }
 
@@ -611,6 +610,25 @@ to_cieuvw(PARAMETERS(colour, cieuvw))
 	case LIBCOLOUR_CIE1960UCS:
 		CONV_N(CIE1960UCS_TO_CIEUVW, to->u0, to->v0);
 		break;
+	}
+}
+
+static void
+to_yes(PARAMETERS(colour, yes))
+{
+	switch (from->model) {
+	DEFAULT_CONVERSION_FROM_SRGB(YES);
+	DEFAULT_CONVERSION(YCGCO, YES);
+	DEFAULT_CONVERSION(YDBDR, YES);
+	DEFAULT_CONVERSION(YIQ, YES);
+	DEFAULT_CONVERSION(YPBPR, YES);
+	DEFAULT_CONVERSION(YUV, YES);
+	case LIBCOLOUR_YES:
+		break;
+	default:
+		to_ciexyz(ARGUMENTS(from, NULL));
+		/* fall through */
+	DEFAULT_CONVERSION(CIEXYZ, YES);
 	}
 }
 

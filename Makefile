@@ -13,7 +13,8 @@ OBJ =\
 HDR =\
 	libcolour.h\
 	common.h\
-	conversions.h
+	conversions.h\
+	conversion-matrices.h
 
 TEMPLATES =\
 	en_masse-template.c\
@@ -78,6 +79,11 @@ MAN3_SYMLINKS =\
 
 
 all: libcolour.a libcolour.so.$(SO_VERSION) libcolour.7 test
+
+
+conversion-matrices.h: matrices.py
+	printf '/* This file is generated! */\n' > conversion-matrices.h
+	./matrices.py >> conversion-matrices.h
 
 
 float.o: float.c $(TEMPLATES) $(HDR)
@@ -179,6 +185,6 @@ check: test
 	./test
 
 clean:
-	-rm -- *.o *.a *.so *.so.* test
+	-rm -- *.o *.a *.so *.so.* test conversion-matrices.h
 
 .PHONY: all clean check install uninstall

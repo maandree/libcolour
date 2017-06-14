@@ -724,6 +724,7 @@ main(int argc, char *argv[])
 	 *     YCgCo
 	 *     CIE 1960 UCS
 	 *     CIEUVW
+	 *     YES
 	 */
 	c1.srgb.with_transfer = 0;
 	c1.srgb.R = 32 / 255., c1.srgb.G = 65 / 255., c1.srgb.B = 32 / 255.;

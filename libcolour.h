@@ -162,7 +162,8 @@
 	_(LIBCOLOUR_YPBPR,      libcolour_ypbpr_##RES##_t,      ypbpr,      __VA_ARGS__)\
 	_(LIBCOLOUR_YCGCO,      libcolour_ycgco_##RES##_t,      ycgco,      __VA_ARGS__)\
 	_(LIBCOLOUR_CIE1960UCS, libcolour_cie1960ucs_##RES##_t, cie1960ucs, __VA_ARGS__)\
-	_(LIBCOLOUR_CIEUVW,     libcolour_cieuvw_##RES##_t,     cieuvw,     __VA_ARGS__)
+	_(LIBCOLOUR_CIEUVW,     libcolour_cieuvw_##RES##_t,     cieuvw,     __VA_ARGS__)\
+	_(LIBCOLOUR_YES,        libcolour_yes_##RES##_t,        yes,        __VA_ARGS__)
 
 #define LIBCOLOUR_LIST_MODELS(_, RES)\
 	_(LIBCOLOUR_RGB,        libcolour_rgb_##RES##_t,        rgb)\
@@ -178,7 +179,8 @@
 	_(LIBCOLOUR_YPBPR,      libcolour_ypbpr_##RES##_t,      ypbpr)\
 	_(LIBCOLOUR_YCGCO,      libcolour_ycgco_##RES##_t,      ycgco)\
 	_(LIBCOLOUR_CIE1960UCS, libcolour_cie1960ucs_##RES##_t, cie1960ucs)\
-	_(LIBCOLOUR_CIEUVW,     libcolour_cieuvw_##RES##_t,     cieuvw)
+	_(LIBCOLOUR_CIEUVW,     libcolour_cieuvw_##RES##_t,     cieuvw)\
+	_(LIBCOLOUR_YES,        libcolour_yes_##RES##_t,        yes)
 
 
 #define LIBCOLOUR_RGB LIBCOLOUR_RGB
@@ -195,6 +197,7 @@
 #define LIBCOLOUR_YCGCO LIBCOLOUR_YCGCO
 #define LIBCOLOUR_CIE1960UCS LIBCOLOUR_CIE1960UCS
 #define LIBCOLOUR_CIEUVW LIBCOLOUR_CIEUVW
+#define LIBCOLOUR_YES LIBCOLOUR_YES
 
 
 typedef enum libcolour_model {
@@ -404,6 +407,13 @@ typedef struct libcolour_cielchuv_##RES {\
 	struct libcolour_ciexyz_##RES white;\
 	TYPE one_revolution;\
 } libcolour_cielchuv_##RES##_t;\
+\
+typedef struct libcolour_yes_##RES {\
+	enum libcolour_model model;\
+	TYPE Y;\
+	TYPE E;\
+	TYPE S;\
+} libcolour_yes_##RES##_t;\
 \
 typedef struct libcolour_rgb_##RES {\
 	enum libcolour_model model;\
