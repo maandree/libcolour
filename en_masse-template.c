@@ -637,7 +637,6 @@ int
 libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colour_t *to,
 			   libcolour_convert_en_masse_mode_t mode, size_t n, ...)
 {
-	libcolour_colour_t tfrom, tto;
 	libcolour_convert_en_masse_mode_t alpha_mode = mode & 3;
 	int on_cpu = mode & LIBCOLOUR_CONVERT_EN_MASSE_ON_CPU;
 	int no_override = mode & LIBCOLOUR_CONVERT_EN_MASSE_NO_OVERRIDE;
@@ -715,7 +714,7 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 	va_end(args);
 
 	switch (from->model) {
-#define X(C, T, N) case C: memcpy(&tfrom, from, sizeof(T)); break;
+#define X(C, T, N) case C: break;
 	LIST_MODELS(X)
 #undef X
 	default:
@@ -726,8 +725,7 @@ libcolour_convert_en_masse(const libcolour_colour_t *from, const libcolour_colou
 	switch (to->model) {
 #define X(C, T, N)\
 		case C:\
-			memcpy(&tto, to, sizeof(T));\
-			to_##N(ARGUMENTS(&tfrom, &tto.N));\
+			to_##N(ARGUMENTS(from, &to->N));\
 			break;
 		LIST_MODELS(X)
 #undef X
