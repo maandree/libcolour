@@ -153,13 +153,13 @@ get_primaries(libcolour_rgb_t *cs)
 	if (eliminate(M, 3, 6))
 		return -1;
 
-	memcpy(M[0], M[0] + 3, 3 * sizeof(TYPE)), M[0][3] = Sr;
-	memcpy(M[1], M[1] + 3, 3 * sizeof(TYPE)), M[1][3] = Sg;
-	memcpy(M[2], M[2] + 3, 3 * sizeof(TYPE)), M[2][3] = Sb;
+	memcpy(M[0], M[0] + 3, 3 * sizeof(TYPE));
+	memcpy(M[1], M[1] + 3, 3 * sizeof(TYPE));
+	memcpy(M[2], M[2] + 3, 3 * sizeof(TYPE));
 
-	w.ciexyz.X = M[0][3];
-	w.ciexyz.Y = M[1][3];
-	w.ciexyz.Z = M[2][3];
+	w.ciexyz.X = Sr;
+	w.ciexyz.Y = Sg;
+	w.ciexyz.Z = Sb;
 
 	cs->red.model   = LIBCOLOUR_CIEXYY;
 	cs->green.model = LIBCOLOUR_CIEXYY;
