@@ -157,9 +157,6 @@ get_primaries(libcolour_rgb_t *cs)
 	memcpy(M[1], M[1] + 3, 3 * sizeof(TYPE)), M[1][3] = Sg;
 	memcpy(M[2], M[2] + 3, 3 * sizeof(TYPE)), M[2][3] = Sb;
 
-	if (eliminate(M, 3, 4))
-		return -1;
-
 	w.ciexyz.X = M[0][3];
 	w.ciexyz.Y = M[1][3];
 	w.ciexyz.Z = M[2][3];
