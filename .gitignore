@@ -9,6 +9,7 @@
 *.so.*
 *.so
 *.a
+*.out
 /__pycache__/
 /test
 /libcolour.7
