@@ -131,7 +131,6 @@ get_primaries(libcolour_rgb_t *cs)
 {
 	libcolour_colour_t r, g, b, w;
 	TYPE Sr, Sg, Sb;
-	TYPE M[3][6];
 
 	r.model = g.model = b.model = w.model = LIBCOLOUR_CIEXYZ;
 	r.ciexyz.Y = 1;
@@ -145,13 +144,6 @@ get_primaries(libcolour_rgb_t *cs)
 	r.ciexyz.X = cs->M[0][0] / Sr, r.ciexyz.Z = cs->M[2][0] / Sr;
 	g.ciexyz.X = cs->M[0][1] / Sg, g.ciexyz.Z = cs->M[2][1] / Sg;
 	b.ciexyz.X = cs->M[0][2] / Sb, b.ciexyz.Z = cs->M[2][2] / Sb;
-
-	M[0][0] = r.ciexyz.X, M[0][1] = g.ciexyz.X, M[0][2] = b.ciexyz.X, M[0][3] = 1, M[0][4] = 0, M[0][5] = 0;
-	M[1][0] = r.ciexyz.Y, M[1][1] = g.ciexyz.Y, M[1][2] = b.ciexyz.Y, M[1][3] = 0, M[1][4] = 1, M[1][5] = 0;
-	M[2][0] = r.ciexyz.Z, M[2][1] = g.ciexyz.Z, M[2][2] = b.ciexyz.Z, M[2][3] = 0, M[2][4] = 0, M[2][5] = 1;
-
-	if (eliminate(M, 3, 6))
-		return -1;
 
 	w.ciexyz.X = Sr;
 	w.ciexyz.Y = Sg;
