@@ -179,10 +179,16 @@
 
 #define CIEXYZ_TO_CIE1960UCS(FROM_X, FROM_Y, FROM_Z, TO_U, TO_V, TO_Y)\
 	do {\
-		TYPE X__ = (FROM_X), Y__ = (FROM_Y), w__;\
-		w__ = X__ + 15 * Y__ + 3 * (FROM_Z);\
-		(TO_U) = 4 * X__ / w__;\
-		(TO_V) = 6 * Y__ / w__;\
+		TYPE X__ = (FROM_X), Y__ = (FROM_Y), u__, v__;\
+		v__ = X__ + 15 * Y__ + 3 * (FROM_Z);\
+		u__ = 4 * X__ / v__;\
+		v__ = 6 * Y__ / v__;\
+		if (WASDIV0(u__) || WASDIV0(v__)) {\
+			u__ = D(0.19783997438029748971999310924729797989130020141602);\
+			v__ = D(0.31222425446887241973215054713364224880933761596680);\
+		}\
+		(TO_U) = u__;\
+		(TO_V) = v__;\
 		(TO_Y) = Y__;\
 	} while (0)
 
