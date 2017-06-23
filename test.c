@@ -146,6 +146,10 @@ test_2convert_1n(libcolour_model_t model, const char *model_name, double ch1, do
 		if (ch3 > 0.9999)
 			return 1;
 		/* fall through */
+	case LIBCOLOUR_CIELUV:
+		if (ch1 <= 0.00001 && (ch2 > 0.00001 || ch3 > 0.00001))
+			return 1;
+		/* fall through */
 	default:
 		c1.srgb.R = ch1, c1.srgb.G = ch2, c1.srgb.B = ch3;
 		break;
