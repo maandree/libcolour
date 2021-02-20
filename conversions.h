@@ -70,23 +70,41 @@
 		TYPE t__ = X__ + 15 * Y__ + 3 * Z__;\
 		TYPE u__ = (FROM_U) / L13__ + 4 * X__ / t__;\
 		TYPE v__ = (FROM_V) / L13__ + 9 * Y__ / t__;\
+		if (WASDIV0(u__) || WASDIV0(v__)) {\
+			u__ = D(0.);\
+			v__ = D(0.);\
+		}\
 		if (L__ <= 8) {\
 			Y__ *= L__ * 27 / 24389;\
 		} else {\
 			L__ = (L__ + 16) / 116;\
 			Y__ *= L__ * L__ * L__;\
 		}\
-		(TO_X) = D(2.25) * Y__ * u__ / v__;\
+		u__ /= v__;\
+		if (WASDIV0(u__)) {\
+			(TO_X) = D(0.);\
+			(TO_Z) = D(0.);\
+		} else {\
+			(TO_X) = D(2.25) * Y__ * u__;\
+			(TO_Z) = Y__ * (3 / v__ - D(0.75) * u__ - 5);\
+		}\
 		(TO_Y) = Y__;\
-		(TO_Z) = Y__ * (3 / v__ - D(0.75) * u__ / v__ - 5);\
 	} while (0)
 
 #define CIE1960UCS_TO_CIEXYZ(FROM_U, FROM_V, FROM_Y, TO_X, TO_Y, TO_Z)\
 	do {\
-		TYPE u__ = (FROM_U), v__ = (FROM_V), Y__ = (FROM_Y);\
-		(TO_X) = D(1.5) * Y__ * u__ / v__;\
-		(TO_Y) = Y__;\
-		(TO_Z) = (4 * Y__ - Y__ * u__ - 10 * Y__ * v__) / (2 * v__);\
+		TYPE u__ = (FROM_U), v__ = (FROM_V), Y__ = (FROM_Y), X__, Z__;\
+		X__ = D(1.5) * Y__ * u__ / v__;\
+		Z__ = (4 * Y__ - Y__ * u__ - 10 * Y__ * v__) / (2 * v__);\
+		if (WASDIV0(X__) || WASDIV0(Z__)) {/* FIXME */\
+			(TO_X) = X__;\
+			(TO_Y) = Y__;\
+			(TO_Z) = Z__;\
+		} else {\
+			(TO_X) = X__;\
+			(TO_Y) = Y__;\
+			(TO_Z) = Z__;\
+		}\
 	} while (0)
 
 #define CIEXYZ_TO_CIELAB(FROM_X, FROM_Y, FROM_Z, TO_L, TO_A, TO_B)\

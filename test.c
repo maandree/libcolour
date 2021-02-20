@@ -40,6 +40,12 @@ test_2convert(libcolour_colour_t *c1, libcolour_colour_t *c2, libcolour_colour_t
 		return -1;
 	if (libcolour_convert(c2, c3))
 		return -1;
+	if (!(isnan(c2->srgb.R) || isnan(c2->srgb.G) || isnan(c2->srgb.B)))
+		if ((isnan(c3->srgb.R) || isnan(c3->srgb.G) || isnan(c3->srgb.B)))
+			fprintf(stderr, "(%lf %lf %lf)[%i] -> (%lf %lf %lf)[%i] -> (%lf %lf %lf)[%i]\n",
+				c1->srgb.R, c1->srgb.G, c1->srgb.B, c1->model,
+				c2->srgb.R, c2->srgb.G, c2->srgb.B, c2->model,
+				c3->srgb.R, c3->srgb.G, c3->srgb.B, c3->model);
 	if ((c1->model == LIBCOLOUR_CIELCHUV) &&
 	    !isnan(c1->cielchuv.h) && !isnan(c3->cielchuv.h) &&
 	    !isinf(c1->cielchuv.h) && !isinf(c3->cielchuv.h) &&
