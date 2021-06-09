@@ -173,19 +173,19 @@ install: libcolour.a libcolour.so.$(SO_VERSION) libcolour.7
 
 
 uninstall:
-	-rm -- "$(DESTDIR)$(PREFIX)/include/libcolour.h"
-	-rm -- "$(DESTDIR)$(PREFIX)/lib/libcolour.a"
-	-rm -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(SO_VERSION)"
-	-rm -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(VERSION_MAJOR)"
-	-rm -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so"
-	-cd -- "$(DESTDIR)$(MANPREFIX)/man7" && rm -- $(MAN7)
-	-cd -- "$(DESTDIR)$(MANPREFIX)/man3" && rm -- $(MAN3) $(MAN3_SYMLINKS)
+	-rm -f -- "$(DESTDIR)$(PREFIX)/include/libcolour.h"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.a"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(SO_VERSION)"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(VERSION_MAJOR)"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so"
+	-cd -- "$(DESTDIR)$(MANPREFIX)/man7" && rm -f -- $(MAN7)
+	-cd -- "$(DESTDIR)$(MANPREFIX)/man3" && rm -f -- $(MAN3) $(MAN3_SYMLINKS)
 
 
 check: test
 	./test
 
 clean:
-	-rm -- *.o *.a *.so *.so.* test conversion-matrices.h
+	-rm -f -- *.o *.a *.so *.so.* test conversion-matrices.h
 
 .PHONY: all clean check install uninstall
