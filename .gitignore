@@ -12,5 +12,4 @@
 *.out
 /__pycache__/
 /test
-/libcolour.7
 /conversion-matrices.h

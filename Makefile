@@ -79,7 +79,7 @@ MAN3_SYMLINKS =\
 	libcolour_convert_en_masse_llf.3
 
 
-all: libcolour.a libcolour.so.$(SO_VERSION) libcolour.7 test
+all: libcolour.a libcolour.so.$(SO_VERSION) test
 
 
 conversion-matrices.h: matrices.py
@@ -122,11 +122,7 @@ test: test.o libcolour.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 
-libcolour.7: libcolour.7.in
-	sed 's:/usr/local:$(PREFIX):g' < libcolour.7.in > libcolour.7
-
-
-install: libcolour.a libcolour.so.$(SO_VERSION) libcolour.7
+install: libcolour.a libcolour.so.$(SO_VERSION)
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/include"
 	cp -- libcolour.h "$(DESTDIR)$(PREFIX)/include/libcolour.h"
 	chmod -- 644 "$(DESTDIR)$(PREFIX)/include/libcolour.h"
