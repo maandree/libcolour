@@ -1,0 +1,99 @@
+[X] RGB
+ ├─[X] custom
+ ├─[X] sRGB
+ ├─[X] Adobe RGB
+ ├─[X] Apple RGB (1998)
+ ├─[X] Best RGB
+ ├─[X] Beta RGB
+ ├─[X] Bruce RGB
+ ├─[X] CIE 1931 RGB
+ ├─[X] ColorMatch RGB
+ ├─[X] DCI-P3 D65
+ ├─[X] DCI-P3 Theater
+ ├─[X] Don RGB 4
+ ├─[X] ECI RGB
+ ├─[X] ECI RGB v2
+ ├─[X] Ekta Space PS5
+ ├─[X] ITU-R Recommendation BT.601, 625 line
+ ├─[X] ITU-R Recommendation BT.601, 525 line
+ ├─[X] ITU-R Recommendation BT.709
+ ├─[X] ITU-R Recommendation BT.2020
+ ├─[X] ITU-R Recommendation BT.2100, using PQ EOTF
+ ├─[X] ITU-R Recommendation BT.2100, using PQ OOTF
+ ├─[X] ITU-R Recommendation BT.2100, using PQ OETF
+ ├─[X] ITU-R Recommendation BT.2100, using HLG EOTF
+ ├─[X] ITU-R Recommendation BT.2100, using HLG OOTF
+ ├─[X] ITU-R Recommendation BT.2100, using HLG OETF
+ ├─[X] Lightroom RGB
+ ├─[X] NTSC RGB
+ ├─[X] PAL/SECAM RGB
+ ├─[X] ProPhoto RGB
+ ├─[X] SGI RGB
+ ├─[X] SMPTE 240M RGB
+ ├─[X] SMPTE C RGB
+ ├─[X] wide-gamut RGB, also known as Adobe Wide Gamut RGB
+ ├─[ ] scRGB
+ ├─[ ] HWB (Alternative model to RGB)
+ ├─[ ] HSL (Alternative model to RGB)
+ ├─[ ] HSV (Alternative model to RGB), also known as HSB
+ ├─[ ] HSI (Alternative model to RGB)
+ ├─[ ] HCL (Alternative model to RGB)
+ ├─[ ] HCV (Alternative model to RGB)
+ └─[ ] HCI (Alternative model to RGB)
+[X] CIE xyY
+[X] CIE 1931 XYZ
+[X] CIE L*a*b*
+[X] CIE 1976 (L*, u*, v*)
+[X] CIE LChuv, also known as CIE HLCuv
+[ ] CIE 1960 UCS
+    └─ https://en.wikipedia.org/wiki/CIE_1960_color_space
+[ ] CIE 1964 (U*, V*, W*)
+    └─ https://en.wikipedia.org/wiki/CIE_1964_color_space
+[X] YIQ
+[ ] Y'IQ
+[X] YDbDr
+[X] YUV
+[ ] Y'UV
+[X] YPBPR
+[X] YCgCo
+[X] CIE 1960 UCS
+[X] CIE 1964 (U*, V*, W*)
+[X] YES
+[ ] Y'ES
+[ ] LMS
+[ ] L'M'S'
+[ ] ICtCp
+[ ] YCbCr
+[ ] Y'CbCr
+[ ] YcCbcBrc
+    └─ https://en.wikipedia.org/wiki/YCbCr#ITU-R_BT.2020_conversion
+[ ] TSL
+[ ] rgY
+[ ] RG
+[ ] RGK
+[ ] CIE DSH
+[ ] HSP
+[ ] HCY
+[ ] HCG
+[ ] IPT
+[ ] xvYCC
+[ ] Munsell
+[ ] NCS
+[ ] RAL
+[ ] HKS
+[ ] PMS
+    └─ https://en.wikipedia.org/wiki/Pantone#Pantone_Color_Matching_System
+[ ] Coloroid
+[ ] OSA-UCS
+[ ] Hunter Rdab
+[ ] Hunter 1948 color space
+    ├─ https://en.wikipedia.org/wiki/CIELAB
+    └─ http://www.konicaminolta.com/instruments/knowledge/color/part4/06.html
+[ ] CIELChab, also known as CIEHLCab
+    └─ https://en.wikipedia.org/wiki/CIELAB_color_space#Cylindrical_model
+[ ] CIELChuv, also known as CIEHLCuv
+    └─ https://en.wikipedia.org/wiki/CIELUV#Cylindrical_representation_(CIELCh)
+[ ] CMY
+[ ] CMYK
+[ ] custom additive with 3 or more channels
+[ ] custom subtractive with 3 or more channels
