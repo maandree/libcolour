@@ -183,5 +183,6 @@ check: test
 
 clean:
 	-rm -f -- *.o *.a *.so *.so.* test conversion-matrices.h
+	-rm -rf -- __pycache__/
 
 .PHONY: all clean check install uninstall
