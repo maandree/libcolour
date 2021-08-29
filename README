@@ -9,7 +9,7 @@ DESCRIPTION
 	futhermore provides access to custom RGB colour spaces.
 
 	To use libcolour, include the header file <libcolour.h> and
-	link with /usr/local/lib/libcolour.a -lm or -lcolour.
+	link with -lcolour -lm.
 
 COLOUR MODELS
 	libcolour supports a number of colour models. A colour model
