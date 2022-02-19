@@ -1,6 +1,3 @@
-VERSION_MAJOR = 2
-VERSION_MINOR = 3
-
 PREFIX    = /usr
 MANPREFIX = $(PREFIX)/share/man
 

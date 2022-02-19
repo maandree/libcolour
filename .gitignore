@@ -5,6 +5,7 @@
 *.swo
 *.swp
 *.o
+*.lo
 *.su
 *.so.*
 *.so

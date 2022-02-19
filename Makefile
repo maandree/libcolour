@@ -3,7 +3,18 @@
 CONFIGFILE = config.mk
 include $(CONFIGFILE)
 
-SO_VERSION = $(VERSION_MAJOR).$(VERSION_MINOR)
+OS = linux
+# Linux:   linux
+# Mac OS:  macos
+# Windows: windows
+include mk/$(OS).mk
+
+
+LIB_MAJOR = 2
+LIB_MINOR = 3
+LIB_VERSION = $(LIB_MAJOR).$(LIB_MINOR)
+
+
 
 OBJ =\
 	float.o\
@@ -79,66 +90,48 @@ MAN3_SYMLINKS =\
 	libcolour_convert_en_masse_llf.3
 
 
-all: libcolour.a libcolour.so.$(SO_VERSION) test
-
+all: libcolour.a libcolour.$(LIBEXT) test
+$(OBJ): $(HDR) $(TEMPLATES)
+$(LOBJ): $(HDR) $(TEMPLATES)
+test.o: test.c libcolour.h
 
 conversion-matrices.h: matrices.py
 	printf '/* This file is generated! */\n' > conversion-matrices.h
 	./matrices.py >> conversion-matrices.h
 
+.c.o:
+	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
-float.o: float.c $(TEMPLATES) $(HDR)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ float.c
-
-double.o: double.c $(TEMPLATES) $(HDR)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ double.c
-
-long-double.o: long-double.c $(TEMPLATES) $(HDR)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ long-double.c
-
-
-float.pic.o: float.c $(TEMPLATES) $(HDR)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -c -o $@ float.c
-
-double.pic.o: double.c $(TEMPLATES) $(HDR)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -c -o $@ double.c
-
-long-double.pic.o: long-double.c $(TEMPLATES) $(HDR)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -c -o $@ long-double.c
-
-
-libcolour.a: $(OBJ)
-	$(AR) rc $@ $?
-	$(AR) -s $@
-
-libcolour.so.$(SO_VERSION): $(OBJ:.o=.pic.o)
-	$(CC) -shared -Wl,-soname,libcolour.so.$(VERSION_MAJOR) -o $@ $(LDFLAGS) $^
-
-
-test.o: test.c libcolour.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ test.c
+.c.lo:
+	$(CC) -fPIC -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 test: test.o libcolour.a
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -o $@ test.o libcolour.a $(LDFLAGS)
 
+libcolour.$(lIBEXT): $(LOBJ)
+	$(CC) $(LIBFLAGS) -o $@ $(LOBJ) $(LDFLAGS)
 
-install: libcolour.a libcolour.so.$(SO_VERSION)
-	mkdir -p -- "$(DESTDIR)$(PREFIX)/include"
-	cp -- libcolour.h "$(DESTDIR)$(PREFIX)/include/libcolour.h"
-	chmod -- 644 "$(DESTDIR)$(PREFIX)/include/libcolour.h"
+libcolour.a: $(OBJ)
+	-rm -f -- $@
+	$(AR) rc $@ $(OBJ)
+	$(AR) -s $@
+
+check: test
+	./test
+
+install: libcolour.a libcolour.$(LIBEXT)
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/lib"
-	cp -- libcolour.a "$(DESTDIR)$(PREFIX)/lib/libcolour.a"
-	chmod -- 644 "$(DESTDIR)$(PREFIX)/lib/libcolour.a"
-	cp -- libcolour.so.$(SO_VERSION) "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(SO_VERSION)"
-	chmod -- 755 "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(SO_VERSION)"
-	ln -sf -- libcolour.so.$(SO_VERSION) "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(VERSION_MAJOR)"
-	ln -sf -- libcolour.so.$(SO_VERSION) "$(DESTDIR)$(PREFIX)/lib/libcolour.so"
-	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man7"
-	cp -- $(MAN7) "$(DESTDIR)$(MANPREFIX)/man7/"
-	cd -- "$(DESTDIR)$(MANPREFIX)/man7" && chmod -- 644 $(MAN7)
+	mkdir -p -- "$(DESTDIR)$(PREFIX)/include"
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man3"
+	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man7"
+	cp -- libcolour.h "$(DESTDIR)$(PREFIX)/include/libcolour.h"
+	cp -- libcolour.a "$(DESTDIR)$(PREFIX)/lib/libcolour.a"
+	cp -- libcolour.$(LIBEXT) "$(DESTDIR)$(PREFIX)/lib/libcolour.$(LIBMINOREXT)"
+	$(FIX_INSTALL_NAME) -- "$(DESTDIR)$(PREFIX)/lib/libcolour.$(LIBMINOREXT)"
+	ln -sf -- "libcolour.$(LIBMINOREXT)" "$(DESTDIR)$(PREFIX)/lib/libcolour.$(LIBMAJOREXT)"
+	ln -sf -- "libcolour.$(LIBMAJOREXT)" "$(DESTDIR)$(PREFIX)/lib/libcolour.$(LIBEXT)"
 	cp -- $(MAN3) "$(DESTDIR)$(MANPREFIX)/man3/"
-	cd -- "$(DESTDIR)$(MANPREFIX)/man3" && chmod -- 644 $(MAN3)
+	cp -- $(MAN7) "$(DESTDIR)$(MANPREFIX)/man7/"
 	ln -sf -- libcolour_convert.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_f.3"
 	ln -sf -- libcolour_convert.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_lf.3"
 	ln -sf -- libcolour_convert.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_llf.3"
@@ -167,22 +160,20 @@ install: libcolour.a libcolour.so.$(SO_VERSION)
 	ln -sf -- libcolour_convert_en_masse.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_en_masse_lf.3"
 	ln -sf -- libcolour_convert_en_masse.3 "$(DESTDIR)$(MANPREFIX)/man3/libcolour_convert_en_masse_llf.3"
 
-
 uninstall:
 	-rm -f -- "$(DESTDIR)$(PREFIX)/include/libcolour.h"
 	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.a"
-	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(SO_VERSION)"
-	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(VERSION_MAJOR)"
-	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(LIBEXT)"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(LIBMAJOREXT)"
+	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libcolour.so.$(LIBMINOREXT)"
 	-cd -- "$(DESTDIR)$(MANPREFIX)/man7" && rm -f -- $(MAN7)
 	-cd -- "$(DESTDIR)$(MANPREFIX)/man3" && rm -f -- $(MAN3) $(MAN3_SYMLINKS)
 
-
-check: test
-	./test
-
 clean:
-	-rm -f -- *.o *.a *.so *.so.* test conversion-matrices.h
+	-rm -f -- *.o *.lo *.a *.so *.so.* test conversion-matrices.h
 	-rm -rf -- __pycache__/
 
-.PHONY: all clean check install uninstall
+.SUFFIXES:
+.SUFFIXES: .lo .o .c
+
+.PHONY: all check install uninstall clean
