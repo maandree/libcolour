@@ -127,7 +127,7 @@ install: libcolour.a libcolour.$(LIBEXT)
 	cp -- libcolour.h "$(DESTDIR)$(PREFIX)/include/libcolour.h"
 	cp -- libcolour.a "$(DESTDIR)$(PREFIX)/lib/libcolour.a"
 	cp -- libcolour.$(LIBEXT) "$(DESTDIR)$(PREFIX)/lib/libcolour.$(LIBMINOREXT)"
-	$(FIX_INSTALL_NAME) -- "$(DESTDIR)$(PREFIX)/lib/libcolour.$(LIBMINOREXT)"
+	$(FIX_INSTALL_NAME) "$(DESTDIR)$(PREFIX)/lib/libcolour.$(LIBMINOREXT)"
 	ln -sf -- "libcolour.$(LIBMINOREXT)" "$(DESTDIR)$(PREFIX)/lib/libcolour.$(LIBMAJOREXT)"
 	ln -sf -- "libcolour.$(LIBMAJOREXT)" "$(DESTDIR)$(PREFIX)/lib/libcolour.$(LIBEXT)"
 	cp -- $(MAN3) "$(DESTDIR)$(MANPREFIX)/man3/"
