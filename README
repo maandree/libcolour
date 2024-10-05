@@ -1,3 +1,7 @@
+This repo has been moved to Codeberg and may be out of date on GitHub.
+Canonical repo: https://codeberg.org/maandree/libcolour
+
+
 NAME
 	libcolour - A C colour space library
 
@@ -99,7 +103,7 @@ COLOUR MODELS
 	YPBPR
 		See LIBCOLOUR_YPBPR(7).
 
-	YCgCo
+	YCgCo (YCoCg)
 		See LIBCOLOUR_YCGCO(7).
 
 	CIE 1960 UCS
